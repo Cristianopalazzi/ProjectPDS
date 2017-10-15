@@ -16,5 +16,7 @@
         public const string ZIP_COMMAND = "ZIP";
         public const string DEFAULT_DIRECTORY = "C:\\Users\\Cristiano\\Desktop";
         public const string DIR_COMMAND = "DIR";
+        public const string ZIP_EXTENSION = ".zip";
+
     }
 }

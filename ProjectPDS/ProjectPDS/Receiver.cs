@@ -21,7 +21,7 @@ namespace ProjectPDS
         }
         ~Receiver() { server.Join(); }
 
-        public void startServer()
+        private void startServer()
         {
             //TODO vedere di cambiare le porte in caso di ricezione da più mittenti contemporanemente (teoricamente no)
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
@@ -37,7 +37,8 @@ namespace ProjectPDS
             {
                 Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
-                Console.WriteLine("remote endpoint {0} {1} ", ((IPEndPoint)handler.RemoteEndPoint).Address.ToString(),
+                string ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
+                Console.WriteLine("remote endpoint {0} {1} ", ipSender,
                     ((IPEndPoint)handler.RemoteEndPoint).Port.ToString());
 
                 byte[] request = new byte[Constants.FILE_NAME + Constants.FILE_COMMAND.Length];
@@ -72,7 +73,7 @@ namespace ProjectPDS
 
 
                 //ricevo zip command + zipFileNameLength
-                byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length+sizeof(int)];
+                byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
                 received = handler.Receive(zipCommand, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None);
 
                 string zipCommandString = Encoding.ASCII.GetString(zipCommand);
@@ -80,7 +81,7 @@ namespace ProjectPDS
 
 
                 //ricevo zip file name e lunghezza
-                byte[] zipFileNameAndLength = new byte[zipFileNameLength+sizeof(long)];
+                byte[] zipFileNameAndLength = new byte[zipFileNameLength + sizeof(long)];
 
                 received = handler.Receive(zipFileNameAndLength, zipFileNameLength + sizeof(long), SocketFlags.None);
                 string zipFileNameAndLengthString = Encoding.ASCII.GetString(zipFileNameAndLength);
@@ -121,13 +122,28 @@ namespace ProjectPDS
                     fs.Flush(true);
                     fs.Close();
 
-
-                    //riempire sta roba
-                    //if (File.Exists()) {
-                    //else{ }
-                    //}
-
-
+                    //controllo se esiste già il file dentro lo zip
+                    ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name))
+                        {
+                            //TESTTTTTT
+                            NeighborProtocol n = new NeighborProtocol();
+                            n.insert(Environment.UserName + "@" + ipSender);
+                            string user = n.getUserFromIp(ipSender);
+                            string extension = Path.GetExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
+                            string onlyName = Path.GetFileNameWithoutExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
+                            string newName = onlyName + user + extension;
+                            if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + newName))
+                            {
+                                string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss").Replace(" ", "_");
+                                entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + onlyName + user + timeStamp + extension);
+                            }
+                            else entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + newName);
+                        }
+                    }
+                    archive.Dispose();
                 }
                 else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
                 {
@@ -139,28 +155,27 @@ namespace ProjectPDS
                     fs.Write(fileContent, 0, fileContent.Length);
                     fs.Flush(true);
                     fs.Close();
-
-
-                    //riempire sta roba
-                    //if (File.Exists()) {
-                    //else{ }
-                    //}
-
-
-                    //Cercare modo per leggere dentro lo zip prima di estrarre
-                    //var zip = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
-                    //var a = zip.Entries[0];
-                    //Console.WriteLine("aaaaaaaaaa {0}", a);
-
-
-                    
-                    //ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + ".zip",
-                    //    Constants.DEFAULT_DIRECTORY);
-
-
-                    //cancella lo zip
-                    File.Delete(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
+                    ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
+                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    {
+                        int index = entry.FullName.IndexOf("/");
+                        string folder = entry.FullName.Substring(0, index);
+                        if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + folder))
+                        {
+                            if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + folder + Environment.UserName))
+                            {
+                                string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss").Replace(" ", "_");
+                                ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + folder + Environment.UserName + timeStamp);
+                            }
+                            else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + folder + Environment.UserName);
+                        }
+                        else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY);
+                    }
+                    archive.Dispose();
                 }
+                //TODO agguingere controllo sulla dimensione massima dei nomi dei file e cartelle
+                //cancella lo zip
+                File.Delete(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
 
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();

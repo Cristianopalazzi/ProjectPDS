@@ -15,20 +15,26 @@ namespace ProjectPDS
         {
             neighbors = new Dictionary<string, MyCounter>();
 
-            Console.WriteLine("Socket creata");
-            listener = new Thread(listen);
-            listener.Name = "listener";
-            listener.Start();
-            //sender = new Thread(sendMe);
-            //sender.Name = "sender";
+            //Console.WriteLine("Socket creata");
+            //listener = new Thread(listen)
+            //{
+            //    Name = "listener"
+            //};
+            //listener.Start();
+            //sender = new Thread(sendMe)
+            //{
+            //    Name = "sender"
+            //};
             //sender.Start();
-            clean = new Thread(cleanMap);
-            clean.Name = "cleaner";
-            clean.Start();
+            //clean = new Thread(cleanMap)
+            //{
+            //    Name = "cleaner"
+            //};
+            //clean.Start();
         }
         ~NeighborProtocol() { listener.Join(); sender.Join(); clean.Join(); }
 
-        public void listen()
+        private void listen()
         {
 
             //IPHostEntry ipHostInfo = Dns.GetHostEntryGetHostEntry(); Dns.Resolve(Dns.GetHostName());
@@ -89,12 +95,22 @@ namespace ProjectPDS
         void threadSend(int s) { }
         void threadListen(int s) { }
         void threadClean() { }
-        public void print()
+        private void print()
         {
             foreach (KeyValuePair<string, MyCounter> pair in neighbors)
                 Console.WriteLine("Key: {0} Values: {1}", pair.Key, pair.Value.Counter);
         }
-
+        public void insert(string ipSender)
+        {
+            neighbors.Add(ipSender, new MyCounter(ipSender, 0));
+        }
+        public string getUserFromIp(string ipSender)
+        {
+            foreach (KeyValuePair<string, MyCounter> pair in neighbors)
+                if (pair.Key.IndexOf(ipSender) != -1)
+                    return pair.Key.Substring(0, pair.Key.LastIndexOf("@"));
+            return null;
+        }
 
         void cleanMap()
         {
@@ -126,7 +142,7 @@ namespace ProjectPDS
             }
         }
 
-        public void sendMe()
+        private void sendMe()
         {
             IPAddress ip = IPAddress.Parse(Constants.MULTICAST);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -134,14 +150,25 @@ namespace ProjectPDS
             socket.Connect(ipep);
 
 
-            byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + "SCEMO");
+            byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + Environment.UserName);
             while (true)
             {
                 socket.Send(toBytes, toBytes.Length, SocketFlags.None);
                 Thread.Sleep(Constants.HELLO_TIME);
             }
-            //byte[] toBytes1 = Encoding.ASCII.GetBytes(Constants.QUIT + Environment.UserName);
-            //socket.Send(toBytes1, toBytes1.Length, SocketFlags.None);
+
+            socket.Close();
+        }
+
+
+        private void quitMe()
+        {
+            IPAddress ip = IPAddress.Parse(Constants.MULTICAST);
+            Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            IPEndPoint ipep = new IPEndPoint(ip, Constants.PORT_UDP);
+            socket.Connect(ipep);
+            byte[] toBytes = Encoding.ASCII.GetBytes(Constants.QUIT + Environment.UserName);
+            socket.Send(toBytes, toBytes.Length, SocketFlags.None);
             socket.Close();
         }
 
@@ -149,9 +176,8 @@ namespace ProjectPDS
         private void receive(int s) { }
         Dictionary<string, MyCounter> neighbors;
 
-        private Thread listener, sender, clean;
+        private Thread listener, clean, sender;
     }
 
-    //TODO ho usato 2 socket per sender e receiver
     //TODO ho cambiato il max counter da 3 a 1
 }
