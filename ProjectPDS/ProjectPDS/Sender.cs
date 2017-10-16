@@ -102,6 +102,14 @@ namespace ProjectPDS
             //sender.SendFile(pathFile);
 
 
+            //TODO aspetto che il server mi dica se vuole il file o no
+            //byte[] responseClient =new byte[2]; 
+            //sender.Receive(responseClient, responseClient.Length, SocketFlags.None);
+            //relativi controlli per chiudere eventualmente la socket
+            //if responseClient== OK continua
+            // else  if responseClient == NO ferma la socket
+
+
             //preparo zip command + zip file name length
             byte[] zipCommand = Encoding.ASCII.GetBytes("ZIP");
             byte[] zipAndFileNameLength = zipCommand.Concat(BitConverter.GetBytes(zipToSend.Length)).ToArray();

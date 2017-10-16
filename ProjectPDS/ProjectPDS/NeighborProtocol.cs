@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 using System.Net;
-
+using System.Collections.Concurrent;
 
 namespace ProjectPDS
 {
@@ -13,24 +13,22 @@ namespace ProjectPDS
     {
         public NeighborProtocol()
         {
-            neighbors = new Dictionary<string, MyCounter>();
-
-            //Console.WriteLine("Socket creata");
-            //listener = new Thread(listen)
-            //{
-            //    Name = "listener"
-            //};
-            //listener.Start();
-            //sender = new Thread(sendMe)
-            //{
-            //    Name = "sender"
-            //};
-            //sender.Start();
-            //clean = new Thread(cleanMap)
-            //{
-            //    Name = "cleaner"
-            //};
-            //clean.Start();
+            neighbors = new ConcurrentDictionary<string, int>();
+            listener = new Thread(listen)
+            {
+                Name = "listener"
+            };
+            listener.Start();
+            sender = new Thread(sendMe)
+            {
+                Name = "sender"
+            };
+            sender.Start();
+            clean = new Thread(cleanMap)
+            {
+                Name = "cleaner"
+            };
+            clean.Start();
         }
         ~NeighborProtocol() { listener.Join(); sender.Join(); clean.Join(); }
 
@@ -41,7 +39,6 @@ namespace ProjectPDS
             //IPAddress ipAddress = ipHostInfo.AddressList[0];
             //IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            byte[] buffer = new byte[Constants.BUFLEN];
             string recv, remoteIpAddress, remotePort;
 
             //EndPoint con le info del client che si collega
@@ -61,6 +58,7 @@ namespace ProjectPDS
             socket.Bind(localEndPoint);
             while (true)
             {
+                byte[] buffer = new byte[Constants.BUFLEN];
                 Console.WriteLine("Waiting for connections...");
                 int i = socket.ReceiveFrom(buffer, ref senderRemote);
                 Array.Resize(ref buffer, i);
@@ -80,33 +78,35 @@ namespace ProjectPDS
                 if (String.Compare(command, Constants.HELL, false) == 0)
                 {
                     if (neighbors.ContainsKey(senderID))
-                        neighbors[senderID].plusCount();
+                        neighbors[senderID] = Constants.MAX_COUNTER;
                     else
-                        neighbors.Add(senderID, new MyCounter(remoteIpAddress, Constants.MAX_COUNTER));
+                        neighbors.TryAdd(senderID, Constants.MAX_COUNTER);
                 }
                 else if (String.Compare(command, Constants.QUIT, false) == 0)
                 {
+                    int value;
                     if (neighbors.ContainsKey(senderID))
-                        neighbors.Remove(senderID);
+                        neighbors.TryRemove(senderID, out value);
                 }
             }
             socket.Close();
         }
-        void threadSend(int s) { }
-        void threadListen(int s) { }
-        void threadClean() { }
+
+
         private void print()
         {
-            foreach (KeyValuePair<string, MyCounter> pair in neighbors)
-                Console.WriteLine("Key: {0} Values: {1}", pair.Key, pair.Value.Counter);
+            foreach (KeyValuePair<string, int> pair in neighbors)
+                Console.WriteLine("Key: {0} Values: {1}", pair.Key, pair.Value);
         }
+
         public void insert(string ipSender)
         {
-            neighbors.Add(ipSender, new MyCounter(ipSender, 0));
+            neighbors.TryAdd(ipSender, 0);
         }
+
         public string getUserFromIp(string ipSender)
         {
-            foreach (KeyValuePair<string, MyCounter> pair in neighbors)
+            foreach (KeyValuePair<string, int> pair in neighbors)
                 if (pair.Key.IndexOf(ipSender) != -1)
                     return pair.Key.Substring(0, pair.Key.LastIndexOf("@"));
             return null;
@@ -118,24 +118,29 @@ namespace ProjectPDS
             {
                 if (neighbors.Count == 0)
                     Console.WriteLine("Niente da pulire");
+
                 //lista temporanea degli oggetti da rimuovere dalla mappa
                 List<string> toRemove = new List<string>();
 
-                foreach (KeyValuePair<string, MyCounter> pair in neighbors.ToList())
+                foreach (KeyValuePair<string, int> pair in neighbors)
                 {
-                    if (pair.Value.Counter == 0)
+                    if (pair.Value == 0)
                     {
+                        Console.WriteLine("Rimuovo {0} ", pair.Key);
                         toRemove.Add(pair.Key);
                     }
-                    else if (pair.Value.Counter == Constants.MAX_COUNTER)
+                    else if (pair.Value == Constants.MAX_COUNTER)
                     {
-                        pair.Value.resetCount();
+                        neighbors[pair.Key] = 0;
                         Console.WriteLine("Rimesso a 0");
                     }
                 }
                 //rimuovo dalla mappa gli oggetti della lista temporanea
                 foreach (string tmp in toRemove)
-                    neighbors.Remove(tmp);
+                {
+                    int value;
+                    neighbors.TryRemove(tmp, out value);
+                }
 
                 print();
                 Thread.Sleep(Constants.CLEAN_TIME);
@@ -156,7 +161,6 @@ namespace ProjectPDS
                 socket.Send(toBytes, toBytes.Length, SocketFlags.None);
                 Thread.Sleep(Constants.HELLO_TIME);
             }
-
             socket.Close();
         }
 
@@ -174,10 +178,7 @@ namespace ProjectPDS
 
 
         private void receive(int s) { }
-        Dictionary<string, MyCounter> neighbors;
-
+        ConcurrentDictionary<string, int> neighbors;
         private Thread listener, clean, sender;
     }
-
-    //TODO ho cambiato il max counter da 3 a 1
 }

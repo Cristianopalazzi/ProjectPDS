@@ -3,7 +3,7 @@
     static class Constants
     {
         public const int MAX_COUNTER = 1;
-        public const string MULTICAST = "224.0.0.1"; // ip multicast
+        public const string MULTICAST = "239.0.0.222"; // ip multicast
         public const int HELLO_TIME = 1000;
         public const int CLEAN_TIME = 6 * HELLO_TIME;
         public const int PORT_UDP = 8888; //The port on which to listen for incoming data
