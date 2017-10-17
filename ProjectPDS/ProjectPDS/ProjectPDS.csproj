@@ -66,6 +66,7 @@
     <Compile Include="MyQueue.cs" />
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
+    <Compile Include="Work.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

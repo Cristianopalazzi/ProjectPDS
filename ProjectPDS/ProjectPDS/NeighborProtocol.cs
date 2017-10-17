@@ -176,8 +176,6 @@ namespace ProjectPDS
             socket.Close();
         }
 
-
-        private void receive(int s) { }
         ConcurrentDictionary<string, int> neighbors;
         private Thread listener, clean, sender;
     }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using System.IO.Pipes;
 using System.IO;
 using System.Collections;
+using System.Collections.Concurrent;
 
 namespace ProjectPDS
 {
@@ -13,7 +15,11 @@ namespace ProjectPDS
         {
             threadPipe = new Thread(listenOnPipe);
             threadPipe.Start();
+            waitOnTake = new Thread(prova);
+            waitOnTake.Start();
+            filesToSend = new BlockingCollection<Work>();
         }
+
         private void listenOnPipe()
         {
             NamedPipeServerStream pipeServer =
@@ -26,12 +32,60 @@ namespace ProjectPDS
                 StreamReader sr = new StreamReader(pipeServer);
                 string file = sr.ReadLine();
                 Console.WriteLine(file);
+
+                //TODO far aggiungere i tizi a cui mandare il file
+                ArrayList array = new ArrayList();
+                array.Add("receiver1");
+                array.Add("receiver2");
+                Work w = new Work(file, array);
+                filesToSend.Add(w);
                 pipeServer.Disconnect();
+
             }
         }
 
-        ~MyQueue() { threadPipe.Join(); }
-        //TODO blockingCollections
-        private Thread threadPipe;
+        ~MyQueue() { threadPipe.Join(); waitOnTake.Join(); }
+
+        public void prova()
+        {
+            while (true)
+            {
+                Console.WriteLine("Aspetto il prossimo work");
+                Work w = filesToSend.Take();
+                int receiversNumber = w.Receivers.Count;
+                Task[] tasks = new Task[receiversNumber];
+                for (int i = 0; i < receiversNumber; i++)
+                {
+                    string receiver = (string)w.Receivers[i];
+                    tasks[i] = Task.Run(() =>
+                    {
+                        //sendFile (w.fileName, receiver)
+                        Console.WriteLine("Task numero {0} ha termiato ", Task.CurrentId.Value);
+                    });
+                }
+
+                //Aspetto tutti i task
+                Task.WaitAll(tasks);
+                Console.WriteLine("Tutti i task conclusi");
+
+                //List<Thread> threads = new List<Thread>();
+                //for (int i = 0; i < 3; i++)
+                //{
+                //    string receiver = (string)w.Receivers[i];
+                //    Thread t = new Thread(() =>
+                //    {
+                //        //sendFile(w.fileName, receiver)
+                //    });
+                //    t.Start();
+                //    threads.Add(t);
+                //}
+                //foreach (var t in threads)
+                //    t.Join();
+                //Console.WriteLine("Finiti tutti");
+            }
+        }
+        BlockingCollection<Work> filesToSend;
+        private Thread threadPipe, waitOnTake;
+
     }
 }
