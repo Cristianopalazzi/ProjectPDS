@@ -21,7 +21,5 @@ namespace ProjectPDS
 
         private string fileName;
         private ArrayList receivers;
-
-
     }
 }
