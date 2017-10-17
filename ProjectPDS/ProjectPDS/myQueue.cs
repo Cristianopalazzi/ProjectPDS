@@ -60,7 +60,7 @@ namespace ProjectPDS
                     tasks[i] = Task.Run(() =>
                     {
                         //sendFile (w.fileName, receiver)
-                        Console.WriteLine("Task numero {0} ha termiato ", Task.CurrentId.Value);
+                        Console.WriteLine("Task numero {0} ha terminato ", Task.CurrentId.Value);
                     });
                 }
 
