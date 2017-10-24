@@ -5,12 +5,12 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
+using System.Threading;
 
 namespace ProjectPDS
 {
     class Sender
     {
-        //TODO rivedere comandi per inviare file o directory(zip)
         public Sender() { }
         public void sendFile(string ipAddr, string pathFile)
         {
@@ -19,13 +19,13 @@ namespace ProjectPDS
             int idx = pathFile.LastIndexOf('\\');
 
             //ricavo fileName
-            string fileName = pathFile.Substring(idx + 1);
+            string fileName = Path.GetFileName(pathFile);
             //ricavo root
             string path = pathFile.Substring(0, idx + 1);
             Console.WriteLine("PAth {0} ", path);
             Console.WriteLine("FileName {0} ", fileName);
 
-
+            //TODO mettere gli zip temporanei nascosti
             byte[] command;
 
             //lunghezza nome file
@@ -33,8 +33,7 @@ namespace ProjectPDS
             long fileLength = 0;
 
             //creo nome random dello zip da mandare
-            string zipToSend = RandomStr() + ".zip";
-
+            string zipToSend = RandomStr() + Constants.ZIP_EXTENSION;
 
             //detect whether its a directory or file
             FileAttributes attr = File.GetAttributes(pathFile);
@@ -42,19 +41,19 @@ namespace ProjectPDS
             {
                 Console.WriteLine("SONO UNA DIRECTORY");
                 //creo comando da mandare
-                command = Encoding.ASCII.GetBytes("DIR");
+                command = Encoding.ASCII.GetBytes(Constants.DIR_COMMAND);
                 //calcolo grandezza della directory (compresi i file dentro)
                 fileLength = DirSize(new DirectoryInfo(pathFile));
                 Console.WriteLine("dimensione directory {0} ", fileLength);
 
                 //zippo cartella
-                ZipFile.CreateFromDirectory(pathFile, path + zipToSend, CompressionLevel.Optimal, true);
+                ZipFile.CreateFromDirectory(pathFile, path + zipToSend, CompressionLevel.NoCompression, true);
             }
             else
             {
                 Console.WriteLine("SONO UN FILE");
                 //creo comando da mandare
-                command = Encoding.ASCII.GetBytes("FIL");
+                command = Encoding.ASCII.GetBytes(Constants.FILE_COMMAND);
 
                 //calcolo grandezza file
                 fileLength = new FileInfo(pathFile).Length;
@@ -62,7 +61,7 @@ namespace ProjectPDS
 
                 //zippo file
                 ZipArchive newFile = ZipFile.Open(path + zipToSend, ZipArchiveMode.Create);
-                newFile.CreateEntryFromFile(pathFile, fileName, CompressionLevel.Fastest);
+                newFile.CreateEntryFromFile(pathFile, fileName, CompressionLevel.NoCompression);
                 newFile.Dispose();
             }
 
@@ -96,22 +95,9 @@ namespace ProjectPDS
             //mando filename + lunghezza file
             sent = sender.Send(fileNameAndLength, fileNameAndLength.Length, SocketFlags.None);
 
-            //send file
-            //TODO vedere se possiamo lasciarlo così o se serve farlo con le socket
-            //ora non serve visto che mandiamo zip
-            //sender.SendFile(pathFile);
-
-
-            //TODO aspetto che il server mi dica se vuole il file o no
-            //byte[] responseClient =new byte[2]; 
-            //sender.Receive(responseClient, responseClient.Length, SocketFlags.None);
-            //relativi controlli per chiudere eventualmente la socket
-            //if responseClient== OK continua
-            // else  if responseClient == NO ferma la socket
-
 
             //preparo zip command + zip file name length
-            byte[] zipCommand = Encoding.ASCII.GetBytes("ZIP");
+            byte[] zipCommand = Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND);
             byte[] zipAndFileNameLength = zipCommand.Concat(BitConverter.GetBytes(zipToSend.Length)).ToArray();
 
             //mando zip command + zip file name length
@@ -125,20 +111,46 @@ namespace ProjectPDS
             //mando zip file name + lunghezza file zip
             sent = sender.Send(tot, tot.Length, SocketFlags.None);
 
+            int temp = 0;
+            SocketError error;
+
+            //Thread per mandare shutdown ( prova ) try per non farlo rompere se ci mette meno di quei millisecondi
+
             //mando zip
-            sender.SendFile(path + zipToSend);
+            new Thread(() => { Thread.Sleep(10); try { sender.Shutdown(SocketShutdown.Both); } catch (System.ObjectDisposedException e) { return; } }).Start();
+            while (true)
+            {
+                if (fileContent.Length - temp >= 1400)
+                    sent = sender.Send(fileContent, temp, 1400, SocketFlags.None, out error);
+                else
+                    sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
+
+                temp += sent;
+                if (error == SocketError.Shutdown)
+                {
+                    Console.WriteLine("thread fa cose");
+                    File.Delete(path + zipToSend);
+                    sender.Close();
+                    return;
+                }
+
+                if (temp == fileContent.Length) break;
+            }
+
 
             //cancello zip temporaneo
             File.Delete(path + zipToSend);
             // Release the socket.
-            sender.Shutdown(SocketShutdown.Both); //??
+            sender.Shutdown(SocketShutdown.Both);
             sender.Close();
+
         }
 
         public static string RandomStr()
+
         {
             string rStr = Path.GetRandomFileName();
-            rStr = rStr.Replace(".", ""); // For Removing the .
+            rStr = rStr.Replace(".", "");
             return rStr;
         }
 

@@ -14,7 +14,7 @@ namespace FileNameSender
         {
             NamedPipeClientStream pipeClient =
                 new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);
-            pipeClient.Connect();
+            pipeClient.Connect(3000);
             StreamWriter sw = new StreamWriter(pipeClient);
             sw.WriteLine(args[0]);
             sw.Flush();

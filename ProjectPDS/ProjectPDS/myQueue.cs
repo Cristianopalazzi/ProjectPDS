@@ -33,7 +33,7 @@ namespace ProjectPDS
                 string file = sr.ReadLine();
                 Console.WriteLine(file);
 
-                //TODO far aggiungere i tizi a cui mandare il file
+                //TODO far aggiungere i tizi a cui mandare il file ( dall'interfaccia)
                 ArrayList array = new ArrayList();
                 array.Add("receiver1");
                 array.Add("receiver2");

@@ -31,12 +31,11 @@ namespace ProjectPDS
                 SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(localEndPoint);
 
-            //non penso possa servire
             listener.Listen(10);
 
-            Console.WriteLine("Waiting for a connection...");
             while (true)
             {
+                Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
                 Thread myThread = new Thread(() => receiveFromSocket(handler));
                 myThread.Start();
@@ -52,8 +51,7 @@ namespace ProjectPDS
             byte[] request = new byte[Constants.FILE_NAME + Constants.FILE_COMMAND.Length];
 
             //Ricevo comando + lunghezza file name
-            int received = handler.Receive(request, Constants.FILE_COMMAND.Length + sizeof(int)
-                , SocketFlags.None);
+            int received = handler.Receive(request, Constants.FILE_COMMAND.Length + sizeof(int), SocketFlags.None);
 
             Array.Resize(ref request, received);
 
@@ -109,19 +107,30 @@ namespace ProjectPDS
             int temp = 0;
             SocketError error;
 
+            Console.WriteLine("Ricevo il file");
 
             while (true)
             {
-                Console.WriteLine("Attendo file");
                 int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out error);
                 temp += bytesRec;
 
+                Console.WriteLine("bytes rec {0} ", bytesRec);
                 //condizione uscita while
                 if (temp == zipFileSize) break;
+
+                //receive == 0, finito file oppure chiusura dal client
+                if (bytesRec == 0) break;
+            }
+
+            if (temp != zipFileSize)
+            {
+                Console.WriteLine("Connessione interrotta dal client");
+                handler.Shutdown(SocketShutdown.Both);
+                handler.Close();
+                return;
             }
 
             //controllo se FIL o DIR per vedere come estrarre
-
             //scrivo il file zip a prescindere, poi devo vedere i file dentro e vedere se già
             //ne esistono altri con lo stesso nome
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
@@ -155,6 +164,7 @@ namespace ProjectPDS
                         }
                         else entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + newName);
                     }
+                    else entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
                 }
                 archive.Dispose();
             }
@@ -186,7 +196,7 @@ namespace ProjectPDS
                 }
                 archive.Dispose();
             }
-            //TODO agguingere controllo sulla dimensione massima dei nomi dei file e cartelle
+            //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
             //cancella lo zip
             File.Delete(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
 

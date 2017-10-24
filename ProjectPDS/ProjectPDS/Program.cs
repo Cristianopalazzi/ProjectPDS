@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO.Compression;
 using System.IO;
+using System.Collections;
 
 namespace ProjectPDS
 {
@@ -22,8 +23,8 @@ namespace ProjectPDS
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new Form1());
             //Receiver r = new Receiver();
-            MyQueue queue = new MyQueue();
-            //NeighborProtocol n = new NeighborProtocol();
+            //MyQueue queue = new MyQueue();
+            NeighborProtocol n = new NeighborProtocol();
         }
     }
 }
