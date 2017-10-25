@@ -50,6 +50,7 @@ namespace ProjectPDS
         {
             while (true)
             {
+                //TODO farlo con i thread, non con i task
                 Console.WriteLine("Aspetto il prossimo work");
                 Work w = filesToSend.Take();
                 int receiversNumber = w.Receivers.Count;

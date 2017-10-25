@@ -8,7 +8,7 @@
         public const int CLEAN_TIME = 6 * HELLO_TIME;
         public const int PORT_UDP = 8888; //The port on which to listen for incoming data
         public const int PORT_UDP_IMG = 8889;
-        public const int BUFLEN = 512; //Max length of bufferThe port on which to listen for incoming data
+        public const int BUFLEN = 300; //Max length of bufferThe port on which to listen for incoming data
         public const string HELL = "HELL";
         public const string QUIT = "QUIT";
         public const int PORT_TCP = 8080;

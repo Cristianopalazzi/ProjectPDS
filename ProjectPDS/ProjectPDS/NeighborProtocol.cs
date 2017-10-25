@@ -7,13 +7,12 @@ using System.Net.Sockets;
 using System.Net;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Drawing;
 
 namespace ProjectPDS
 {
     class NeighborProtocol
     {
-        public NeighborProtocol()
+        private NeighborProtocol()
         {
             neighbors = new ConcurrentDictionary<string, int>();
             neighborsImage = new Dictionary<string, byte[]>();
@@ -61,7 +60,6 @@ namespace ProjectPDS
             socket.Bind(localEndPoint);
             while (true)
             {
-                //TODO diminuire buflen, serve meno spazio
                 byte[] buffer = new byte[Constants.BUFLEN];
                 Console.WriteLine("Waiting for hello...");
                 int i = socket.ReceiveFrom(buffer, ref senderRemote);
@@ -119,11 +117,6 @@ namespace ProjectPDS
             foreach (KeyValuePair<string, int> pair in neighbors)
                 Console.WriteLine("Key: {0} Values: {1}", pair.Key, pair.Value);
             Console.WriteLine("Dimensione neighborImage {0} ", neighborsImage.Count);
-        }
-
-        public void insert(string ipSender)
-        {
-            neighbors.TryAdd(ipSender, 0);
         }
 
         public string getUserFromIp(string ipSender)
@@ -237,6 +230,7 @@ namespace ProjectPDS
                 if (temp == sizeImg) break;
             }
             //TODO non salvare foto che non serve
+            //TODO salvare placeholder invece della foto, se arriva 0, controllare se la cartella dei placeholder è la stessa anche su altre versioni di windows
             FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + "user.jpg", FileMode.Create);
             fs.Write(img, 0, img.Length);
             fs.Flush(true);
@@ -324,8 +318,18 @@ namespace ProjectPDS
             return result;
         }
 
+        public static NeighborProtocol getInstance
+        {
+            get
+            {
+                if (instance == null)
+                    instance = new NeighborProtocol();
+                return instance;
+            }
+        }
         private ConcurrentDictionary<string, int> neighbors;
         private Dictionary<string, byte[]> neighborsImage;
         private Thread listener, clean, sender;
+        private static NeighborProtocol instance;
     }
 }

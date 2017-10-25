@@ -23,7 +23,6 @@ namespace ProjectPDS
 
         private void startServer()
         {
-            //TODO vedere di cambiare le porte in caso di ricezione da più mittenti contemporanemente (teoricamente no)
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
 
             // Create a TCP/IP socket.
@@ -114,7 +113,6 @@ namespace ProjectPDS
                 int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out error);
                 temp += bytesRec;
 
-                Console.WriteLine("bytes rec {0} ", bytesRec);
                 //condizione uscita while
                 if (temp == zipFileSize) break;
 
@@ -150,9 +148,7 @@ namespace ProjectPDS
                 {
                     if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name))
                     {
-                        //TESTTTTTT
-                        NeighborProtocol n = new NeighborProtocol();
-                        n.insert(Environment.UserName + "@" + ipSender);
+                        NeighborProtocol n = NeighborProtocol.getInstance;
                         string user = n.getUserFromIp(ipSender);
                         string extension = Path.GetExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
                         string onlyName = Path.GetFileNameWithoutExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
@@ -182,17 +178,16 @@ namespace ProjectPDS
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     int index = entry.FullName.IndexOf("/");
-                    string folder = entry.FullName.Substring(0, index);
-                    if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + folder))
+                    if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString))
                     {
-                        if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + folder + Environment.UserName))
+                        if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName))
                         {
                             string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss").Replace(" ", "_");
-                            ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + folder + Environment.UserName + timeStamp);
+                            ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName + timeStamp);
                         }
-                        else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + folder + Environment.UserName);
+                        else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName);
                     }
-                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY);
+                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY+"\\"+fileNameString);
                 }
                 archive.Dispose();
             }

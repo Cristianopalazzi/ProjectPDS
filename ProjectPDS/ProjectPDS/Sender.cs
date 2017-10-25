@@ -25,7 +25,6 @@ namespace ProjectPDS
             Console.WriteLine("PAth {0} ", path);
             Console.WriteLine("FileName {0} ", fileName);
 
-            //TODO mettere gli zip temporanei nascosti
             byte[] command;
 
             //lunghezza nome file
@@ -47,7 +46,8 @@ namespace ProjectPDS
                 Console.WriteLine("dimensione directory {0} ", fileLength);
 
                 //zippo cartella
-                ZipFile.CreateFromDirectory(pathFile, path + zipToSend, CompressionLevel.NoCompression, true);
+                ZipFile.CreateFromDirectory(pathFile, path + zipToSend, CompressionLevel.NoCompression, false);
+                File.SetAttributes(path + zipToSend, FileAttributes.Hidden);
             }
             else
             {
@@ -62,6 +62,7 @@ namespace ProjectPDS
                 //zippo file
                 ZipArchive newFile = ZipFile.Open(path + zipToSend, ZipArchiveMode.Create);
                 newFile.CreateEntryFromFile(pathFile, fileName, CompressionLevel.NoCompression);
+                File.SetAttributes(path + zipToSend, FileAttributes.Hidden);
                 newFile.Dispose();
             }
 
@@ -76,7 +77,7 @@ namespace ProjectPDS
             fs.Close();
 
 
-            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), 8080);
+            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), Constants.PORT_TCP);
 
             Socket sender = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
