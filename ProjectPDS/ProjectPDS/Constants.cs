@@ -21,7 +21,9 @@
         public const string ZIP_EXTENSION = ".zip";
         public const string  NEED_IMG = "YIMG";
         public const string DONT_NEED_IMG = "NIMG";
+        //TODO controllare questi path in altre versioni di windows
         public const string ACCOUNT_IMAGE = @"\Microsoft\Windows\AccountPictures\";
+        public const string PLACEHOLDER_IMAGE = @"C:\ProgramData\Microsoft\User Account Pictures\guest.png";
 
     }
 }

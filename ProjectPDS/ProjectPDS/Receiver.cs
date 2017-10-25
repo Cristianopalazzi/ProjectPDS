@@ -131,17 +131,15 @@ namespace ProjectPDS
             //controllo se FIL o DIR per vedere come estrarre
             //scrivo il file zip a prescindere, poi devo vedere i file dentro e vedere se già
             //ne esistono altri con lo stesso nome
+
+            //scrivo zip file nella directory di default
+            FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, FileMode.OpenOrCreate);
+            fs.Write(fileContent, 0, fileContent.Length);
+            fs.Flush(true);
+            fs.Close();
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
             {
                 Console.WriteLine("FILE");
-                //scrivo zip file nella directory di default
-                //devo rivedere bene questo permission, forse non serve
-                FileIOPermission fileIOPerm = new FileIOPermission(FileIOPermissionAccess.Write, Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
-                FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, FileMode.Create);
-                fs.Write(fileContent, 0, fileContent.Length);
-                fs.Flush(true);
-                fs.Close();
-
                 //controllo se esiste già il file dentro lo zip
                 ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
                 foreach (ZipArchiveEntry entry in archive.Entries)
@@ -155,8 +153,8 @@ namespace ProjectPDS
                         string newName = onlyName + user + extension;
                         if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + newName))
                         {
-                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss").Replace(" ", "_");
-                            entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + onlyName + user + timeStamp + extension);
+                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                            entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + onlyName + user + timeStamp + extension, true);
                         }
                         else entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + newName);
                     }
@@ -167,13 +165,6 @@ namespace ProjectPDS
             else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
             {
                 Console.WriteLine("DIR");
-
-                //scrivo zip file nella directory di default
-                FileIOPermission fileIOPerm1 = new FileIOPermission(FileIOPermissionAccess.Write, Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
-                FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, FileMode.Create);
-                fs.Write(fileContent, 0, fileContent.Length);
-                fs.Flush(true);
-                fs.Close();
                 ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
@@ -182,12 +173,12 @@ namespace ProjectPDS
                     {
                         if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName))
                         {
-                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss").Replace(" ", "_");
+                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
                             ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName + timeStamp);
                         }
                         else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName);
                     }
-                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY+"\\"+fileNameString);
+                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString);
                 }
                 archive.Dispose();
             }

@@ -95,8 +95,8 @@ namespace ProjectPDS
                 byte[] requestImage;
                 if (!neighborsImage.ContainsKey(senderID))
                 {
-                    //richiedo la foto 
-                    Console.WriteLine("Non ho la foto del tizio, gliela richiedo");
+                    //chiedo la foto 
+                    Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
                     requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
                     socket.SendTo(requestImage, requestImage.Length, SocketFlags.None, ip);
                     receiveImg(senderID);
@@ -220,6 +220,18 @@ namespace ProjectPDS
             byte[] buffer = new byte[sizeof(int)];
             handler.Receive(buffer, buffer.Length, SocketFlags.None);
             int sizeImg = BitConverter.ToInt32(buffer, 0);
+            if (sizeImg == -1)
+            {
+                Console.WriteLine("Prendo placeholder perchè il tizio nn ha la foto");
+                string placeholderPath = Constants.PLACEHOLDER_IMAGE;
+                int placeholderLength = (int)new FileInfo(placeholderPath).Length;
+                FileStream fsp = File.OpenRead(placeholderPath);
+                byte[] placeholderByte = new byte[placeholderLength];
+                placeholderByte = File.ReadAllBytes(placeholderPath);
+                fsp.Close();
+                neighborsImage.Add(neighbor, placeholderByte);
+                return;
+            }
             byte[] img = new byte[sizeImg];
             int temp = 0;
             SocketError error;
@@ -230,7 +242,7 @@ namespace ProjectPDS
                 if (temp == sizeImg) break;
             }
             //TODO non salvare foto che non serve
-            //TODO salvare placeholder invece della foto, se arriva 0, controllare se la cartella dei placeholder è la stessa anche su altre versioni di windows
+
             FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + "user.jpg", FileMode.Create);
             fs.Write(img, 0, img.Length);
             fs.Flush(true);
@@ -241,13 +253,21 @@ namespace ProjectPDS
 
         private void sendImg(string ipAddress)
         {
-            //TODO verificare se la foto utente esiste, in caso contrario mandare 0 al server come dimensione e fargli prendere un placeholder da salvare nella mappa
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddress), Constants.PORT_TCP_IMG);
             Socket sender = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
             sender.Connect(remoteEP);
             DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
-            var accountImage = dir.GetFiles("*.accountpicture-ms")
+
+            FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
+            if (images.Length == 0)
+            {
+                Console.WriteLine("Non ho l'immagine");
+                sender.Send(BitConverter.GetBytes(-1), sizeof(int), SocketFlags.None);
+                return;
+            }
+
+            var accountImage = images
              .OrderByDescending(f => f.LastWriteTime)
              .First();
 
