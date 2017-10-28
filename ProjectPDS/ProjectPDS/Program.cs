@@ -18,11 +18,11 @@ namespace ProjectPDS
         [STAThread]
         static void Main()
         {
-            NeighborProtocol n = NeighborProtocol.getInstance;
+            //NeighborProtocol n = NeighborProtocol.getInstance;
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new Form1());
-            Receiver r = new Receiver();
+            //Receiver r = new Receiver();
             MyQueue queue = new MyQueue();
         }
     }

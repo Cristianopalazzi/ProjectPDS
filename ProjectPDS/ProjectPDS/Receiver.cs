@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using System.IO.Compression;
-using System.Security.Permissions;
 
 namespace ProjectPDS
 {
@@ -112,7 +109,6 @@ namespace ProjectPDS
             {
                 int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out error);
                 temp += bytesRec;
-
                 //condizione uscita while
                 if (temp == zipFileSize) break;
 

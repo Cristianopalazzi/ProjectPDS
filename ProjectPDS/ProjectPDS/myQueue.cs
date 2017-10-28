@@ -35,13 +35,13 @@ namespace ProjectPDS
 
                 //TODO far aggiungere i tizi a cui mandare il file ( dall'interfaccia)
                 ArrayList array = new ArrayList();
-                array.Add("192.168.1.133");
-                array.Add("192.168.1.133");
+                array.Add("192.168.1.105");
+                //array.Add("192.168.1.109");
                 Work w = new Work(file, array);
                 filesToSend.Add(w);
 
-                Thread.Sleep(3000);
-                filesToSend.Add(w);
+                //Thread.Sleep(3000);
+                //filesToSend.Add(w);
                 pipeServer.Disconnect();
             }
         }
@@ -54,10 +54,10 @@ namespace ProjectPDS
             {
                 Console.WriteLine("Aspetto il prossimo work");
                 Work w = filesToSend.Take();
-                int receiversNumber = w.Receivers.Count;
+                int receivers = w.Receivers.Count;
                 Sender s = new Sender();
                 List<Thread> threads = new List<Thread>();
-                for (int i = 0; i < w.Receivers.Count; i++)
+                for (int i = 0; i < receivers; i++)
                 {
                     string receiver = (string)w.Receivers[i];
                     Thread t = new Thread(() =>
@@ -72,6 +72,7 @@ namespace ProjectPDS
                 Console.WriteLine("Finiti tutti");
             }
         }
+
         BlockingCollection<Work> filesToSend;
         private Thread threadPipe, waitOnTake;
     }

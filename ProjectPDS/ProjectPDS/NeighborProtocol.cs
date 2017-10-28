@@ -36,16 +36,14 @@ namespace ProjectPDS
 
         private void listen()
         {
-
-            //IPHostEntry ipHostInfo = Dns.GetHostEntryGetHostEntry(); Dns.Resolve(Dns.GetHostName());
-            //IPAddress ipAddress = ipHostInfo.AddressList[0];
-            //IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            Socket socketImg = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             string recv, remoteIpAddress, remotePort;
 
             //EndPoint con le info del client che si collega
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-            EndPoint senderRemote = (EndPoint)sender;
+            EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
+
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
 
             //join ad un gruppo multicast
             socket.SetSocketOption(SocketOptionLevel.IP,
@@ -53,15 +51,13 @@ namespace ProjectPDS
                 new MulticastOption(IPAddress.Parse(Constants.MULTICAST)));
 
             //Non ricevo pacchetti da me stesso
-            //socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, false);
-
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, false);
 
             socket.Bind(localEndPoint);
+
             while (true)
             {
                 byte[] buffer = new byte[Constants.BUFLEN];
-                Console.WriteLine("Waiting for hello...");
                 int i = socket.ReceiveFrom(buffer, ref senderRemote);
                 Array.Resize(ref buffer, i);
                 recv = Encoding.UTF8.GetString(buffer);
@@ -75,7 +71,7 @@ namespace ProjectPDS
                 string senderName = recv.Substring(4);
 
                 string senderID = String.Concat(senderName, String.Concat("@", remoteIpAddress));
-                //Console.WriteLine("senderID {0} ", senderID);
+                Console.WriteLine("HELLO FROM {0} ", senderID);
                 //Console.WriteLine("senderIPPPP {0} ", remoteIpAddress);
                 if (String.Compare(command, Constants.HELL, false) == 0)
                 {
@@ -91,24 +87,25 @@ namespace ProjectPDS
                         neighbors.TryRemove(senderID, out value);
                 }
 
-                IPEndPoint ip = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
                 byte[] requestImage;
+                IPEndPoint ipImg = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
+                socketImg.Connect(ipImg);
                 if (!neighborsImage.ContainsKey(senderID))
                 {
                     //chiedo la foto 
                     Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
                     requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
-                    socket.SendTo(requestImage, requestImage.Length, SocketFlags.None, ip);
+                    socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                     receiveImg(senderID);
                 }
                 else
                 {
-                    Console.WriteLine("Ho la foto del tizio");
                     requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
-                    socket.SendTo(requestImage, requestImage.Length, SocketFlags.None, ip);
+                    socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                 }
             }
             socket.Close();
+            socketImg.Close();
         }
 
 
@@ -147,9 +144,9 @@ namespace ProjectPDS
                     else if (pair.Value == Constants.MAX_COUNTER)
                     {
                         neighbors[pair.Key] = 0;
-                        Console.WriteLine("Rimesso a 0");
                     }
                 }
+
                 //rimuovo dalla mappa gli oggetti della lista temporanea
                 foreach (string tmp in toRemove)
                 {
@@ -164,44 +161,52 @@ namespace ProjectPDS
 
         private void sendMe()
         {
-            IPAddress ip = IPAddress.Parse(Constants.MULTICAST);
+            IPEndPoint ipMulticast = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             Socket socketImg = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPEndPoint ipepImg = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP_IMG);
-            IPEndPoint ipep = new IPEndPoint(ip, Constants.PORT_UDP);
-            socket.Connect(ipep);
-            IPEndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-            EndPoint senderRemote = (EndPoint)sender;
-            string remoteIpAddress, remotePort;
-            socketImg.Bind(ipepImg);
+            IPEndPoint ipImg = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP_IMG);
 
+            EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
+            string remoteIpAddress, remotePort;
+
+            socketImg.Bind(ipImg);
+            socketImg.ReceiveTimeout = 500;
             byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + Environment.UserName);
-            byte[] requestImg = new byte[Constants.NEED_IMG.Length];
+
             while (true)
             {
-                socket.Send(toBytes, toBytes.Length, SocketFlags.None);
-                socketImg.ReceiveFrom(requestImg, requestImg.Length, SocketFlags.None, ref senderRemote);
+                byte[] requestImg = new byte[Constants.NEED_IMG.Length];
+                socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipMulticast);
+                try
+                {
+                    socketImg.ReceiveFrom(requestImg, requestImg.Length, SocketFlags.None, ref senderRemote);
+                }
+                catch (SocketException s)
+                {
+                    //Console.WriteLine("Eccezione {0} ", s.ToString());
+                    //TODO cercare eccezioni timeout
+                }
+
                 if (String.Compare(Encoding.UTF8.GetString(requestImg), Constants.NEED_IMG) == 0)
                 {
-                    Console.WriteLine("Server vuole la foto");
                     remoteIpAddress = ((IPEndPoint)senderRemote).Address.ToString();
                     remotePort = ((IPEndPoint)senderRemote).Port.ToString();
                     sendImg(remoteIpAddress);
+                    Console.WriteLine("Foto Inviata");
                 }
                 Thread.Sleep(Constants.HELLO_TIME);
             }
             socket.Close();
+            socketImg.Close();
         }
 
 
         private void quitMe()
         {
-            IPAddress ip = IPAddress.Parse(Constants.MULTICAST);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPEndPoint ipep = new IPEndPoint(ip, Constants.PORT_UDP);
-            socket.Connect(ipep);
+            IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             byte[] toBytes = Encoding.ASCII.GetBytes(Constants.QUIT + Environment.UserName);
-            socket.Send(toBytes, toBytes.Length, SocketFlags.None);
+            socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipep);
             socket.Close();
         }
 
@@ -213,7 +218,7 @@ namespace ProjectPDS
                 SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(localEndPoint);
 
-            listener.Listen(10);
+            listener.Listen(1);
 
             Console.WriteLine("Waiting for img...");
             Socket handler = listener.Accept();
@@ -241,6 +246,8 @@ namespace ProjectPDS
                 temp += bytesRec;
                 if (temp == sizeImg) break;
             }
+
+
             //TODO non salvare foto che non serve
 
             FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + "user.jpg", FileMode.Create);
@@ -248,6 +255,9 @@ namespace ProjectPDS
             fs.Flush(true);
             fs.Close();
             neighborsImage.Add(neighbor, img);
+            handler.Shutdown(SocketShutdown.Both);
+            handler.Close();
+            listener.Close();
         }
 
 
@@ -287,6 +297,9 @@ namespace ProjectPDS
                 temp += sent;
                 if (temp == accountImage.Length) break;
             }
+
+            sender.Shutdown(SocketShutdown.Both);
+            sender.Close();
         }
 
         private byte[] GetImage(string path)

@@ -24,6 +24,5 @@
         //TODO controllare questi path in altre versioni di windows
         public const string ACCOUNT_IMAGE = @"\Microsoft\Windows\AccountPictures\";
         public const string PLACEHOLDER_IMAGE = @"C:\ProgramData\Microsoft\User Account Pictures\guest.png";
-
     }
 }
