@@ -262,4 +262,4 @@ __pycache__/
 
 
 #Ignored the keyRegisters
-.reg
+*.reg
