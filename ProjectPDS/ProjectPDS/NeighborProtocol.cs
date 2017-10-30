@@ -15,7 +15,7 @@ namespace ProjectPDS
         private NeighborProtocol()
         {
             neighbors = new ConcurrentDictionary<string, int>();
-            neighborsImage = new Dictionary<string, byte[]>();
+            neighborsImage = new ConcurrentDictionary<string, byte[]>();
             listener = new Thread(listen)
             {
                 Name = "listener"
@@ -170,7 +170,7 @@ namespace ProjectPDS
             string remoteIpAddress, remotePort;
 
             socketImg.Bind(ipImg);
-            socketImg.ReceiveTimeout = 500;
+            socketImg.ReceiveTimeout = 2000;
             byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + Environment.UserName);
 
             while (true)
@@ -234,15 +234,14 @@ namespace ProjectPDS
                 byte[] placeholderByte = new byte[placeholderLength];
                 placeholderByte = File.ReadAllBytes(placeholderPath);
                 fsp.Close();
-                neighborsImage.Add(neighbor, placeholderByte);
+                neighborsImage.TryAdd(neighbor, placeholderByte);
                 return;
             }
             byte[] img = new byte[sizeImg];
             int temp = 0;
-            SocketError error;
             while (true)
             {
-                int bytesRec = handler.Receive(img, temp, sizeImg - temp, SocketFlags.None, out error);
+                int bytesRec = handler.Receive(img, temp, sizeImg - temp, SocketFlags.None, out SocketError error);
                 temp += bytesRec;
                 if (temp == sizeImg) break;
             }
@@ -254,7 +253,7 @@ namespace ProjectPDS
             fs.Write(img, 0, img.Length);
             fs.Flush(true);
             fs.Close();
-            neighborsImage.Add(neighbor, img);
+            neighborsImage.TryAdd(neighbor, img);
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
             listener.Close();
@@ -360,8 +359,14 @@ namespace ProjectPDS
                 return instance;
             }
         }
+
+
+        public ConcurrentDictionary<string, byte[]> getNeighbors()
+        {
+            return neighborsImage;
+        }
         private ConcurrentDictionary<string, int> neighbors;
-        private Dictionary<string, byte[]> neighborsImage;
+        private ConcurrentDictionary<string, byte[]> neighborsImage;
         private Thread listener, clean, sender;
         private static NeighborProtocol instance;
     }

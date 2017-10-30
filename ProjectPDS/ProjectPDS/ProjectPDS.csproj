@@ -54,11 +54,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="Form1.cs">
+    <Compile Include="NeighborSelection.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="NeighborSelection.Designer.cs">
+      <DependentUpon>NeighborSelection.cs</DependentUpon>
     </Compile>
     <Compile Include="NeighborProtocol.cs" />
     <Compile Include="Program.cs" />
@@ -67,6 +67,9 @@
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="Work.cs" />
+    <EmbeddedResource Include="NeighborSelection.resx">
+      <DependentUpon>NeighborSelection.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

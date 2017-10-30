@@ -18,7 +18,7 @@ namespace ProjectPDS
         [STAThread]
         static void Main()
         {
-            //NeighborProtocol n = NeighborProtocol.getInstance;
+            NeighborProtocol n = NeighborProtocol.getInstance;
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.Run(new Form1());

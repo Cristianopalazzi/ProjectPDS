@@ -6,11 +6,13 @@ using System.IO.Pipes;
 using System.IO;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Windows.Forms;
 
 namespace ProjectPDS
 {
     class MyQueue
     {
+
         public MyQueue()
         {
             filesToSend = new BlockingCollection<Work>();
@@ -32,16 +34,22 @@ namespace ProjectPDS
                 StreamReader sr = new StreamReader(pipeServer);
                 string file = sr.ReadLine();
                 Console.WriteLine(file);
+                Console.WriteLine("aperto form");
+                NeighborSelection form = new NeighborSelection();
+                form.Text = "Condividi " + file + " con ";
+                form.Focus();
+                form.ShowDialog();
+                ArrayList array = form.getSelectedNames();
 
-                //TODO far aggiungere i tizi a cui mandare il file ( dall'interfaccia)
-                ArrayList array = new ArrayList();
-                array.Add("192.168.1.105");
-                //array.Add("192.168.1.109");
-                Work w = new Work(file, array);
-                filesToSend.Add(w);
-
-                //Thread.Sleep(3000);
-                //filesToSend.Add(w);
+                if (array.Count != 0)
+                {
+                    foreach (var uu in array)
+                    {
+                        Console.WriteLine("**********************************" + uu);
+                    }
+                    Work w = new Work(file, array);
+                    // filesToSend.Add(w);
+                }
                 pipeServer.Disconnect();
             }
         }
