@@ -15,17 +15,21 @@ namespace ProjectPDS
 
         public MyQueue()
         {
+
             filesToSend = new BlockingCollection<Work>();
             threadPipe = new Thread(listenOnPipe);
             threadPipe.Start();
             waitOnTake = new Thread(listenOnQueue);
             waitOnTake.Start();
+            
         }
 
         private void listenOnPipe()
         {
+            FilesToSend fils = new FilesToSend();
             NamedPipeServerStream pipeServer =
                       new NamedPipeServerStream("testpipe", PipeDirection.In);
+            
             while (true)
             {
                 Console.WriteLine("Waiting for client connection...");
@@ -33,6 +37,7 @@ namespace ProjectPDS
                 Console.WriteLine("Client connected.");
                 StreamReader sr = new StreamReader(pipeServer);
                 string file = sr.ReadLine();
+              
                 Console.WriteLine(file);
                 Console.WriteLine("aperto form");
                 NeighborSelection form = new NeighborSelection();
@@ -40,16 +45,14 @@ namespace ProjectPDS
                 form.Focus();
                 form.ShowDialog();
                 ArrayList array = form.getSelectedNames();
-
                 if (array.Count != 0)
                 {
-                    foreach (var uu in array)
-                    {
-                        Console.WriteLine("**********************************" + uu);
-                    }
                     Work w = new Work(file, array);
-                    // filesToSend.Add(w);
+                    filesToSend.Add(w);
+                    fils.AddFile(w);
                 }
+                fils.ShowDialog();
+                form.Dispose();
                 pipeServer.Disconnect();
             }
         }
@@ -74,14 +77,19 @@ namespace ProjectPDS
                     });
                     t.Start();
                     threads.Add(t);
+                   
                 }
+               
                 foreach (var t in threads)
                     t.Join();
                 Console.WriteLine("Finiti tutti");
             }
         }
 
-        BlockingCollection<Work> filesToSend;
+
+        private BlockingCollection<Work> filesToSend;
         private Thread threadPipe, waitOnTake;
+        
+        
     }
 }

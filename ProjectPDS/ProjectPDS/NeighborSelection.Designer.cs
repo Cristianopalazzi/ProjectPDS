@@ -69,14 +69,13 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // Cose
+            // NeighborSelection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
             this.Controls.Add(this.tableLayoutPanel1);
-            this.Name = "Cose";
-            this.Text = "Cose";
+            this.Name = "NeighborSelection";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 

@@ -118,7 +118,7 @@ namespace ProjectPDS
             //Thread per mandare shutdown ( prova ) try per non farlo rompere se ci mette meno di quei millisecondi
 
             //mando zip
-            new Thread(() => { Thread.Sleep(10); try { sender.Shutdown(SocketShutdown.Both); } catch (System.ObjectDisposedException e) { return; } }).Start();
+            //new Thread(() => { Thread.Sleep(10); try { sender.Shutdown(SocketShutdown.Both); } catch (System.ObjectDisposedException e) { return; } }).Start();
             while (true)
             {
                 if (fileContent.Length - temp >= 1400)
@@ -127,6 +127,7 @@ namespace ProjectPDS
                     sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
 
                 temp += sent;
+                updateProgress(fileName, ipAddr,((temp*100)/fileContent.Length));
                 if (error == SocketError.Shutdown)
                 {
                     Console.WriteLine("thread fa cose");
@@ -168,5 +169,9 @@ namespace ProjectPDS
                 size += DirSize(di);
             return size;
         }
+
+
+        public delegate void myDelegate(string filename, string receiver, int percentage);
+        public static event myDelegate updateProgress;
     }
 }

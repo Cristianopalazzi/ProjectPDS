@@ -7,7 +7,7 @@ using System.Collections;
 
 namespace ProjectPDS
 {
-    class Work
+   public class Work
     {
         public Work(string fileName, ArrayList receivers)
         {

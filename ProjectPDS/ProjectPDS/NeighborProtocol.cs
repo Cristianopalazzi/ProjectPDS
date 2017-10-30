@@ -365,6 +365,8 @@ namespace ProjectPDS
         {
             return neighborsImage;
         }
+
+
         private ConcurrentDictionary<string, int> neighbors;
         private ConcurrentDictionary<string, byte[]> neighborsImage;
         private Thread listener, clean, sender;

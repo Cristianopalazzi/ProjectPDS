@@ -133,6 +133,7 @@ namespace ProjectPDS
             fs.Write(fileContent, 0, fileContent.Length);
             fs.Flush(true);
             fs.Close();
+            NeighborProtocol n = NeighborProtocol.getInstance;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
             {
                 Console.WriteLine("FILE");
@@ -142,7 +143,7 @@ namespace ProjectPDS
                 {
                     if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name))
                     {
-                        NeighborProtocol n = NeighborProtocol.getInstance;
+
                         string user = n.getUserFromIp(ipSender);
                         string extension = Path.GetExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
                         string onlyName = Path.GetFileNameWithoutExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
@@ -162,20 +163,17 @@ namespace ProjectPDS
             {
                 Console.WriteLine("DIR");
                 ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
-                foreach (ZipArchiveEntry entry in archive.Entries)
+                if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString))
                 {
-                    int index = entry.FullName.IndexOf("/");
-                    if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString))
+                    if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + n.getUserFromIp(ipSender)))
                     {
-                        if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName))
-                        {
-                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName + timeStamp);
-                        }
-                        else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + Environment.UserName);
+                        string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                        ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + n.getUserFromIp(ipSender) + timeStamp);
                     }
-                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString);
+                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + n.getUserFromIp(ipSender));
                 }
+                else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString);
+
                 archive.Dispose();
             }
             //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
