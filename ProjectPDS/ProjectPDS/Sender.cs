@@ -12,9 +12,8 @@ namespace ProjectPDS
     class Sender
     {
         public Sender() { }
-        public void sendFile(string ipAddr, string pathFile)
+        public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
-            //TODO vedere se fare questo parse dopo aver ricevuto con il tasto destro o qui
             //estraggo nome file dal path assoluto
             int idx = pathFile.LastIndexOf('\\');
 
@@ -76,11 +75,7 @@ namespace ProjectPDS
             fileContent = File.ReadAllBytes(path + zipToSend);
             fs.Close();
 
-
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), Constants.PORT_TCP);
-
-            Socket sender = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
 
             sender.Connect(remoteEP);
             Console.WriteLine("Socket connected to {0}", sender.RemoteEndPoint.ToString());
@@ -115,22 +110,22 @@ namespace ProjectPDS
             int temp = 0;
             SocketError error;
 
-            //Thread per mandare shutdown ( prova ) try per non farlo rompere se ci mette meno di quei millisecondi
-
             //mando zip
-            //new Thread(() => { Thread.Sleep(10); try { sender.Shutdown(SocketShutdown.Both); } catch (System.ObjectDisposedException e) { return; } }).Start();
             while (true)
             {
+              
                 if (fileContent.Length - temp >= 1400)
                     sent = sender.Send(fileContent, temp, 1400, SocketFlags.None, out error);
                 else
                     sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
 
                 temp += sent;
-                updateProgress(fileName, ipAddr,((temp*100)/fileContent.Length));
+                updateProgress(fileName, sender,((temp * 100) / fileContent.Length));
+
                 if (error == SocketError.Shutdown)
                 {
-                    Console.WriteLine("thread fa cose");
+                    //TODO cose
+                    Console.WriteLine("****** DEBUG ******* THREAD SHUTDOWN ********");
                     File.Delete(path + zipToSend);
                     sender.Close();
                     return;
@@ -139,17 +134,14 @@ namespace ProjectPDS
                 if (temp == fileContent.Length) break;
             }
 
-
             //cancello zip temporaneo
             File.Delete(path + zipToSend);
             // Release the socket.
             sender.Shutdown(SocketShutdown.Both);
             sender.Close();
-
         }
 
         public static string RandomStr()
-
         {
             string rStr = Path.GetRandomFileName();
             rStr = rStr.Replace(".", "");
@@ -171,7 +163,7 @@ namespace ProjectPDS
         }
 
 
-        public delegate void myDelegate(string filename, string receiver, int percentage);
+        public delegate void myDelegate(string filename, Socket sock, int percentage);
         public static event myDelegate updateProgress;
     }
 }

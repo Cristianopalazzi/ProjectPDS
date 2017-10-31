@@ -40,20 +40,21 @@ namespace ProjectPDS
             listView1.LargeImageList = iml;
             foreach (var item in np.getNeighbors())
             {
-                
-                var listItem = listView1.Items.Add(np.getUserFromIp(item.Key));
-                listItem.Tag = item.Key.Substring(item.Key.LastIndexOf("@") + 1);
+
                 var ms = new MemoryStream(item.Value);
-                iml.Images.Add(item.Key,Image.FromStream(ms));
+                iml.Images.Add(item.Key, Image.FromStream(ms));
+
+                var listItem = listView1.Items.Add(np.getUserFromIp(item.Key));
+                listItem.Tag = item.Key;
                 listItem.ImageKey = item.Key;
 
                 var listItem2 = listView1.Items.Add(np.getUserFromIp(item.Key) + " b");
                 listItem2.ImageKey = item.Key;
-                listItem2.Tag = item.Key.Substring(item.Key.LastIndexOf("@") + 1);
+                listItem2.Tag = item.Key;
 
                 var listItem3 = listView1.Items.Add(np.getUserFromIp(item.Key) + " C");
                 listItem3.ImageKey = item.Key;
-                listItem3.Tag = item.Key.Substring(item.Key.LastIndexOf("@") + 1);
+                listItem3.Tag = item.Key;
 
             }
         }

@@ -54,12 +54,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
-    <Compile Include="FileProgress.cs" />
     <Compile Include="FilesToSend.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FilesToSend.Designer.cs">
       <DependentUpon>FilesToSend.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="NeighborSelection.cs">
       <SubType>Form</SubType>
@@ -74,6 +79,9 @@
     <Compile Include="Receiver.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="Work.cs" />
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="NeighborSelection.resx">
       <DependentUpon>NeighborSelection.cs</DependentUpon>
     </EmbeddedResource>

@@ -19,13 +19,16 @@ namespace ProjectPDS
         static void Main()
         {
 
+           
 
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
-            //Receiver r = new Receiver();
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Receiver r = new Receiver();
             NeighborProtocol n = NeighborProtocol.getInstance;
             MyQueue queue = new MyQueue();
+
+
+
         }
     }
 }

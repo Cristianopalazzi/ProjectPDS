@@ -93,7 +93,7 @@ namespace ProjectPDS
                 if (!neighborsImage.ContainsKey(senderID))
                 {
                     //chiedo la foto 
-                    Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
+                    //Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
                     requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
                     socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                     receiveImg(senderID);

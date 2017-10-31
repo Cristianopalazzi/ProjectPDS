@@ -15,21 +15,25 @@ namespace ProjectPDS
 
         public MyQueue()
         {
-
             filesToSend = new BlockingCollection<Work>();
-            threadPipe = new Thread(listenOnPipe);
+            threadPipe = new Thread(listenOnPipe)
+            {
+                Name = "ThreadPipe"
+            };
             threadPipe.Start();
-            waitOnTake = new Thread(listenOnQueue);
+            waitOnTake = new Thread(listenOnQueue)
+            {
+                Name = "waitOnTake"
+            };
             waitOnTake.Start();
-            
+            form = new MainForm();
+            form.Show();
+            Application.Run();
         }
 
         private void listenOnPipe()
         {
-            FilesToSend fils = new FilesToSend();
-            NamedPipeServerStream pipeServer =
-                      new NamedPipeServerStream("testpipe", PipeDirection.In);
-            
+            NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.In);
             while (true)
             {
                 Console.WriteLine("Waiting for client connection...");
@@ -37,22 +41,26 @@ namespace ProjectPDS
                 Console.WriteLine("Client connected.");
                 StreamReader sr = new StreamReader(pipeServer);
                 string file = sr.ReadLine();
-              
+
                 Console.WriteLine(file);
-                Console.WriteLine("aperto form");
-                NeighborSelection form = new NeighborSelection();
-                form.Text = "Condividi " + file + " con ";
-                form.Focus();
-                form.ShowDialog();
-                ArrayList array = form.getSelectedNames();
-                if (array.Count != 0)
+                Work w = null;
+                NeighborSelection formUsers = new NeighborSelection
                 {
-                    Work w = new Work(file, array);
+                    Text = "Condividi " + file + " con "
+                };
+                formUsers.Focus();
+                formUsers.ShowDialog();
+
+                ArrayList array = formUsers.getSelectedNames();
+                if (array.Count != 0)
+                { 
+                    w = new Work(file, array);
                     filesToSend.Add(w);
-                    fils.AddFile(w);
+                    form.BeginInvoke((MethodInvoker)delegate
+                    {
+                        form.apriFileToSend(w);
+                    });
                 }
-                fils.ShowDialog();
-                form.Dispose();
                 pipeServer.Disconnect();
             }
         }
@@ -65,21 +73,22 @@ namespace ProjectPDS
             {
                 Console.WriteLine("Aspetto il prossimo work");
                 Work w = filesToSend.Take();
-                int receivers = w.Receivers.Count;
+                int receivers = w.SendingFiles.Count;
                 Sender s = new Sender();
                 List<Thread> threads = new List<Thread>();
-                for (int i = 0; i < receivers; i++)
+                foreach (SendingFile sf in w.SendingFiles)
                 {
-                    string receiver = (string)w.Receivers[i];
                     Thread t = new Thread(() =>
                     {
-                        s.sendFile(receiver, w.FileName);
-                    });
+                        s.sendFile(sf.IpAddr, w.FileName, sf.Sock);
+                    })
+                    {
+                        Name = "thread che manda " + w.FileName + " a  " + sf.Name
+                    };
                     t.Start();
                     threads.Add(t);
-                   
+                    
                 }
-               
                 foreach (var t in threads)
                     t.Join();
                 Console.WriteLine("Finiti tutti");
@@ -89,7 +98,6 @@ namespace ProjectPDS
 
         private BlockingCollection<Work> filesToSend;
         private Thread threadPipe, waitOnTake;
-        
-        
+        private MainForm form;
     }
 }

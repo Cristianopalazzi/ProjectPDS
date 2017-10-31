@@ -16,7 +16,7 @@
         public const int FILE_NAME = 256;
         public const string FILE_COMMAND = "FIL";
         public const string ZIP_COMMAND = "ZIP";
-        public const string DEFAULT_DIRECTORY = @"C:\Users\Gianmaria\Desktop";
+        public const string DEFAULT_DIRECTORY = @"C:\Users\Gianmaria\Desktop\prova";
         public const string DIR_COMMAND = "DIR";
         public const string ZIP_EXTENSION = ".zip";
         public const string  NEED_IMG = "YIMG";
