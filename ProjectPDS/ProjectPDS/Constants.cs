@@ -16,13 +16,16 @@
         public const int FILE_NAME = 256;
         public const string FILE_COMMAND = "FIL";
         public const string ZIP_COMMAND = "ZIP";
-        public const string DEFAULT_DIRECTORY = @"C:\Users\Gianmaria\Desktop\prova";
+        public const string DEFAULT_DIRECTORY = @"C:\Users\Cristiano\Desktop\Prove";
         public const string DIR_COMMAND = "DIR";
         public const string ZIP_EXTENSION = ".zip";
-        public const string  NEED_IMG = "YIMG";
+        public const string NEED_IMG = "YIMG";
         public const string DONT_NEED_IMG = "NIMG";
         //TODO controllare questi path in altre versioni di windows
         public const string ACCOUNT_IMAGE = @"\Microsoft\Windows\AccountPictures\";
         public const string PLACEHOLDER_IMAGE = @"C:\ProgramData\Microsoft\User Account Pictures\guest.png";
+        public const string ACCEPT_FILE = "OK";
+        public const string DECLINE_FILE = "NO";
+        public const string SETTINGS = "Settings.xml";
     }
 }

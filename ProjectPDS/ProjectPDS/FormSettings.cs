@@ -1,45 +1,48 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ProjectPDS
 {
     public partial class FormSettings : Form
     {
-         public FormSettings()
+        public FormSettings()
         {
             InitializeComponent();
             Rectangle workingArea = Screen.GetWorkingArea(this);
-            this.Location = new Point(workingArea.Right - 369, workingArea.Bottom - 340);
+            Location = new Point(workingArea.Right - 369, workingArea.Bottom - 340);
         }
 
         private void FormSettings_Load(object sender, EventArgs e)
         {
-            this.checkBox1.Checked = props.AutoAccept;
-            this.checkBox2.Checked = props.DefaultDir;
-            this.textBox1.Text = props.DefaultDirPath;
-            if (!checkBox2.Checked)
-                textBox1.Enabled = false;
-            if (!props.Online)
+            checkBoxAutoAccept.Checked = props.AutoAccept;
+            checkBoxDefaultDir.Checked = props.DefaultDir;
+            textBoxDefaultPath.Text = props.DefaultDirPath;
+            if (checkBoxDefaultDir.Checked)
             {
-                button1.Text = "Stato: Offline";
-                button1.BackColor = Color.Gray;
+                textBoxDefaultPath.Visible = true;
+                labelDefaultPath.Visible = true;
+                fileSelector.Visible = true;
             }
             else
             {
-                button1.Text = "Stato: Online";
-                button1.BackColor = System.Drawing.SystemColors.HotTrack;
+                textBoxDefaultPath.Visible = false;
+                labelDefaultPath.Visible = false;
+                fileSelector.Visible = false;
+            }
+            if (!props.Online)
+            {
+                stato.Text = "Stato: Offline";
+                stato.BackColor = Color.Gray;
+            }
+            else
+            {
+                stato.Text = "Stato: Online";
+                stato.BackColor = SystemColors.HotTrack;
             }
 
-            panel2.Hide();
+            impostazioni.Hide();
             //if (this.WindowState == FormWindowState.Minimized)
             //    this.Hide();
 
@@ -53,54 +56,78 @@ namespace ProjectPDS
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (String.Compare("Stato: Online", button1.Text) == 0)
+            if (String.Compare("Stato: Online", stato.Text) == 0)
             {
-                button1.Text = "Stato: Offline";
-                button1.BackColor = Color.Gray;
+                stato.Text = "Stato: Offline";
+                stato.BackColor = Color.Gray;
                 props.Online = false;
+                NeighborProtocol.senderEvent.Reset();
             }
             else
             {
-                button1.Text = "Stato: Online";
-                button1.BackColor = System.Drawing.SystemColors.HotTrack;
+                stato.Text = "Stato: Online";
+                stato.BackColor = SystemColors.HotTrack;
                 props.Online = true;
+                NeighborProtocol.senderEvent.Set();
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            // When closing the form, save the data from the TextBoxes to a file 
-            props.DefaultDirPath = textBox1.Text;
-            props.DefaultDir = checkBox2.Checked;
-            props.AutoAccept = checkBox1.Checked;
-            panel2.Hide();
+            if (checkBoxDefaultDir.Checked)
+            {
+                if (Directory.Exists(textBoxDefaultPath.Text))
+                {
+                    props.DefaultDir = checkBoxDefaultDir.Checked;
+                    props.AutoAccept = checkBoxAutoAccept.Checked;
+                    props.DefaultDirPath = textBoxDefaultPath.Text;
+                    impostazioni.Hide();
+                    Settings.writeSettings(props);
+                }
+                else
+                    MessageBox.Show("Il percorso selezionato non è valido");
+            }
+            else
+            {
+                props.DefaultDir = checkBoxDefaultDir.Checked;
+                props.AutoAccept = checkBoxAutoAccept.Checked;
+                textBoxDefaultPath.Text = props.DefaultDirPath;
+                impostazioni.Hide();
+                Settings.writeSettings(props);
+            }
         }
 
 
 
         private void checkBox2_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox2.Checked)
+            if (checkBoxDefaultDir.Checked)
             {
-                textBox1.Enabled = true;
+                textBoxDefaultPath.Visible = true;
+                labelDefaultPath.Visible = true;
+                fileSelector.Visible = true;
             }
             else
             {
-                textBox1.Enabled = false;
+                if (!Directory.Exists(textBoxDefaultPath.Text)) textBoxDefaultPath.Text = "";
+                textBoxDefaultPath.Visible = false;
+                labelDefaultPath.Visible = false;
+                fileSelector.Visible = false;
             }
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            panel2.Hide();
-            checkBox2.Checked = props.DefaultDir;
-            checkBox1.Checked = props.AutoAccept;
-            textBox1.Text = props.DefaultDirPath;
+            impostazioni.Hide();
+            textBoxDefaultPath.Text = props.DefaultDirPath;
+            checkBoxDefaultDir.Checked = props.DefaultDir;
+            checkBoxAutoAccept.Checked = props.AutoAccept;
+
         }
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            panel2.Show();
+            impostazioni.Show();
         }
 
 
@@ -112,9 +139,9 @@ namespace ProjectPDS
         private void button4_Click(object sender, EventArgs e)
         {
             folderBrowserDialog1.Description = "Seleziona la cartella di default.";
-            if (folderBrowserDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                textBox1.Text = folderBrowserDialog1.SelectedPath;
+                textBoxDefaultPath.Text = folderBrowserDialog1.SelectedPath;
             }
         }
 

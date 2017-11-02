@@ -18,18 +18,12 @@ namespace ProjectPDS
         [STAThread]
         static void Main()
         {
-
-
             Settings instance = Settings.getInstance;
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Receiver r = new Receiver();
             NeighborProtocol n = NeighborProtocol.getInstance;
             MyQueue queue = new MyQueue();
-
-
-
         }
     }
 }

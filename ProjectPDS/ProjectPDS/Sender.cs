@@ -6,6 +6,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace ProjectPDS
 {
@@ -92,6 +93,21 @@ namespace ProjectPDS
             sent = sender.Send(fileNameAndLength, fileNameAndLength.Length, SocketFlags.None);
 
 
+
+            byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
+            sender.Receive(responseFromServer, responseFromServer.Length, SocketFlags.None);
+            string response = Encoding.ASCII.GetString(responseFromServer);
+            if (String.Compare(response, Constants.DECLINE_FILE) == 0)
+            {
+                //TODO cambiare
+                MessageBox.Show("File rifiutato");
+                File.Delete(path + zipToSend);
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
+                return;
+            }
+
+
             //preparo zip command + zip file name length
             byte[] zipCommand = Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND);
             byte[] zipAndFileNameLength = zipCommand.Concat(BitConverter.GetBytes(zipToSend.Length)).ToArray();
@@ -113,14 +129,14 @@ namespace ProjectPDS
             //mando zip
             while (true)
             {
-              
+
                 if (fileContent.Length - temp >= 1400)
                     sent = sender.Send(fileContent, temp, 1400, SocketFlags.None, out error);
                 else
                     sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
 
                 temp += sent;
-                updateProgress(fileName, sender,((temp * 100) / fileContent.Length));
+                updateProgress(fileName, sender, ((temp * 100) / fileContent.Length));
 
                 if (error == SocketError.Shutdown)
                 {

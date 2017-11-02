@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using System.IO.Compression;
+using System.Windows.Forms;
 
 namespace ProjectPDS
 {
@@ -12,8 +13,11 @@ namespace ProjectPDS
     {
         public Receiver()
         {
-            server = new Thread(startServer);
-            server.Name = "server";
+            settings = Settings.getInstance;
+            server = new Thread(startServer)
+            {
+                Name = "server"
+            };
             server.Start();
         }
         ~Receiver() { server.Join(); }
@@ -34,6 +38,7 @@ namespace ProjectPDS
                 Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
                 Thread myThread = new Thread(() => receiveFromSocket(handler));
+                myThread.SetApartmentState(ApartmentState.STA);
                 myThread.Start();
             }
         }
@@ -73,10 +78,55 @@ namespace ProjectPDS
             Console.WriteLine("fileName {0} ", fileNameString);
             Console.WriteLine("FileSize {0} ", fileSize);
 
-            //TODO integrare con interfaccia grafica per accettare o rifiutare
-            //byte[] responseClient = Encoding.ASCII.GetBytes("OK"); // Encoding.ASCII.GetBytes("NO");
-            //handler.Send(responseClient, responseClient.Length, SocketFlags.None);
-            //relativi controlli per chiudere eventualmente la socket
+
+            if (settings.AutoAccept)
+            {
+                byte[] responseClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
+                handler.Send(responseClient, responseClient.Length, SocketFlags.None);
+            }
+            else
+            {
+                byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
+                string adjustedSize = null;
+                if (fileSize < 1024)
+                    adjustedSize = fileSize + " B";
+                else if (fileSize > 1024 && fileSize < (1024 * 1024))
+                    adjustedSize = fileSize / 1024 + " KB";
+                else if (fileSize > (1024 * 1024))
+                    adjustedSize = fileSize / (1024 * 1024) + " MB";
+
+                DialogResult dialogResult = MessageBox.Show(fileNameString + " di: " + adjustedSize, "Vuoi accettare:", MessageBoxButtons.YesNo);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    responseToClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
+                    handler.Send(responseToClient, responseToClient.Length, SocketFlags.None);
+                }
+                else if (dialogResult == DialogResult.No)
+                {
+                    responseToClient = Encoding.ASCII.GetBytes(Constants.DECLINE_FILE);
+                    handler.Send(responseToClient, responseToClient.Length, SocketFlags.None);
+                    handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                    return;
+                }
+            }
+
+            string currentDirectory = String.Empty;
+            while (String.IsNullOrEmpty(currentDirectory))
+            {
+                if (!settings.DefaultDir)
+                {
+                    FolderBrowserDialog fbd = new FolderBrowserDialog
+                    {
+                        Description = "Selezione la cartella in cui salvare il file"
+                    };
+                    if (fbd.ShowDialog() == DialogResult.OK)
+                        currentDirectory = fbd.SelectedPath;
+                }
+                else
+                    currentDirectory = settings.DefaultDirPath;
+
+            }
 
 
             //ricevo zip command + zipFileNameLength
@@ -101,13 +151,12 @@ namespace ProjectPDS
             //preparo struttura per contenere il file
             byte[] fileContent = new byte[zipFileSize];
             int temp = 0;
-            SocketError error;
 
             Console.WriteLine("Ricevo il file");
 
             while (true)
             {
-                int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out error);
+                int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out SocketError error);
                 temp += bytesRec;
                 //condizione uscita while
                 if (temp == zipFileSize) break;
@@ -129,61 +178,63 @@ namespace ProjectPDS
             //ne esistono altri con lo stesso nome
 
             //scrivo zip file nella directory di default
-            FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, FileMode.OpenOrCreate);
+            FileStream fs = new FileStream(currentDirectory + "\\" + zipFileName, FileMode.OpenOrCreate);
             fs.Write(fileContent, 0, fileContent.Length);
             fs.Flush(true);
             fs.Close();
-            File.SetAttributes(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, FileAttributes.Hidden);
+            File.SetAttributes(currentDirectory + "\\" + zipFileName, FileAttributes.Hidden);
             NeighborProtocol n = NeighborProtocol.getInstance;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
             {
                 Console.WriteLine("FILE");
                 //controllo se esiste già il file dentro lo zip
-                ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
+                ZipArchive archive = ZipFile.OpenRead(currentDirectory + "\\" + zipFileName);
                 foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name))
+                    if (File.Exists(currentDirectory + "\\" + entry.Name))
                     {
 
                         string user = n.getUserFromIp(ipSender);
-                        string extension = Path.GetExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
-                        string onlyName = Path.GetFileNameWithoutExtension(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
+                        string extension = Path.GetExtension(currentDirectory + "\\" + entry.Name);
+                        string onlyName = Path.GetFileNameWithoutExtension(currentDirectory + "\\" + entry.Name);
                         string newName = onlyName + user + extension;
-                        if (File.Exists(Constants.DEFAULT_DIRECTORY + "\\" + newName))
+                        if (File.Exists(currentDirectory + "\\" + newName))
                         {
                             string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + onlyName + user + timeStamp + extension, true);
+                            entry.ExtractToFile(currentDirectory + "\\" + onlyName + user + timeStamp + extension, true);
                         }
-                        else entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + newName);
+                        else entry.ExtractToFile(currentDirectory + "\\" + newName);
                     }
-                    else entry.ExtractToFile(Constants.DEFAULT_DIRECTORY + "\\" + entry.Name);
+                    else entry.ExtractToFile(currentDirectory + "\\" + entry.Name);
                 }
                 archive.Dispose();
             }
             else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
             {
                 Console.WriteLine("DIR");
-                ZipArchive archive = ZipFile.OpenRead(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
-                if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString))
+                ZipArchive archive = ZipFile.OpenRead(currentDirectory + "\\" + zipFileName);
+                if (Directory.Exists(currentDirectory + "\\" + fileNameString))
                 {
-                    if (Directory.Exists(Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + n.getUserFromIp(ipSender)))
+                    if (Directory.Exists(currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender)))
                     {
                         string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                        ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + n.getUserFromIp(ipSender) + timeStamp);
+                        ZipFile.ExtractToDirectory(currentDirectory + "\\" + zipFileName, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender) + timeStamp);
                     }
-                    else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString + n.getUserFromIp(ipSender));
+                    else ZipFile.ExtractToDirectory(currentDirectory + "\\" + zipFileName, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender));
                 }
-                else ZipFile.ExtractToDirectory(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, Constants.DEFAULT_DIRECTORY + "\\" + fileNameString);
+                else ZipFile.ExtractToDirectory(currentDirectory + "\\" + zipFileName, currentDirectory + "\\" + fileNameString);
 
                 archive.Dispose();
             }
             //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
             //cancella lo zip
-            File.Delete(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName);
+            File.Delete(currentDirectory + "\\" + zipFileName);
 
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
         }
         private Thread server;
+        private Settings settings;
+        //private delegate string 
     }
 }

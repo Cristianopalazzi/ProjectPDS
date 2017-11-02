@@ -16,6 +16,9 @@ namespace ProjectPDS
         {
             neighbors = new ConcurrentDictionary<string, int>();
             neighborsImage = new ConcurrentDictionary<string, byte[]>();
+            settings = Settings.getInstance;
+            senderEvent = new ManualResetEvent(settings.Online);
+
             listener = new Thread(listen)
             {
                 Name = "listener"
@@ -161,6 +164,7 @@ namespace ProjectPDS
 
         private void sendMe()
         {
+
             IPEndPoint ipMulticast = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             Socket socketImg = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -173,7 +177,7 @@ namespace ProjectPDS
             socketImg.ReceiveTimeout = 2000;
             byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + Environment.UserName);
 
-            while (true)
+            while (senderEvent.WaitOne())
             {
                 byte[] requestImg = new byte[Constants.NEED_IMG.Length];
                 socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipMulticast);
@@ -246,14 +250,8 @@ namespace ProjectPDS
                 if (temp == sizeImg) break;
             }
 
-
-            //TODO non salvare foto che non serve
-
-            FileStream fs = new FileStream(Constants.DEFAULT_DIRECTORY + "\\" + "user.jpg", FileMode.Create);
-            fs.Write(img, 0, img.Length);
-            fs.Flush(true);
-            fs.Close();
             neighborsImage.TryAdd(neighbor, img);
+
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
             listener.Close();
@@ -371,5 +369,7 @@ namespace ProjectPDS
         private ConcurrentDictionary<string, byte[]> neighborsImage;
         private Thread listener, clean, sender;
         private static NeighborProtocol instance = null;
+        private Settings settings;
+        public static ManualResetEvent senderEvent;
     }
 }

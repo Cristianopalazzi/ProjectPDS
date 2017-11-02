@@ -58,7 +58,7 @@ namespace ProjectPDS
         private void impostazioniToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (formSettings.Visible)
-                formSettings.Close();
+                formSettings.Hide();
             else
                 formSettings.Show();
         }
@@ -66,7 +66,8 @@ namespace ProjectPDS
         private void esciToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //TODO per ora va bene cosi, poi cambiare in application.exit
-            System.Environment.Exit(0);
+            Settings.writeSettings(Settings.getInstance);
+            Environment.Exit(0);
         }
 
 
@@ -75,15 +76,15 @@ namespace ProjectPDS
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (this.WindowState == FormWindowState.Normal)
+                if (WindowState == FormWindowState.Normal)
                 {
-                    this.Hide();
-                    this.WindowState = FormWindowState.Minimized;
+                    Hide();
+                    WindowState = FormWindowState.Minimized;
                 }
                 else
                 {
-                    this.Show();
-                    this.WindowState = FormWindowState.Normal;
+                    Show();
+                    WindowState = FormWindowState.Normal;
                 }
             }
 
@@ -92,7 +93,5 @@ namespace ProjectPDS
 
         private FilesToSend fils;
         private FormSettings formSettings;
-
-      
     }
 }

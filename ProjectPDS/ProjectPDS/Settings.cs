@@ -1,9 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace ProjectPDS
@@ -11,55 +7,40 @@ namespace ProjectPDS
     [Serializable]
     public class Settings
     {
-
-
         public Boolean DefaultDir
         {
-            get { return this._defaultDir; }
-            set { this._defaultDir = value; }
+            get { return _defaultDir; }
+            set { _defaultDir = value; }
         }
 
         public Boolean AutoAccept
         {
-            get { return this._autoAccept; }
-            set { this._autoAccept = value; }
+            get { return _autoAccept; }
+            set { _autoAccept = value; }
         }
 
         public string DefaultDirPath
         {
-            get { return this._defaultDirPath; }
-            set { this._defaultDirPath = value; }
+            get { return _defaultDirPath; }
+            set { _defaultDirPath = value; }
         }
 
         public Boolean Online
         {
-            get { return this._online; }
-            set { this._online = value; }
+            get { return _online; }
+            set
+            {
+                _online = value;
+            }
         }
 
         private Settings()
         {
-            DefaultDir = true;
-            AutoAccept = true;
-            DefaultDirPath = "";
+            DefaultDir = false;
+            AutoAccept = false;
+            DefaultDirPath = String.Empty;
             Online = true;
         }
-
-
-        private static void getUpdatedValues()
-        {
-            if (File.Exists("Customer.bin"))
-            {
-
-                // If the file exists, restore the data from the file  
-                using (FileStream s = new FileStream("Customer.xml", FileMode.Open)) 
-                {
-                    XmlSerializer xSer = new XmlSerializer(typeof(Settings));
-                    instance = (Settings) xSer.Deserialize(s);
-                }
-            }
-        }
-
 
         public static Settings getInstance
         {
@@ -68,17 +49,31 @@ namespace ProjectPDS
                 if (instance == null)
                 {
                     instance = new Settings();
-                    getUpdatedValues();
+                    readSettings();
                 }
                 return instance;
             }
         }
 
-      
+
+        private static void readSettings()
+        {
+            if (File.Exists(Constants.SETTINGS))
+            {
+                using (FileStream s = new FileStream(Constants.SETTINGS, FileMode.Open))
+                {
+                    XmlSerializer xSer = new XmlSerializer(typeof(Settings));
+                    instance = (Settings)xSer.Deserialize(s);
+                    s.Dispose();
+                    s.Close();
+                }
+            }
+        }
+
 
         public static void writeSettings(Settings values)
         {
-            using (FileStream s = new FileStream("Customer.xml", FileMode.Create))
+            using (FileStream s = new FileStream(Constants.SETTINGS, FileMode.Create))
             {
                 XmlSerializer xSer = new XmlSerializer(typeof(Settings));
                 xSer.Serialize(s, values);
