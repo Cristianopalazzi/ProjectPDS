@@ -370,6 +370,6 @@ namespace ProjectPDS
         private ConcurrentDictionary<string, int> neighbors;
         private ConcurrentDictionary<string, byte[]> neighborsImage;
         private Thread listener, clean, sender;
-        private static NeighborProtocol instance;
+        private static NeighborProtocol instance = null;
     }
 }

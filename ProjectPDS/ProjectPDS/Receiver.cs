@@ -133,6 +133,7 @@ namespace ProjectPDS
             fs.Write(fileContent, 0, fileContent.Length);
             fs.Flush(true);
             fs.Close();
+            File.SetAttributes(Constants.DEFAULT_DIRECTORY + "\\" + zipFileName, FileAttributes.Hidden);
             NeighborProtocol n = NeighborProtocol.getInstance;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
             {

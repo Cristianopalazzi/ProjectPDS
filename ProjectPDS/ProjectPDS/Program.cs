@@ -19,7 +19,8 @@ namespace ProjectPDS
         static void Main()
         {
 
-           
+
+            Settings instance = Settings.getInstance;
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
