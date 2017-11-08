@@ -53,7 +53,7 @@ namespace ProjectPDS
 
                 ArrayList array = formUsers.getSelectedNames();
                 if (array.Count != 0)
-                { 
+                {
                     w = new Work(file, array);
                     filesToSend.Add(w);
                     form.BeginInvoke((MethodInvoker)delegate
@@ -95,9 +95,13 @@ namespace ProjectPDS
             }
         }
 
+     
+
 
         private BlockingCollection<Work> filesToSend;
         private Thread threadPipe, waitOnTake;
         private MainForm form;
+
+        
     }
 }

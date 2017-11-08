@@ -153,11 +153,22 @@ namespace ProjectPDS
             int temp = 0;
 
             Console.WriteLine("Ricevo il file");
+            ReceivingFile rF = new ReceivingFile(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, ipSender);
+            int index = -1;
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form.GetType() == typeof(MainForm))
+                {
+                    index = ((MainForm)form).apriFileToReceive(rF);
+                }
+            }
 
             while (true)
             {
                 int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out SocketError error);
                 temp += bytesRec;
+                if (index != -1)
+                    updateProgress(index, ((temp * 100) / fileContent.Length));
                 //condizione uscita while
                 if (temp == zipFileSize) break;
 
@@ -235,6 +246,8 @@ namespace ProjectPDS
         }
         private Thread server;
         private Settings settings;
-        //private delegate string 
+
+        public delegate void myDelegate(int index, int percentage);
+        public static event myDelegate updateProgress;
     }
 }

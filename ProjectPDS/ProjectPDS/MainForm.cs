@@ -11,6 +11,7 @@ namespace ProjectPDS
             InitializeComponent();
             fils = new FilesToSend();
             formSettings = new FormSettings();
+            filestoReceive = new ReceivingFiles();
         }
 
         public void apriFileToSend(Work w)
@@ -23,6 +24,11 @@ namespace ProjectPDS
                 if (fils.WindowState == FormWindowState.Minimized)
                     fils.WindowState = FormWindowState.Normal;
             }
+        }
+
+        public int apriFileToReceive(ReceivingFile r)
+        {
+            return filestoReceive.addFile(r);
         }
 
 
@@ -47,7 +53,13 @@ namespace ProjectPDS
 
         private void fileInRicezioneToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (!filestoReceive.Visible)
+                filestoReceive.ShowDialog();
+            else
+            {
+                if (filestoReceive.WindowState == FormWindowState.Minimized)
+                    filestoReceive.WindowState = FormWindowState.Normal;
+            }
         }
 
         private void contattiOnlineToolStripMenuItem_Click(object sender, EventArgs e)
@@ -93,5 +105,6 @@ namespace ProjectPDS
 
         private FilesToSend fils;
         private FormSettings formSettings;
+        private ReceivingFiles filestoReceive;
     }
 }

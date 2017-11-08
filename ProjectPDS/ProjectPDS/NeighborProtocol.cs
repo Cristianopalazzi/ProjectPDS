@@ -145,9 +145,7 @@ namespace ProjectPDS
                         toRemove.Add(pair.Key);
                     }
                     else if (pair.Value == Constants.MAX_COUNTER)
-                    {
                         neighbors[pair.Key] = 0;
-                    }
                 }
 
                 //rimuovo dalla mappa gli oggetti della lista temporanea
