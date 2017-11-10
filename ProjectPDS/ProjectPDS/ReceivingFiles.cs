@@ -78,6 +78,7 @@ namespace ProjectPDS
             riga.Controls.Add(r.PicProgress);
             //aggiungo la riga alla struttura esterna
             tableLayoutPanel1.Controls.Add(riga);
+            //TODO tLP.ROWCOUNT modificare? 
             return files.IndexOf(r);
 
         }

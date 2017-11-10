@@ -162,13 +162,23 @@ namespace ProjectPDS
                     index = ((MainForm)form).apriFileToReceive(rF);
                 }
             }
-
+            int percentage = 0;
             while (true)
             {
                 int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out SocketError error);
                 temp += bytesRec;
+                ulong temporary = (ulong) temp * 100;
                 if (index != -1)
-                    updateProgress(index, ((temp * 100) / fileContent.Length));
+                    if (temp < 0 )
+                        Console.WriteLine("ciaone bellissimo");
+
+               
+               int  tempPercentage = (int ) (temporary / (ulong)fileContent.Length);
+               if (tempPercentage > percentage)
+                {
+                    updateProgress(index, tempPercentage);
+                    percentage = tempPercentage;
+                }
                 //condizione uscita while
                 if (temp == zipFileSize) break;
 

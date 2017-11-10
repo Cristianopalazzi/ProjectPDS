@@ -123,7 +123,7 @@ namespace ProjectPDS
             //mando zip file name + lunghezza file zip
             sent = sender.Send(tot, tot.Length, SocketFlags.None);
 
-            int temp = 0;
+            int temp = 0,percentage = 0;
             SocketError error;
 
             //mando zip
@@ -136,7 +136,13 @@ namespace ProjectPDS
                     sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
 
                 temp += sent;
-                updateProgress(fileName, sender, ((temp * 100) / fileContent.Length));
+                ulong temporary = (ulong)temp * 100;
+                int tempPercentage = (int)(temporary / (ulong)fileContent.Length);
+                if( tempPercentage > percentage)
+                {
+                    updateProgress(fileName, sender, tempPercentage);
+                    percentage = tempPercentage;
+                }
 
                 if (error == SocketError.Shutdown)
                 {

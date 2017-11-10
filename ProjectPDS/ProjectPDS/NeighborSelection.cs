@@ -56,6 +56,14 @@ namespace ProjectPDS
                 listItem3.ImageKey = item.Key;
                 listItem3.Tag = item.Key;
 
+                var listItem4 = listView1.Items.Add(np.getUserFromIp(item.Key) + " D");
+                listItem4.ImageKey = item.Key;
+                listItem4.Tag = item.Key;
+
+                var listItem5 = listView1.Items.Add(np.getUserFromIp(item.Key) + " E");
+                listItem5.ImageKey = item.Key;
+                listItem5.Tag = item.Key;
+
             }
         }
         NeighborProtocol np = NeighborProtocol.getInstance;
