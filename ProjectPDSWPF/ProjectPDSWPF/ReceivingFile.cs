@@ -1,37 +1,63 @@
-﻿using System;
+﻿using System.ComponentModel;
+using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Collections;
+using System.Net.Sockets;
+using System;
+
 
 namespace ProjectPDSWPF
 {
-    public class ReceivingFile
+    public class ReceivingFile : INotifyPropertyChanged
     {
-        private string username,filename,ipaddr;
-        private ProgressBar progress;
-        private PictureBox picProgress;
-
-        public ReceivingFile(string username,string filename,String ipaddr)
+        public ReceivingFile(Neighbor neighbor, string filename, string guid)
         {
-            this.username = username;
-            this.filename = filename;
-            this.ipaddr = ipaddr;
-            progress = new ProgressBar();
-            Progress.Size = new System.Drawing.Size(300, 20); //TODO attenzione alle dimensioni fisse della progbar
-            Progress.Anchor = AnchorStyles.Left;
-            Progress.Padding = new Padding(3);
-            picProgress = new PictureBox();
-            PicProgress.Size = new System.Drawing.Size(32, 32);
-            PicProgress.Anchor = AnchorStyles.Left;
+            Name = neighbor.NeighborName;
+            Filename = filename;
+            Ipaddr = neighbor.NeighborIp;
+            Image = new BitmapImage();
+            Image = neighbor.NeighborImage;
+            Guid = guid;
         }
 
-     
-        public string Username { get => username; }
-        public string Filename { get => filename; }
-        public ProgressBar Progress { get => progress; }
-        public PictureBox PicProgress { get => picProgress; }
-        public string Ipaddr { get => ipaddr; }
+        public BitmapImage Pic
+        {
+            get => pic;
+            set
+            {
+                pic = value;
+                NotifyPropertyChanged("Pic");
+            }
+        }
+
+        public double Value
+        {
+            get => value;
+            set
+            {
+                this.value = value;
+                NotifyPropertyChanged("Value");
+            }
+        }
+
+        public BitmapImage Image { get => image; set => image = value; }
+        public string Name { get => name; set => name = value; }
+        public string Filename { get => filename; set => filename = value; }
+        public string Ipaddr { get => ipaddr; set => ipaddr = value; }
+        public string Guid { get => guid; set => guid = value; }
+
+        public void NotifyPropertyChanged(string propName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+
+        private string name, filename, ipaddr;
+        private double value;
+        private BitmapImage image, pic;
+        private string guid;
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

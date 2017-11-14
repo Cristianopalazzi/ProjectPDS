@@ -10,7 +10,7 @@
     <Grid>
         <TabControl Name="tabControl" Width="Auto" x:FieldModifier="public">
             <TabItem Header="File in ricezione">
-                <ListView Name="Persone" ItemsSource="{Binding People}">
+                <ListView Name="listReceivingFiles" ItemsSource="{Binding FilesToReceive}">
 
                     <!--<ListView.ContextMenu>
                         <ContextMenu>
@@ -18,16 +18,20 @@
                             <MenuItem Header="Modify" Click="Menu_modify_click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>-->
-
+                    <ListView.Resources>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Style>
+                    </ListView.Resources>
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Sender">
+                            <GridViewColumn>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Margin="5">
                                             <Ellipse Height="54" Width="54">
                                                 <Ellipse.Fill>
-                                                    <ImageBrush ImageSource="C:\Users\Cristiano\Desktop\placeholder.png"/>
+                                                    <ImageBrush ImageSource="{Binding Image}"/>
                                                 </Ellipse.Fill>
                                             </Ellipse>
                                             <!--Serve per fare in modo che la colonna si adatti al contenuto-->
@@ -37,37 +41,28 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="File">
+                            <GridViewColumn>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--Serve per fare in modo che la colonna si adatti al contenuto-->
-                                        <TextBlock Text="{Binding Surname}" TextAlignment="Left" FontSize="16"/>
+                                        <TextBlock Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
 
-                            <GridViewColumn Width="240"  Header="Progress">
+                            <GridViewColumn Width="240">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <ProgressBar Value="{Binding Prog.Value}"/>
-                                            <TextBlock Text="{Binding Path = Prog.Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <ProgressBar Value="{Binding Value}"/>
+                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="140"  Header="Cancel">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-
-                            <GridViewColumn Width="150"  Header="Buttons">
+                            <GridViewColumn Width="150">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Image Source="{Binding Pic}" Width="32" Height="32"/>
@@ -96,8 +91,12 @@
             </TabItem>
 
             <TabItem Header="File in invio">
-                <ListView Name="sendingFiles" ItemsSource="{Binding FileToSend}">
-
+                <ListView Name="sendingFiles" ItemsSource="{Binding FilesToSend}">
+                    <ListView.Resources>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Style>
+                    </ListView.Resources>
                     <!--<ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Delete" Click="Menu_delete_click"/>
@@ -107,7 +106,7 @@
 
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="">
+                            <GridViewColumn>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Margin="5">
@@ -131,27 +130,43 @@
                             </GridViewColumn>-->
 
 
-                            <GridViewColumn Width="240"  Header="">
+                            <GridViewColumn Width="240">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <ProgressBar Value="{Binding Path = Value}"/>
-                                            <TextBlock Text="{Binding Path = Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <ProgressBar Value="{Binding Value}"/>
+                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="140"  Header="">
+                            <GridViewColumn Width="140">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click"/>
+                                        <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click">
+
+
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Value}" Value="100">
+                                                            <Setter Property="Visibility" Value="Hidden" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+
+
+
+                                        </Button>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
 
-                            <GridViewColumn Width="150"  Header="">
+                            <GridViewColumn Width="150">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Image Source="{Binding Pic}" Width="32" Height="32"/>
@@ -161,8 +176,6 @@
 
                         </GridView>
                     </ListView.View>
-
-
 
                     <ListView.GroupStyle>
                         <GroupStyle>
@@ -182,7 +195,7 @@
             <TabItem Header="Contatti online" >
                 <Grid>
                     <StackPanel>
-                        <TextBlock Name="sendingFile"></TextBlock>
+                        <TextBlock Name="sendingFile"/>
                         <ListView x:Name="Neighbors" ItemsSource="{Binding NeighborsValues}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
                             <ListView.ItemsPanel>
                                 <ItemsPanelTemplate>

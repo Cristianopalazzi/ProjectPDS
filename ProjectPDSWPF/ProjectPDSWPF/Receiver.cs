@@ -153,30 +153,23 @@ namespace ProjectPDSWPF
             int temp = 0;
 
             Console.WriteLine("Ricevo il file");
-            ReceivingFile rF = new ReceivingFile(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, ipSender);
-            int index = -1;
-            foreach (Form form in Application.OpenForms)
-            {
-                //if (form.GetType() == typeof(MainForm))
-                //{
-                //    index = ((MainForm)form).apriFileToReceive(rF);
-                //}
-            }
+
+
+            string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
+            byte[] image;
+            NeighborProtocol.getInstance.getNeighbors().TryGetValue(senderID, out image);
+            string id = Guid.NewGuid().ToString();
+            updateReceivingFiles(senderID, image, fileNameString, id);
             int percentage = 0;
             while (true)
             {
                 int bytesRec = handler.Receive(fileContent, temp, (int)(zipFileSize - temp), SocketFlags.None, out SocketError error);
                 temp += bytesRec;
-                ulong temporary = (ulong) temp * 100;
-                if (index != -1)
-                    if (temp < 0 )
-                        Console.WriteLine("ciaone bellissimo");
-
-               
-               int  tempPercentage = (int ) (temporary / (ulong)fileContent.Length);
-               if (tempPercentage > percentage)
+                ulong temporary = (ulong)temp * 100;
+                int tempPercentage = (int)(temporary / (ulong)fileContent.Length);
+                if (tempPercentage > percentage)
                 {
-                    updateProgress(index, tempPercentage);
+                    updateProgress(id, tempPercentage);
                     percentage = tempPercentage;
                 }
                 //condizione uscita while
@@ -189,6 +182,7 @@ namespace ProjectPDSWPF
             if (temp != zipFileSize)
             {
                 Console.WriteLine("Connessione interrotta dal client");
+                fileCancel(id);
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
                 return;
@@ -257,7 +251,13 @@ namespace ProjectPDSWPF
         private Thread server;
         private Settings settings;
 
-        public delegate void myDelegate(int index, int percentage);
+        public delegate void myDelegate(string id, int percentage);
         public static event myDelegate updateProgress;
+
+        public delegate void myDelegate1(string senderID, byte[] image, string fileName, string id);
+        public static event myDelegate1 updateReceivingFiles;
+
+        public delegate void myDelegate2(string id);
+        public static event myDelegate2 fileCancel;
     }
 }

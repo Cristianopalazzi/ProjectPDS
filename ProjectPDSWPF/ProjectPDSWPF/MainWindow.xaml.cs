@@ -10,6 +10,7 @@ using System.Windows.Media.Animation;
 using System;
 using System.Collections.Generic;
 using System.Collections;
+using System.Net.Sockets;
 
 namespace ProjectPDSWPF
 {
@@ -18,20 +19,29 @@ namespace ProjectPDSWPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        //TODO cercare come mettere le immagini come risorse
+        // eliminazione delle righe
+        // controllare invii e ricezioni con placeholder al posto della foto utente
+        // placeholder per le liste vuote
+        //rifare la window per le impostazioni
+        //vedere se lasciare una sola window per i contatti online o separarle
+        //resize della finestra principale
+        
 
         public static bool closedByExit = false;
-        private ObservableCollection<test> people;
         private ObservableCollection<Neighbor> neighborsValues;
-        private ObservableCollection<SendingFile> fileToSend;
+        private ObservableCollection<SendingFile> filesToSend;
+        private ObservableCollection<ReceivingFile> filesToReceive;
 
         public delegate void del(List<SendingFile> sf);
         public static event del sendSelectedNeighbors;
 
+
         private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
 
-        public ObservableCollection<test> People { get => people; set => people = value; }
         public ObservableCollection<Neighbor> NeighborsValues { get => neighborsValues; set => neighborsValues = value; }
-        public ObservableCollection<SendingFile> FileToSend { get => fileToSend; set => fileToSend = value; }
+        public ObservableCollection<SendingFile> FilesToSend { get => filesToSend; set => filesToSend = value; }
+        public ObservableCollection<ReceivingFile> FilesToReceive { get => filesToReceive; set => filesToReceive = value; }
 
         public MainWindow()
         {
@@ -39,14 +49,17 @@ namespace ProjectPDSWPF
             InitializeComponent();
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
+            Receiver.updateProgress += updateReceivingProgressBar;
+            Receiver.updateReceivingFiles += updateReceivingFiles;
+            Receiver.fileCancel += file_cancel;
             MyQueue.openNeighbors += neighbor_selection;
             //Settings instance = Settings.getInstance;
-            //Receiver r = new Receiver();
+            Receiver r = new Receiver();
             NeighborProtocol n = NeighborProtocol.getInstance;
             Settings s = Settings.getInstance;
             NeighborsValues = new ObservableCollection<Neighbor>();
-            FileToSend = new ObservableCollection<SendingFile>();
-
+            FilesToSend = new ObservableCollection<SendingFile>();
+            FilesToReceive = new ObservableCollection<ReceivingFile>();
 
             MyQueue queue = new MyQueue();
             nIcon.Icon = new System.Drawing.Icon(@"C:\Users\Cristiano\Desktop\check.ico");
@@ -69,44 +82,68 @@ namespace ProjectPDSWPF
             item3.Click += delegate { Show(); WindowState = WindowState.Normal; tabControl.SelectedIndex = 2; };
             //item4.Click += delegate { closedByExit = true; Close(); };
             nIcon.Visible = true;
-            people = new ObservableCollection<test>();
             DataContext = this;
-            test t = new test();
-            test t1 = new test();
-            test t2 = new test();
-            t.Name = "Cristiano";
-            t.Surname = "Palazzi";
-            t.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
-            t.Prog.Value = 0;
-            t1.Name = "Gianmaria";
-            t1.Surname = "Tremigliozzi";
-            t1.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
-            t1.Prog.Value = 0;
-            t2.Name = "Antonella";
-            t2.Surname = "Palazzi";
-            t2.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
-            t2.Prog.Value = 0;
-            people.Add(t);
-            people.Add(t1);
-            people.Add(t2);
-            Neighbors.ItemsSource = neighborsValues;
-            sendingFiles.ItemsSource = FileToSend;
-            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(fileToSend);
+            Neighbors.ItemsSource = NeighborsValues;
+            sendingFiles.ItemsSource = FilesToSend;
+            listReceivingFiles.ItemsSource = FilesToReceive;
+            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
         }
 
-        private void updateProgressBar(string filename, System.Net.Sockets.Socket sock, int percentage)
+        private void file_cancel(string id)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
-                foreach (SendingFile sf in FileToSend)
+                foreach (ReceivingFile r in FilesToReceive)
+                    if (String.Compare(r.Guid, id) == 0)
+                    {
+                        r.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
+                        break;
+                    }
+            }));
+        }
+
+        private void updateReceivingProgressBar(string id, int percentage)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (ReceivingFile r in FilesToReceive)
                 {
-                    if (sf.Sock == sock)
-                        sf.Value = percentage;
-                    if (sf.Value == 100)
-                        sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+                    if (String.Compare(r.Guid, id) == 0)
+                    {
+                        r.Value = percentage;
+                        if (r.Value == 100)
+                        {
+                            r.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+                            break;
+                        }
+                    }
                 }
+            }));
+        }
+
+        private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                ReceivingFile rf = new ReceivingFile(new Neighbor(senderID, image), fileName, id);
+                FilesToReceive.Add(rf);
+            }));
+        }
+
+        private void updateProgressBar(string filename, Socket sock, int percentage)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (SendingFile sf in FilesToSend)
+                    if (sf.Sock == sock)
+                    {
+                        sf.Value = percentage;
+                        if (sf.Value == 100)
+                            sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+                        break;
+                    }
             }));
         }
 
@@ -155,22 +192,30 @@ namespace ProjectPDSWPF
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            test y = b.DataContext as test;
-            people.Remove(y);
-            //var item = (sender as FrameworkElement).DataContext;
-            //int index = Persone.Items.IndexOf(item);
-            //test t = people.ElementAt(index);
-            //MessageBox.Show(""+t.Name);
+            SendingFile sf = b.DataContext as SendingFile;
+            try
+            {
+                sf.Sock.Shutdown(SocketShutdown.Both);
+            }
+            catch (ObjectDisposedException exc)
+            {
+                MessageBox.Show(exc.ToString());
+            }
+            finally
+            {
+                b.Visibility = Visibility.Hidden;
+                sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
+            }
         }
 
 
-        private void Menu_delete_click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show(NeighborsValues.Count + "");
-            if (Persone.SelectedIndex == -1)
-                return;
-            people.Remove(Persone.SelectedItem as test);
-        }
+        //private void Menu_delete_click(object sender, RoutedEventArgs e)
+        //{
+        //    MessageBox.Show(NeighborsValues.Count + "");
+        //    if (Persone.SelectedIndex == -1)
+        //        return;
+        //    people.Remove(Persone.SelectedItem as test);
+        //}
 
 
         //private void Menu_modify_click(object sender, RoutedEventArgs e)
@@ -214,9 +259,8 @@ namespace ProjectPDSWPF
                     sendingFiles.Add(sf);
                 }
                 sendSelectedNeighbors(sendingFiles);
-
                 foreach (SendingFile sf in sendingFiles)
-                    FileToSend.Add(sf);
+                    FilesToSend.Add(sf);
                 tabControl.SelectedIndex = 1;
             }
             else MessageBox.Show("Seleziona almeno un vicino");
@@ -241,7 +285,8 @@ namespace ProjectPDSWPF
             if (addOrRemove && !isPresent)
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
-                    Neighbor n1 = new Neighbor(id, bytes); neighborsValues.Add(n1);
+                    Neighbor n1 = new Neighbor(id, bytes);
+                    neighborsValues.Add(n1);
                     neighborsValues.Add(n1);
                     neighborsValues.Add(n1);
                     neighborsValues.Add(n1);
@@ -251,73 +296,6 @@ namespace ProjectPDSWPF
                     neighborsValues.Add(n1);
                     neighborsValues.Add(n1);
                 }));
-        }
-    }
-
-    public class test : INotifyPropertyChanged
-    {
-        public test()
-        {
-            prog = new ProgressBar();
-        }
-        private string name, surname;
-        private BitmapImage pic;
-        private ProgressBar prog;
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void NotifyPropertyChanged(string propName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-        }
-        public string Name
-        {
-            get => name;
-            set
-            {
-                if (name != value)
-                {
-                    name = value;
-                    NotifyPropertyChanged("Name");
-                }
-            }
-        }
-
-        public string Surname
-        {
-            get => surname;
-            set
-            {
-                if (surname != value)
-                {
-                    surname = value;
-                    NotifyPropertyChanged("Surname");
-                }
-            }
-        }
-
-        public BitmapImage Pic
-        {
-            get { return pic; }
-            set
-            {
-                pic = value;
-                NotifyPropertyChanged("Pic");
-            }
-        }
-
-        public ProgressBar Prog
-        {
-            get => prog;
-            set
-            {
-                if (prog.Value != value.Value)
-                {
-                    prog.Value = value.Value;
-                    NotifyPropertyChanged("Prog.Value");
-                }
-            }
         }
     }
 }
