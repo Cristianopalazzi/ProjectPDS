@@ -141,7 +141,7 @@ namespace ProjectPDSWPF
                 if( tempPercentage > percentage)
                 {
 
-                    //updateProgress(fileName, sender, tempPercentage);
+                    updateProgress(fileName, sender, tempPercentage);
                     percentage = tempPercentage;
                 }
 

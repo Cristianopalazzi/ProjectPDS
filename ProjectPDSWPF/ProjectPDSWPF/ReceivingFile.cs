@@ -12,7 +12,6 @@ namespace ProjectPDSWPF
         private string username,filename,ipaddr;
         private ProgressBar progress;
         private PictureBox picProgress;
-        private int index;
 
         public ReceivingFile(string username,string filename,String ipaddr)
         {

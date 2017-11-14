@@ -12,12 +12,12 @@
             <TabItem Header="File in ricezione">
                 <ListView Name="Persone" ItemsSource="{Binding People}">
 
-                    <ListView.ContextMenu>
+                    <!--<ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Delete" Click="Menu_delete_click"/>
                             <MenuItem Header="Modify" Click="Menu_modify_click"/>
                         </ContextMenu>
-                    </ListView.ContextMenu>
+                    </ListView.ContextMenu>-->
 
                     <ListView.View>
                         <GridView>
@@ -98,16 +98,16 @@
             <TabItem Header="File in invio">
                 <ListView Name="sendingFiles" ItemsSource="{Binding FileToSend}">
 
-                    <ListView.ContextMenu>
+                    <!--<ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Delete" Click="Menu_delete_click"/>
                             <MenuItem Header="Modify" Click="Menu_modify_click"/>
                         </ContextMenu>
-                    </ListView.ContextMenu>
+                    </ListView.ContextMenu>-->
 
                     <ListView.View>
                         <GridView>
-                            <GridViewColumn Header="Receiver">
+                            <GridViewColumn Header="">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel Margin="5">
@@ -122,27 +122,27 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Header="File">
+                            <!--<GridViewColumn Header="File">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding FileName}" TextAlignment="Left" FontSize="16"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
+                            </GridViewColumn>-->
 
 
-                            <GridViewColumn Width="240"  Header="Progress">
+                            <GridViewColumn Width="240"  Header="">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <ProgressBar Value="{Binding Path = Progress.Value}"/>
-                                            <TextBlock Text="{Binding Path = Progress.Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <ProgressBar Value="{Binding Path = Value}"/>
+                                            <TextBlock Text="{Binding Path = Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="140"  Header="Cancel">
+                            <GridViewColumn Width="140"  Header="">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click"/>
@@ -151,7 +151,7 @@
                             </GridViewColumn>
 
 
-                            <GridViewColumn Width="150"  Header="Buttons">
+                            <GridViewColumn Width="150"  Header="">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Image Source="{Binding Pic}" Width="32" Height="32"/>
@@ -193,7 +193,7 @@
 
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" >
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" Margin="10">
                                         <Ellipse Height="64" Width="64" >
                                             <Ellipse.Fill>
                                                 <ImageBrush  ImageSource="{Binding NeighborImage}"  Stretch="Uniform" />
@@ -211,7 +211,7 @@
                                 </Style>
                             </ListView.ItemContainerStyle>
                         </ListView>
-                        <Button Content="Invia" Click="button_send"></Button>
+                        <Button Content="Invia" Click="button_send_files"></Button>
                     </StackPanel>
                 </Grid>
             </TabItem>

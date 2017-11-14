@@ -24,11 +24,11 @@ namespace ProjectPDSWPF
         private ObservableCollection<Neighbor> neighborsValues;
         private ObservableCollection<SendingFile> fileToSend;
 
-        public delegate void del(Work w);
+        public delegate void del(List<SendingFile> sf);
         public static event del sendSelectedNeighbors;
 
-        //public event addNeighbor,removeNeighbor;
         private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
+
         public ObservableCollection<test> People { get => people; set => people = value; }
         public ObservableCollection<Neighbor> NeighborsValues { get => neighborsValues; set => neighborsValues = value; }
         public ObservableCollection<SendingFile> FileToSend { get => fileToSend; set => fileToSend = value; }
@@ -38,6 +38,7 @@ namespace ProjectPDSWPF
             Closing += MainWindow_Closing;
             InitializeComponent();
             NeighborProtocol.neighborsEvent += modify_neighbors;
+            Sender.updateProgress += updateProgressBar;
             MyQueue.openNeighbors += neighbor_selection;
             //Settings instance = Settings.getInstance;
             //Receiver r = new Receiver();
@@ -95,12 +96,39 @@ namespace ProjectPDSWPF
             view.GroupDescriptions.Add(groupDescription);
         }
 
+        private void updateProgressBar(string filename, System.Net.Sockets.Socket sock, int percentage)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (SendingFile sf in FileToSend)
+                {
+                    if (sf.Sock == sock)
+                        sf.Value = percentage;
+                    if (sf.Value == 100)
+                        sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+                }
+            }));
+        }
+
+
+        //private void Doubleanimation_Completed(object sender, EventArgs e, ProgressBar progress)
+        //{
+        //    if (progress.Value == 100)
+        //        foreach (SendingFile sf in FileToSend)
+        //            if (sf.Progress == progress)
+        //            {
+        //                sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+        //                break;
+        //            }
+        //}
+
+
         private void neighbor_selection(string file)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 sendingFile.Text = file;
-                //TODO aggiungere la scritta del file che stiamo mandando
+                //TODO sistemare la scritta del file che stiamo mandando
                 tabControl.SelectedIndex = 2;
                 Show();
             }));
@@ -124,22 +152,6 @@ namespace ProjectPDSWPF
             Environment.Exit(0);
         }
 
-
-
-        //Cancella una o più righe
-        //private void Button_Click_1(object sender, RoutedEventArgs e)
-        //{
-        //    if (Persone.SelectedItems.Count > 0)
-        //    {
-        //        var selected = Persone.SelectedItems.Cast<test>().ToArray();
-        //        foreach (var item in selected)
-        //            people.Remove(item);
-        //    }
-        //    else MessageBox.Show("Selezione almeno una riga");
-        //}
-
-
-
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
@@ -161,46 +173,53 @@ namespace ProjectPDSWPF
         }
 
 
-        private void Menu_modify_click(object sender, RoutedEventArgs e)
-        {
-            if (Persone.SelectedIndex == -1)
-                return;
-            test tmp = Persone.SelectedItem as test;
-            for (int i = 0; i < 10; i++)
-            {
-                double t = tmp.Prog.Value += 1;
-                Duration duration = new Duration(TimeSpan.FromSeconds(0.5));
-                DoubleAnimation doubleanimation = new DoubleAnimation(t, duration);
-                doubleanimation.Completed += delegate (object sender1, EventArgs e1)
-                {
-                    Doubleanimation_Completed(sender1, e1, tmp);
-                };
-                tmp.Prog.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
-            }
-        }
+        //private void Menu_modify_click(object sender, RoutedEventArgs e)
+        //{
+        //    if (Persone.SelectedIndex == -1)
+        //        return;
+        //    test tmp = Persone.SelectedItem as test;
+        //    for (int i = 0; i < 10; i++)
+        //    {
+        //        double t = tmp.Prog.Value += 1;
+        //        Duration duration = new Duration(TimeSpan.FromSeconds(0.5));
+        //        DoubleAnimation doubleanimation = new DoubleAnimation(t, duration);
+        //        doubleanimation.Completed += delegate (object sender1, EventArgs e1)
+        //        {
+        //            Doubleanimation_Completed(sender1, e1, tmp);
+        //        };
+        //        tmp.Prog.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
+        //    }
+        //}
 
-        private void Doubleanimation_Completed(object sender, EventArgs e, test tmp)
-        {
-            if (tmp.Prog.Value == 100)
-                tmp.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
-        }
+        //private void Doubleanimation_Completed(object sender, EventArgs e, test tmp)
+        //{
+        //    if (tmp.Prog.Value == 100)
+        //        tmp.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
+        //}
 
 
 
-        private void button_send(object sender, RoutedEventArgs e)
+        private void button_send_files(object sender, RoutedEventArgs e)
         {
             string file = sendingFile.Text;
             List<Neighbor> selected = null;
-            Work w = null;
+            List<SendingFile> sendingFiles = null;
             if (Neighbors.SelectedItems.Count > 0)
             {
+                sendingFiles = new List<SendingFile>();
                 selected = Neighbors.SelectedItems.Cast<Neighbor>().ToList();
-                w = new Work(file, selected);
-                sendSelectedNeighbors(w);
-                foreach (SendingFile sf in w.SendingFiles)
+                foreach (Neighbor n in selected)
+                {
+                    SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);
+                    sendingFiles.Add(sf);
+                }
+                sendSelectedNeighbors(sendingFiles);
+
+                foreach (SendingFile sf in sendingFiles)
                     FileToSend.Add(sf);
+                tabControl.SelectedIndex = 1;
             }
-            else MessageBox.Show("Selezione almeno uno stronzo");
+            else MessageBox.Show("Seleziona almeno un vicino");
         }
 
 
@@ -216,7 +235,6 @@ namespace ProjectPDSWPF
                     isPresent = true;
                     if (!addOrRemove)
                         Application.Current.Dispatcher.Invoke(new Action(() => { neighborsValues.Remove(n); }));
-
                     break;
                 }
             }

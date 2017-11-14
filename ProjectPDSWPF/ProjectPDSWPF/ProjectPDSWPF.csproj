@@ -63,7 +63,7 @@
     <Compile Include="ReceivingFile.cs" />
     <Compile Include="Sender.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="Work.cs" />
+    <Compile Include="SendingFile.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
