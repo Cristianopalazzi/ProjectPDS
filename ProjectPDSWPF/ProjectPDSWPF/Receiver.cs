@@ -16,8 +16,9 @@ namespace ProjectPDSWPF
             settings = Settings.getInstance;
             server = new Thread(startServer)
             {
-                Name = "server"
-            };
+                Name = "server",
+                IsBackground = true
+        };
             server.Start();
         }
         ~Receiver() { server.Join(); }
@@ -38,7 +39,7 @@ namespace ProjectPDSWPF
                 Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
                 Thread myThread = new Thread(() => receiveFromSocket(handler));
-                myThread.SetApartmentState(ApartmentState.STA);
+                myThread.IsBackground = true;
                 myThread.Start();
             }
         }

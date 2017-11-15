@@ -21,17 +21,20 @@ namespace ProjectPDSWPF
 
             listener = new Thread(listen)
             {
-                Name = "listener"
+                Name = "listener",
+                IsBackground = true
             };
             listener.Start();
             sender = new Thread(sendMe)
             {
-                Name = "sender"
+                Name = "sender",
+                IsBackground = true
             };
             sender.Start();
             clean = new Thread(cleanMap)
             {
-                Name = "cleaner"
+                Name = "cleaner",
+                IsBackground = true
             };
             clean.Start();
         }
@@ -255,7 +258,6 @@ namespace ProjectPDSWPF
                 temp += bytesRec;
                 if (temp == sizeImg) break;
             }
-
             neighborsImage.TryAdd(neighbor, img);
             neighborsEvent(neighbor, img, true);
             handler.Shutdown(SocketShutdown.Both);

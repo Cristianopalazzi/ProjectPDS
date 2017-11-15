@@ -24,20 +24,11 @@ namespace ProjectPDSWPF
         // controllare invii e ricezioni con placeholder al posto della foto utente
         // placeholder per le liste vuote
         //rifare la window per le impostazioni
-        //vedere se lasciare una sola window per i contatti online o separarle
         //resize della finestra principale
-        
 
-        public static bool closedByExit = false;
         private ObservableCollection<Neighbor> neighborsValues;
         private ObservableCollection<SendingFile> filesToSend;
         private ObservableCollection<ReceivingFile> filesToReceive;
-
-        public delegate void del(List<SendingFile> sf);
-        public static event del sendSelectedNeighbors;
-
-
-        private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
 
         public ObservableCollection<Neighbor> NeighborsValues { get => neighborsValues; set => neighborsValues = value; }
         public ObservableCollection<SendingFile> FilesToSend { get => filesToSend; set => filesToSend = value; }
@@ -45,43 +36,18 @@ namespace ProjectPDSWPF
 
         public MainWindow()
         {
-            Closing += MainWindow_Closing;
             InitializeComponent();
+            Closing += MainWindow_Closing;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
             Receiver.updateProgress += updateReceivingProgressBar;
             Receiver.updateReceivingFiles += updateReceivingFiles;
             Receiver.fileCancel += file_cancel;
-            MyQueue.openNeighbors += neighbor_selection;
-            //Settings instance = Settings.getInstance;
-            Receiver r = new Receiver();
-            NeighborProtocol n = NeighborProtocol.getInstance;
-            Settings s = Settings.getInstance;
+            NeighborSelection.sendSelectedNeighbors += addSendingFiles;
+
             NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
             FilesToReceive = new ObservableCollection<ReceivingFile>();
-
-            MyQueue queue = new MyQueue();
-            nIcon.Icon = new System.Drawing.Icon(@"C:\Users\Cristiano\Desktop\check.ico");
-            System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
-            System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
-            System.Windows.Forms.MenuItem item3 = new System.Windows.Forms.MenuItem();
-            System.Windows.Forms.MenuItem item4 = new System.Windows.Forms.MenuItem();
-            System.Windows.Forms.ContextMenu cMenu = new System.Windows.Forms.ContextMenu();
-            cMenu.MenuItems.Add(item1);
-            cMenu.MenuItems.Add(item2);
-            cMenu.MenuItems.Add(item3);
-            cMenu.MenuItems.Add(item4);
-            nIcon.ContextMenu = cMenu;
-            item1.Text = "File in ricezione";
-            item2.Text = "File in invio";
-            item3.Text = "Tizi online";
-            item4.Text = "Esci";
-            item1.Click += delegate { Show(); WindowState = WindowState.Normal; tabControl.SelectedIndex = 0; };
-            item2.Click += delegate { Show(); WindowState = WindowState.Normal; tabControl.SelectedIndex = 1; };
-            item3.Click += delegate { Show(); WindowState = WindowState.Normal; tabControl.SelectedIndex = 2; };
-            //item4.Click += delegate { closedByExit = true; Close(); };
-            nIcon.Visible = true;
             DataContext = this;
             Neighbors.ItemsSource = NeighborsValues;
             sendingFiles.ItemsSource = FilesToSend;
@@ -89,6 +55,13 @@ namespace ProjectPDSWPF
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
+        }
+
+        private void addSendingFiles(List<SendingFile> sf)
+        {
+            tabControl.SelectedIndex = 1;
+            foreach (SendingFile s in sf)
+                FilesToSend.Add(s);
         }
 
         private void file_cancel(string id)
@@ -129,6 +102,7 @@ namespace ProjectPDSWPF
             {
                 ReceivingFile rf = new ReceivingFile(new Neighbor(senderID, image), fileName, id);
                 FilesToReceive.Add(rf);
+                //TODO mettere notifiche
             }));
         }
 
@@ -160,33 +134,10 @@ namespace ProjectPDSWPF
         //}
 
 
-        private void neighbor_selection(string file)
-        {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                sendingFile.Text = file;
-                //TODO sistemare la scritta del file che stiamo mandando
-                tabControl.SelectedIndex = 2;
-                Show();
-            }));
-
-        }
-
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
-            //if (closedByExit)
-            //{
-            //    e.Cancel = false;
-            //    nIcon.Dispose();
-            //}
-            //else
-            //{
-            //    e.Cancel = true;
-            //    WindowState = WindowState.Minimized;
-            //    Hide();
-            //}
-            nIcon.Dispose();
-            Environment.Exit(0);
+            e.Cancel = true;
+            Hide();
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
@@ -241,31 +192,6 @@ namespace ProjectPDSWPF
         //    if (tmp.Prog.Value == 100)
         //        tmp.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
         //}
-
-
-
-        private void button_send_files(object sender, RoutedEventArgs e)
-        {
-            string file = sendingFile.Text;
-            List<Neighbor> selected = null;
-            List<SendingFile> sendingFiles = null;
-            if (Neighbors.SelectedItems.Count > 0)
-            {
-                sendingFiles = new List<SendingFile>();
-                selected = Neighbors.SelectedItems.Cast<Neighbor>().ToList();
-                foreach (Neighbor n in selected)
-                {
-                    SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);
-                    sendingFiles.Add(sf);
-                }
-                sendSelectedNeighbors(sendingFiles);
-                foreach (SendingFile sf in sendingFiles)
-                    FilesToSend.Add(sf);
-                tabControl.SelectedIndex = 1;
-            }
-            else MessageBox.Show("Seleziona almeno un vicino");
-        }
-
 
 
         public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)

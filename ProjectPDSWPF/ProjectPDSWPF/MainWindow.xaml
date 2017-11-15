@@ -195,7 +195,6 @@
             <TabItem Header="Contatti online" >
                 <Grid>
                     <StackPanel>
-                        <TextBlock Name="sendingFile"/>
                         <ListView x:Name="Neighbors" ItemsSource="{Binding NeighborsValues}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
                             <ListView.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -224,7 +223,6 @@
                                 </Style>
                             </ListView.ItemContainerStyle>
                         </ListView>
-                        <Button Content="Invia" Click="button_send_files"></Button>
                     </StackPanel>
                 </Grid>
             </TabItem>

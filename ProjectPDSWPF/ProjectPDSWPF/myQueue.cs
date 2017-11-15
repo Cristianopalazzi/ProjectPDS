@@ -16,16 +16,18 @@ namespace ProjectPDSWPF
     {
         public MyQueue()
         {
-            MainWindow.sendSelectedNeighbors += receive_selected_neighbors;
+            NeighborSelection.sendSelectedNeighbors += receive_selected_neighbors;
             filesToSend = new BlockingCollection<List<SendingFile>>();
             threadPipe = new Thread(listenOnPipe)
             {
-                Name = "ThreadPipe"
+                Name = "ThreadPipe",
+                IsBackground = true
             };
             threadPipe.Start();
             waitOnTake = new Thread(listenOnQueue)
             {
-                Name = "waitOnTake"
+                Name = "waitOnTake",
+                IsBackground = true
             };
             waitOnTake.Start();
         }
@@ -63,9 +65,11 @@ namespace ProjectPDSWPF
                         sender.sendFile(s.IpAddr, s.FileName, s.Sock);
                     })
                     {
-                        Name = "thread che manda " + s.FileName + " a  " + s.Name
+                        Name = "thread che manda " + s.FileName + " a  " + s.Name,
+                        IsBackground = true
                     };
                     t.Start();
+
                     threads.Add(t);
                 }
                 foreach (var t in threads)

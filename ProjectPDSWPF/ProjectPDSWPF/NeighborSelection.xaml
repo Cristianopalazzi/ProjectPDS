@@ -1,0 +1,43 @@
+﻿<Window x:Class="ProjectPDSWPF.NeighborSelection"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ProjectPDSWPF"
+        mc:Ignorable="d"
+        Title="NeighborSelection" Height="300" Width="300">
+    <Grid>
+        <StackPanel>
+            <TextBlock Name="sendingFile"/>
+            <ListView x:Name="listNeighborSelection" ItemsSource="{Binding Neighbors}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+
+                </ListView.ItemsPanel>
+
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" Margin="10">
+                            <Ellipse Height="64" Width="64" >
+                                <Ellipse.Fill>
+                                    <ImageBrush  ImageSource="{Binding NeighborImage}"  Stretch="Uniform" />
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+                <ListView.ItemContainerStyle>
+                    <Style  TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="BorderBrush" Value="Red" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+            <Button Content="Invia" Click="button_send_files"></Button>
+        </StackPanel>
+    </Grid>
+</Window>
