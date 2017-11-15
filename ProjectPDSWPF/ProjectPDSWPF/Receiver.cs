@@ -39,6 +39,7 @@ namespace ProjectPDSWPF
                 Console.WriteLine("Waiting for a connection...");
                 Socket handler = listener.Accept();
                 Thread myThread = new Thread(() => receiveFromSocket(handler));
+                myThread.SetApartmentState(ApartmentState.STA);
                 myThread.IsBackground = true;
                 myThread.Start();
             }

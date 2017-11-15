@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using System.Net.Sockets;
+using System.IO;
 
 namespace ProjectPDSWPF
 {
@@ -26,13 +27,7 @@ namespace ProjectPDSWPF
         //rifare la window per le impostazioni
         //resize della finestra principale
 
-        private ObservableCollection<Neighbor> neighborsValues;
-        private ObservableCollection<SendingFile> filesToSend;
-        private ObservableCollection<ReceivingFile> filesToReceive;
 
-        public ObservableCollection<Neighbor> NeighborsValues { get => neighborsValues; set => neighborsValues = value; }
-        public ObservableCollection<SendingFile> FilesToSend { get => filesToSend; set => filesToSend = value; }
-        public ObservableCollection<ReceivingFile> FilesToReceive { get => filesToReceive; set => filesToReceive = value; }
 
         public MainWindow()
         {
@@ -56,6 +51,11 @@ namespace ProjectPDSWPF
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
+
+            sets = Settings.getInstance;
+            CheckAutoAccept.IsChecked = sets.AutoAccept;
+            CheckDefaultDir.IsChecked = sets.DefaultDir;
+            defaultDirPath.Text = sets.DefaultDirPath;
         }
 
         private void tabChange()
@@ -77,7 +77,8 @@ namespace ProjectPDSWPF
                 foreach (ReceivingFile r in FilesToReceive)
                     if (String.Compare(r.Guid, id) == 0)
                     {
-                        r.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
+                        r.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
+                        triggerBalloon(r.Filename, r.Name, 2);
                         break;
                     }
             }));
@@ -94,7 +95,8 @@ namespace ProjectPDSWPF
                         r.Value = percentage;
                         if (r.Value == 100)
                         {
-                            r.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+                            r.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/check.ico", UriKind.RelativeOrAbsolute));
+                            triggerBalloon(r.Filename, r.Name, 0);
                             break;
                         }
                     }
@@ -121,7 +123,11 @@ namespace ProjectPDSWPF
                     {
                         sf.Value = percentage;
                         if (sf.Value == 100)
-                            sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
+                        {
+                            sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/check.ico", UriKind.RelativeOrAbsolute));
+                            if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
+                                triggerBalloon(sf.FileName, sf.Name, 1);
+                        }
                         break;
                     }
             }));
@@ -143,6 +149,7 @@ namespace ProjectPDSWPF
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
+            WindowState = WindowState.Minimized;
             Hide();
         }
 
@@ -161,7 +168,7 @@ namespace ProjectPDSWPF
             finally
             {
                 b.Visibility = Visibility.Hidden;
-                sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
+                sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
             }
         }
 
@@ -219,38 +226,49 @@ namespace ProjectPDSWPF
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
                     neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
                 }));
         }
 
 
-        public void openFolderBrowserDialog(object sender,EventArgs e)
+        public void openFolderBrowserDialog(object sender, EventArgs e)
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
                 defaultDirPath.Text = dialog.SelectedPath;
             }
-
         }
 
         public void confirmSettings(object sender, EventArgs e)
         {
             Settings.writeSettings(Settings.getInstance);
-            
         }
 
-        public void tabChanged(object Sender,EventArgs e)
+        public void tabChanged(object Sender, EventArgs e)
         {
-          //TODO aggiungere dei controlli?
-                Settings.writeSettings(Settings.getInstance);
+            //TODO aggiungere dei controlli?
+            Settings sets = Settings.getInstance;
+            sets.AutoAccept = CheckAutoAccept.IsChecked.HasValue ? CheckAutoAccept.IsChecked.Value : false;
+            sets.DefaultDir = CheckDefaultDir.IsChecked.HasValue ? CheckDefaultDir.IsChecked.Value : false;
+            if (sets.DefaultDir)
+            {
+                sets.DefaultDirPath = defaultDirPath.Text;
+            }
+
+            Settings.writeSettings(Settings.getInstance);
         }
+
+
+        private ObservableCollection<Neighbor> neighborsValues;
+        private ObservableCollection<SendingFile> filesToSend;
+        private ObservableCollection<ReceivingFile> filesToReceive;
+        private Settings sets;
+
+        public ObservableCollection<Neighbor> NeighborsValues { get => neighborsValues; set => neighborsValues = value; }
+        public ObservableCollection<SendingFile> FilesToSend { get => filesToSend; set => filesToSend = value; }
+        public ObservableCollection<ReceivingFile> FilesToReceive { get => filesToReceive; set => filesToReceive = value; }
+
+        public delegate void myDelegate(string filename, string username, int type);
+        public static event myDelegate triggerBalloon;
     }
 }

@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.IO;
 
 namespace ProjectPDSWPF
 {
@@ -24,10 +25,12 @@ namespace ProjectPDSWPF
         private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
         private MainWindow mw;
         private UserSettings us;
+       
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             mw = new MainWindow();
+            //todo nel caso volessimo far partire MW da qua, bisogna aggiungere show
             ns = new NeighborSelection();
             queue = new MyQueue();
             r = new Receiver();
@@ -35,12 +38,47 @@ namespace ProjectPDSWPF
             s = Settings.getInstance;
             us = new UserSettings();
             MyQueue.openNeighbors += neighbor_selection;
+            ProjectPDSWPF.MainWindow.triggerBalloon += createBalloons;
             initializeNotifyIcon();
+        }
+
+        private void createBalloons(string fileName, string userName, int type)
+        {
+           switch (type)
+            {
+                case 0:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipText = "ricevuto correttamente da " + userName;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+
+                    }
+
+                case 1:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipText = "inviato correttamente a " + userName;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1;  mw.WindowState = WindowState.Normal; mw.Show(); };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    };
+              
+                case 2:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipText = userName + " ha annullato l'invio";
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+            }
         }
 
         private void initializeNotifyIcon()
         {
-            nIcon.Icon = new System.Drawing.Icon(@"C:\Users\Gianmaria\Desktop\check.ico");
+            nIcon.Icon = new System.Drawing.Icon(Directory.GetCurrentDirectory() + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item3 = new System.Windows.Forms.MenuItem();
@@ -74,7 +112,7 @@ namespace ProjectPDSWPF
                     us.WindowState = WindowState.Normal;
                 }
             };
-            item5.Click += delegate { nIcon.Dispose(); App.Current.Shutdown(); };
+            item5.Click += delegate { nIcon.Dispose(); App.Current.Shutdown(); Settings.writeSettings(Settings.getInstance); };
             nIcon.Visible = true;
         }
 

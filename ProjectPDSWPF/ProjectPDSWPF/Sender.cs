@@ -134,7 +134,10 @@ namespace ProjectPDSWPF
                     sent = sender.Send(fileContent, temp, 1400, SocketFlags.None, out error);
                 else
                     sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
-
+                if(error != SocketError.Success)
+                {
+                    //TODO aggiungere controlli come receiver
+                }
                 temp += sent;
                 ulong temporary = (ulong)temp * 100;
                 int tempPercentage = (int)(temporary / (ulong)fileContent.Length);

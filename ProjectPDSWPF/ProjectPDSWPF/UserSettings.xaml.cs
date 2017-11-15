@@ -1,16 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace ProjectPDSWPF
 {
@@ -38,16 +27,22 @@ namespace ProjectPDSWPF
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            settings.Online = !settings.Online;
             if (settings.Online)
-                bottoneOnline.Content = "Online";
-            else
+            {
+                settings.Online = false;
                 bottoneOnline.Content = "Offline";
+                NeighborProtocol.senderEvent.Reset();
+            }
+            else
+            {
+                settings.Online = true;
+                bottoneOnline.Content = "Online";
+                NeighborProtocol.senderEvent.Set();
+            }
             Settings.writeSettings(settings);
         }
 
-        Settings settings = Settings.getInstance;
-
+        private Settings settings = Settings.getInstance;
         public delegate void myDelegate();
         public static event myDelegate openTabSettings;
     }
