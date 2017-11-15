@@ -8,8 +8,8 @@
         Name="MyWindow"
         Title="PDSProject" Height="350" Width="Auto" SizeToContent="Width">
     <Grid>
-        <TabControl Name="tabControl" Width="Auto" x:FieldModifier="public">
-            <TabItem Header="File in ricezione">
+        <TabControl Name="tabControl" Width="Auto" >
+            <TabItem Header="File in ricezione" >
                 <ListView Name="listReceivingFiles" ItemsSource="{Binding FilesToReceive}">
 
                     <!--<ListView.ContextMenu>
@@ -225,6 +225,32 @@
                         </ListView>
                     </StackPanel>
                 </Grid>
+            </TabItem>
+            <TabItem Header="Impostazioni" Selector.Unselected="tabChanged">
+                <StackPanel>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0" Content="AutoAccept" />
+                        <Label Grid.Row="1" Grid.Column="0" Content="Default Directory" />
+                        <Label Grid.Row="2" Grid.Column="0" Content="Default Directory Path" />
+                        <CheckBox Grid.Row ="0" Grid.Column="2" />
+                        <CheckBox Grid.Row ="1" Grid.Column="2" />
+                        <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="5" Click="openFolderBrowserDialog" />
+                        <TextBox Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true"/>
+                    </Grid>
+                    <StackPanel Orientation="Horizontal" >
+                        <Button x:Name="Conferma" Content="Conferma" Click="confirmSettings" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
         </TabControl>
     </Grid>

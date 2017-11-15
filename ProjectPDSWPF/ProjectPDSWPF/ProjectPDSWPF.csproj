@@ -67,6 +67,9 @@
     <Compile Include="Sender.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SendingFile.cs" />
+    <Compile Include="UserSettings.xaml.cs">
+      <DependentUpon>UserSettings.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -81,6 +84,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="NeighborSelection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserSettings.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

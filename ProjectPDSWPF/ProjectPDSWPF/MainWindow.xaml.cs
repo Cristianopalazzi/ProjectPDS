@@ -42,6 +42,7 @@ namespace ProjectPDSWPF
             Sender.updateProgress += updateProgressBar;
             Receiver.updateProgress += updateReceivingProgressBar;
             Receiver.updateReceivingFiles += updateReceivingFiles;
+            UserSettings.openTabSettings += tabChange;
             Receiver.fileCancel += file_cancel;
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
 
@@ -55,6 +56,11 @@ namespace ProjectPDSWPF
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
+        }
+
+        private void tabChange()
+        {
+            tabControl.SelectedIndex = 3;
         }
 
         private void addSendingFiles(List<SendingFile> sf)
@@ -222,6 +228,29 @@ namespace ProjectPDSWPF
                     neighborsValues.Add(n1);
                     neighborsValues.Add(n1);
                 }));
+        }
+
+
+        public void openFolderBrowserDialog(object sender,EventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                defaultDirPath.Text = dialog.SelectedPath;
+            }
+
+        }
+
+        public void confirmSettings(object sender, EventArgs e)
+        {
+            Settings.writeSettings(Settings.getInstance);
+            
+        }
+
+        public void tabChanged(object Sender,EventArgs e)
+        {
+          //TODO aggiungere dei controlli?
+                Settings.writeSettings(Settings.getInstance);
         }
     }
 }
