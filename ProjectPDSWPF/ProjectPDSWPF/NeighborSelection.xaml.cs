@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.Controls;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace ProjectPDSWPF
     /// <summary>
     /// Logica di interazione per NeighborSelection.xaml
     /// </summary>
-    public partial class NeighborSelection : Window
+    public partial class NeighborSelection : MetroWindow
     {
 
         public delegate void del(List<SendingFile> sf);

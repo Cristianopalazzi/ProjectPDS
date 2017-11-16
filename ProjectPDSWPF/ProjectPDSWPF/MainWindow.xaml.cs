@@ -8,13 +8,14 @@ using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using System.IO;
+using MahApps.Metro.Controls;
 
 namespace ProjectPDSWPF
 {
     /// <summary>
     /// Logica di interazione per MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : MetroWindow
     {
         //TODO cercare come mettere le immagini come risorse
         // controllare invii e ricezioni con placeholder al posto della foto utente
@@ -264,8 +265,8 @@ namespace ProjectPDSWPF
         {
             //TODO aggiungere dei controlli?
             Settings sets = Settings.getInstance;
-            sets.AutoAccept = CheckAutoAccept.IsChecked.HasValue ? CheckAutoAccept.IsChecked.Value : false;
-            sets.DefaultDir = CheckDefaultDir.IsChecked.HasValue ? CheckDefaultDir.IsChecked.Value : false;
+            sets.AutoAccept = CheckAutoAccept.IsChecked ?? false;
+            sets.DefaultDir = CheckDefaultDir.IsChecked ?? false;
             if (sets.DefaultDir)
             {
                 sets.DefaultDirPath = defaultDirPath.Text;

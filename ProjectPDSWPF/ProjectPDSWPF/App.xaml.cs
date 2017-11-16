@@ -123,11 +123,11 @@ namespace ProjectPDSWPF
             {
                 ns.sendingFile.Text = file;
                 //TODO sistemare la scritta del file che stiamo mandando
+                //TODO vedere perchè non va in activate
                 ns.Show();
-                ns.Activate();
                 ns.WindowState = WindowState.Normal;
+                ns.Activate();
             }));
         }
     }
-
 }

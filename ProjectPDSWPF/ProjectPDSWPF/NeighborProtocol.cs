@@ -310,7 +310,6 @@ namespace ProjectPDSWPF
         private byte[] GetImage(string path)
         {
             FileStream fs = new FileStream(path, FileMode.Open);
-            //TODO long position = Seek(fs, "JFIF", 100);  => aumenta grandezza
             long position = Seek(fs, "JFIF", 0);
             byte[] b = new byte[Convert.ToInt32(fs.Length)];
             fs.Seek(position - 6, SeekOrigin.Begin);
