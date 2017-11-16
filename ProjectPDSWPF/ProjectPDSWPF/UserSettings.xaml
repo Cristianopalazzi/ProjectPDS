@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         WindowStyle="None"
         WindowState="Minimized"
-         Height="250" Width="300" AllowsTransparency="True" >
+        Deactivated="deactivated_settings"
+        Height="250" Width="300" AllowsTransparency="True" >
     <Window.Background>
         <SolidColorBrush Color="#FF3D3D3D" Opacity="0.90"/>
     </Window.Background>
@@ -17,6 +18,6 @@
             <Hyperlink NavigateUri="impostazioni" Foreground="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Click="openSettings">impostazioni</Hyperlink>
         </TextBlock>
     </Grid>
-   
- 
+
+
 </Window>

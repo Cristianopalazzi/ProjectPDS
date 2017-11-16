@@ -11,8 +11,9 @@ namespace ProjectPDSWPF
         public UserSettings()
         {
             InitializeComponent();
-            Left = System.Windows.SystemParameters.WorkArea.Right - Width;
-            Top = System.Windows.SystemParameters.WorkArea.Bottom - Height;
+            settings = Settings.getInstance;
+            Left = SystemParameters.WorkArea.Right - Width;
+            Top = SystemParameters.WorkArea.Bottom - Height;
             if (settings.Online)
                 bottoneOnline.Content = "Online";
             else
@@ -42,7 +43,14 @@ namespace ProjectPDSWPF
             Settings.writeSettings(settings);
         }
 
-        private Settings settings = Settings.getInstance;
+        private void deactivated_settings(object sender, EventArgs e)
+        {
+            Settings.writeSettings(settings);
+            WindowState = WindowState.Minimized;
+            Hide();
+        }
+
+        private Settings settings;
         public delegate void myDelegate();
         public static event myDelegate openTabSettings;
     }

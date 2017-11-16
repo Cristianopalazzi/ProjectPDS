@@ -230,6 +230,18 @@ namespace ProjectPDSWPF
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
                     neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
+                    neighborsValues.Add(n1);
                 }));
         }
 

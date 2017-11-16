@@ -75,14 +75,7 @@ namespace ProjectPDSWPF
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
                     neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
-                    neighbors.Add(n1);
+
                 }));
         }
     }

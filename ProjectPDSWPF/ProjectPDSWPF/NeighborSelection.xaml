@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ProjectPDSWPF"
         mc:Ignorable="d"
-        Title="NeighborSelection" Height="300" Width="300">
+        Title="NeighborSelection" Height="300" Width="300" SizeToContent="Width">
     <Grid>
         <StackPanel>
             <TextBlock Name="sendingFile"/>
@@ -14,28 +14,27 @@
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
                     </ItemsPanelTemplate>
-
                 </ListView.ItemsPanel>
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" Margin="10">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5">
                             <Ellipse Height="64" Width="64" >
                                 <Ellipse.Fill>
-                                    <ImageBrush  ImageSource="{Binding NeighborImage}"  Stretch="Uniform" />
+                                    <ImageBrush  ImageSource="{Binding NeighborImage}"/>
                                 </Ellipse.Fill>
                             </Ellipse>
                             <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
+                
                 <ListView.ItemContainerStyle>
-                    <Style  TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        <Setter Property="BorderBrush" Value="Red" />
-                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
                     </Style>
                 </ListView.ItemContainerStyle>
+                
             </ListView>
             <Button Content="Invia" Click="button_send_files"></Button>
         </StackPanel>

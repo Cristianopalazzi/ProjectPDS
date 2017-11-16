@@ -50,7 +50,7 @@ namespace ProjectPDSWPF
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipText = "ricevuto correttamente da " + userName;
-                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.WindowState = WindowState.Normal; };
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
@@ -59,7 +59,7 @@ namespace ProjectPDSWPF
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipText = "inviato correttamente a " + userName;
-                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.WindowState = WindowState.Normal; };
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     };
@@ -68,7 +68,7 @@ namespace ProjectPDSWPF
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipText = userName + " ha annullato l'invio";
-                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.WindowState = WindowState.Normal; };
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
@@ -95,9 +95,9 @@ namespace ProjectPDSWPF
             item3.Text = "Tizi online";
             item4.Text = "Impostazioni";
             item5.Text = "Esci";
-            item1.Click += delegate { mw.Show(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 0; };
-            item2.Click += delegate { mw.Show(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 1; };
-            item3.Click += delegate { mw.Show(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 2; };
+            item1.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 0; };
+            item2.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 1; };
+            item3.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 2; };
             item4.Click += delegate
             {
                 if (us.WindowState == WindowState.Normal)
@@ -124,6 +124,7 @@ namespace ProjectPDSWPF
                 ns.sendingFile.Text = file;
                 //TODO sistemare la scritta del file che stiamo mandando
                 ns.Show();
+                ns.Activate();
                 ns.WindowState = WindowState.Normal;
             }));
         }

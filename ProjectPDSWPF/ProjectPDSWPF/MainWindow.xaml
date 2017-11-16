@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ProjectPDSWPF"
         mc:Ignorable="d"
         Name="MyWindow"
-        Title="PDSProject" Height="350" Width="Auto" SizeToContent="Width">
+        Title="PDSProject" Height="350" Width="650">
     <Grid>
         <TabControl Name="tabControl" Width="Auto" >
             <TabItem Header="File in ricezione" >
@@ -25,13 +25,15 @@
                             <Setter Property="Visibility" Value="Collapsed" />
                         </Style>
                     </ListView.Resources>
+
+
                     <ListView.View>
                         <GridView>
                             <GridViewColumn>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="5">
-                                            <Ellipse Height="54" Width="54">
+                                        <StackPanel Margin="5" VerticalAlignment="Center">
+                                            <Ellipse Height="64" Width="64">
                                                 <Ellipse.Fill>
                                                     <ImageBrush ImageSource="{Binding Image}"/>
                                                 </Ellipse.Fill>
@@ -47,7 +49,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--Serve per fare in modo che la colonna si adatti al contenuto-->
-                                        <TextBlock Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" />
+                                        <TextBlock ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -57,38 +59,31 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <ProgressBar Value="{Binding Value}"/>
-                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <ProgressBar Value="{Binding Value}" Height="20"/>
+                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="White"  HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <GridViewColumn Width="150">
+                            <GridViewColumn Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Image Source="{Binding Pic}" Width="32" Height="32"/>
+                                        <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
                         </GridView>
+
                     </ListView.View>
-
-
-
-                    <ListView.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding Name}"/>
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </ListView.GroupStyle>
-
-
-
+                    <ListView.ItemContainerStyle>
+                        <Style  TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="BorderBrush" Value="LightGray" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                 </ListView>
             </TabItem>
 
@@ -112,8 +107,8 @@
                             <GridViewColumn>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <StackPanel Margin="5">
-                                            <Ellipse Height="54" Width="54">
+                                        <StackPanel Margin="5" VerticalAlignment="Center">
+                                            <Ellipse Height="64" Width="64">
                                                 <Ellipse.Fill>
                                                     <ImageBrush ImageSource="{Binding Immagine}"/>
                                                 </Ellipse.Fill>
@@ -124,21 +119,14 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-                            <!--<GridViewColumn Header="File">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock Text="{Binding FileName}" TextAlignment="Left" FontSize="16"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>-->
 
 
                             <GridViewColumn Width="240">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <ProgressBar Value="{Binding Value}"/>
-                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <ProgressBar Value="{Binding Value}" Height="20"/>
+                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -147,7 +135,7 @@
                             <GridViewColumn Width="140">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click">
+                                        <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click" VerticalAlignment="Center">
 
 
                                             <Button.Style>
@@ -161,24 +149,30 @@
                                                 </Style>
                                             </Button.Style>
 
-
-
                                         </Button>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
 
-                            <GridViewColumn Width="150">
+                            <GridViewColumn Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Image Source="{Binding Pic}" Width="32" Height="32"/>
+                                        <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
                         </GridView>
                     </ListView.View>
+
+                    <ListView.ItemContainerStyle>
+                        <Style  TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="BorderBrush" Value="LightGray" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
 
                     <ListView.GroupStyle>
                         <GroupStyle>
@@ -197,32 +191,30 @@
                 <Grid>
                     <StackPanel>
                         <ListView x:Name="Neighbors" ItemsSource="{Binding NeighborsValues}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                                </Style>
+                            </ListView.ItemContainerStyle>
                             <ListView.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
                                 </ItemsPanelTemplate>
-
                             </ListView.ItemsPanel>
 
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" Margin="10">
-                                        <Ellipse Height="64" Width="64" >
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="5">
+                                        <Ellipse Height="64" Width="64" HorizontalAlignment="Center">
                                             <Ellipse.Fill>
-                                                <ImageBrush  ImageSource="{Binding NeighborImage}"  Stretch="Uniform" />
+                                                <ImageBrush  ImageSource="{Binding NeighborImage}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
                                         <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
-                            <ListView.ItemContainerStyle>
-                                <Style  TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    <Setter Property="BorderBrush" Value="Red" />
-                                    <Setter Property="BorderThickness" Value="0,0,0,1" />
-                                </Style>
-                            </ListView.ItemContainerStyle>
+
                         </ListView>
                     </StackPanel>
                 </Grid>
@@ -254,18 +246,6 @@
         </TabControl>
     </Grid>
     <Window.Resources>
-
-        <!--Serve per fare in modo che la colonna si adatti al contenuto-->
-        <Style  TargetType="ListViewItem">
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="BorderBrush" Value="LightGray" />
-            <Setter Property="BorderThickness" Value="0,0,0,1" />
-        </Style>
-
-        <Style TargetType="GridViewColumnHeader">
-            <Setter Property="FontSize" Value="16" />
-        </Style>
-
 
     </Window.Resources>
 </Window>
