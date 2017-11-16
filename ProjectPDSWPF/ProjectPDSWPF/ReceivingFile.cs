@@ -1,10 +1,5 @@
 ﻿using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Collections.Generic;
-using System.Collections;
-using System.Net.Sockets;
-using System;
 
 
 namespace ProjectPDSWPF
@@ -19,6 +14,7 @@ namespace ProjectPDSWPF
             Image = new BitmapImage();
             Image = neighbor.NeighborImage;
             Guid = guid;
+            File_state = Constants.FILE_STATE.PROGRESS;
         }
 
         public BitmapImage Pic
@@ -46,6 +42,7 @@ namespace ProjectPDSWPF
         public string Filename { get => filename; set => filename = value; }
         public string Ipaddr { get => ipaddr; set => ipaddr = value; }
         public string Guid { get => guid; set => guid = value; }
+        internal Constants.FILE_STATE File_state { get => file_state; set => file_state = value; }
 
         public void NotifyPropertyChanged(string propName)
         {
@@ -57,6 +54,7 @@ namespace ProjectPDSWPF
         private double value;
         private BitmapImage image, pic;
         private string guid;
+        private Constants.FILE_STATE file_state;
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

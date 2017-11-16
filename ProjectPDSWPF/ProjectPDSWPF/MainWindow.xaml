@@ -12,12 +12,14 @@
             <TabItem Header="File in ricezione" >
                 <ListView Name="listReceivingFiles" ItemsSource="{Binding FilesToReceive}">
 
-                    <!--<ListView.ContextMenu>
+                    <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Delete" Click="Menu_delete_click"/>
-                            <MenuItem Header="Modify" Click="Menu_modify_click"/>
+                            <MenuItem Header="Rimuovi" Click="receiving_files_menu_delete_click"/>
+                            <MenuItem Header="Rimuovi i completati" Click="receiving_files_menu_all_delete_click"/>
                         </ContextMenu>
-                    </ListView.ContextMenu>-->
+                    </ListView.ContextMenu>
+
+
                     <ListView.Resources>
                         <Style TargetType="GridViewColumnHeader">
                             <Setter Property="Visibility" Value="Collapsed" />
@@ -97,12 +99,13 @@
                             <Setter Property="Visibility" Value="Collapsed" />
                         </Style>
                     </ListView.Resources>
-                    <!--<ListView.ContextMenu>
+
+                    <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Delete" Click="Menu_delete_click"/>
-                            <MenuItem Header="Modify" Click="Menu_modify_click"/>
+                            <MenuItem Header="Rimuovi" Click="sending_files_menu_delete_click"/>
+                            <MenuItem Header="Rimuovi i completati" Click="sending_files_menu_all_delete_click"/>
                         </ContextMenu>
-                    </ListView.ContextMenu>-->
+                    </ListView.ContextMenu>
 
                     <ListView.View>
                         <GridView>
@@ -187,8 +190,6 @@
                         </GroupStyle>
                     </ListView.GroupStyle>
 
-
-
                 </ListView>
 
             </TabItem>
@@ -227,28 +228,28 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Impostazioni" Selector.Unselected="tabChanged">
-                
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0" Content="AutoAccept" />
-                        <Label Grid.Row="1" Grid.Column="0" Content="Default Directory" />
-                        <Label Grid.Row="2" Grid.Column="0" Content="Default Directory Path" />
-                        <CheckBox Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
-                        <CheckBox Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
-                        <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="5" Click="openFolderBrowserDialog" />
-                        <TextBox Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true"/>
-                    </Grid>
-                   
-              
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Content="AutoAccept" />
+                    <Label Grid.Row="1" Grid.Column="0" Content="Default Directory" />
+                    <Label Grid.Row="2" Grid.Column="0" Content="Default Directory Path" />
+                    <CheckBox Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
+                    <CheckBox Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
+                    <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="5" Click="openFolderBrowserDialog" />
+                    <TextBox Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true"/>
+                </Grid>
+
+
             </TabItem>
         </TabControl>
     </Grid>

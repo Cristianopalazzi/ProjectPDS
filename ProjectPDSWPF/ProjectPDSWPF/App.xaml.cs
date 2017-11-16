@@ -25,7 +25,7 @@ namespace ProjectPDSWPF
         private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
         private MainWindow mw;
         private UserSettings us;
-       
+
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -44,7 +44,7 @@ namespace ProjectPDSWPF
 
         private void createBalloons(string fileName, string userName, int type)
         {
-           switch (type)
+            switch (type)
             {
                 case 0:
                     {
@@ -53,18 +53,17 @@ namespace ProjectPDSWPF
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
-
                     }
 
                 case 1:
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipText = "inviato correttamente a " + userName;
-                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1;  mw.WindowState = WindowState.Normal; mw.Show(); };
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     };
-              
+
                 case 2:
                     {
                         nIcon.BalloonTipTitle = fileName;
@@ -94,7 +93,7 @@ namespace ProjectPDSWPF
             item1.Text = "File in ricezione";
             item2.Text = "File in invio";
             item3.Text = "Tizi online";
-            item4.Text = "impostazioni";
+            item4.Text = "Impostazioni";
             item5.Text = "Esci";
             item1.Click += delegate { mw.Show(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 0; };
             item2.Click += delegate { mw.Show(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 1; };
@@ -125,6 +124,7 @@ namespace ProjectPDSWPF
                 ns.sendingFile.Text = file;
                 //TODO sistemare la scritta del file che stiamo mandando
                 ns.Show();
+                ns.WindowState = WindowState.Normal;
             }));
         }
     }

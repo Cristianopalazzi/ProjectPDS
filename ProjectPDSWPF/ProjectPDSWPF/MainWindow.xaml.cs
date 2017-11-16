@@ -1,15 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
-using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Animation;
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.Net.Sockets;
 using System.IO;
 
@@ -21,12 +17,11 @@ namespace ProjectPDSWPF
     public partial class MainWindow : Window
     {
         //TODO cercare come mettere le immagini come risorse
-        // eliminazione delle righe
         // controllare invii e ricezioni con placeholder al posto della foto utente
         // placeholder per le liste vuote
-        //rifare la window per le impostazioni
-        //resize della finestra principale
-
+        // rifare la window per le impostazioni
+        // resize della finestra principale
+        // rifare le scritte con il tasto destro sulla liste dei file in invio e in ricezione
 
 
         public MainWindow()
@@ -60,12 +55,13 @@ namespace ProjectPDSWPF
 
         private void tabChange()
         {
+            Show();
+            WindowState = WindowState.Normal;
             tabControl.SelectedIndex = 3;
         }
 
         private void addSendingFiles(List<SendingFile> sf)
         {
-            tabControl.SelectedIndex = 1;
             foreach (SendingFile s in sf)
                 FilesToSend.Add(s);
         }
@@ -77,6 +73,7 @@ namespace ProjectPDSWPF
                 foreach (ReceivingFile r in FilesToReceive)
                     if (String.Compare(r.Guid, id) == 0)
                     {
+                        r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
                         triggerBalloon(r.Filename, r.Name, 2);
                         break;
@@ -95,6 +92,7 @@ namespace ProjectPDSWPF
                         r.Value = percentage;
                         if (r.Value == 100)
                         {
+                            r.File_state = Constants.FILE_STATE.COMPLETED;
                             r.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/check.ico", UriKind.RelativeOrAbsolute));
                             triggerBalloon(r.Filename, r.Name, 0);
                             break;
@@ -124,6 +122,7 @@ namespace ProjectPDSWPF
                         sf.Value = percentage;
                         if (sf.Value == 100)
                         {
+                            sf.File_state = Constants.FILE_STATE.COMPLETED;
                             sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/check.ico", UriKind.RelativeOrAbsolute));
                             if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
                                 triggerBalloon(sf.FileName, sf.Name, 1);
@@ -132,19 +131,6 @@ namespace ProjectPDSWPF
                     }
             }));
         }
-
-
-        //private void Doubleanimation_Completed(object sender, EventArgs e, ProgressBar progress)
-        //{
-        //    if (progress.Value == 100)
-        //        foreach (SendingFile sf in FileToSend)
-        //            if (sf.Progress == progress)
-        //            {
-        //                sf.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\check.ico"));
-        //                break;
-        //            }
-        //}
-
 
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
@@ -167,44 +153,62 @@ namespace ProjectPDSWPF
             }
             finally
             {
-                b.Visibility = Visibility.Hidden;
+                sf.File_state = Constants.FILE_STATE.CANCELED;
                 sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
+                b.Visibility = Visibility.Hidden;
             }
         }
 
 
-        //private void Menu_delete_click(object sender, RoutedEventArgs e)
-        //{
-        //    MessageBox.Show(NeighborsValues.Count + "");
-        //    if (Persone.SelectedIndex == -1)
-        //        return;
-        //    people.Remove(Persone.SelectedItem as test);
-        //}
+        //Right Click on receiving files
+        private void receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
+        {
+            if (listReceivingFiles.SelectedIndex == -1)
+                return;
+            ReceivingFile rf = listReceivingFiles.SelectedItem as ReceivingFile;
+            if (rf.File_state == Constants.FILE_STATE.PROGRESS)
+                MessageBox.Show("Attendi il completamento del file");
+            else FilesToReceive.Remove(rf);
+        }
 
 
-        //private void Menu_modify_click(object sender, RoutedEventArgs e)
-        //{
-        //    if (Persone.SelectedIndex == -1)
-        //        return;
-        //    test tmp = Persone.SelectedItem as test;
-        //    for (int i = 0; i < 10; i++)
-        //    {
-        //        double t = tmp.Prog.Value += 1;
-        //        Duration duration = new Duration(TimeSpan.FromSeconds(0.5));
-        //        DoubleAnimation doubleanimation = new DoubleAnimation(t, duration);
-        //        doubleanimation.Completed += delegate (object sender1, EventArgs e1)
-        //        {
-        //            Doubleanimation_Completed(sender1, e1, tmp);
-        //        };
-        //        tmp.Prog.BeginAnimation(ProgressBar.ValueProperty, doubleanimation);
-        //    }
-        //}
+        //Right Click on receiving files
+        private void receiving_files_menu_all_delete_click(object sender, RoutedEventArgs e)
+        {
+            if (listReceivingFiles.SelectedIndex == -1)
+                return;
+            List<ReceivingFile> tmp = new List<ReceivingFile>();
+            foreach (ReceivingFile rf in FilesToReceive)
+                if (rf.File_state == Constants.FILE_STATE.CANCELED || rf.File_state == Constants.FILE_STATE.COMPLETED)
+                    tmp.Add(rf);
+            foreach (ReceivingFile rf in tmp)
+                FilesToReceive.Remove(rf);
+        }
 
-        //private void Doubleanimation_Completed(object sender, EventArgs e, test tmp)
-        //{
-        //    if (tmp.Prog.Value == 100)
-        //        tmp.Pic = new BitmapImage(new Uri(@"C:\Users\Cristiano\Desktop\cross.ico"));
-        //}
+        //Right Click on sending files
+        private void sending_files_menu_delete_click(object sender, RoutedEventArgs e)
+        {
+            if (sendingFiles.SelectedIndex == -1)
+                return;
+            SendingFile sf = sendingFiles.SelectedItem as SendingFile;
+            if (sf.File_state == Constants.FILE_STATE.PROGRESS)
+                MessageBox.Show("Non puoi cancellare un file in invio\nPremi annulla per fermare l'invio");
+            else FilesToSend.Remove(sf);
+        }
+
+
+        //Right Click on sending files
+        private void sending_files_menu_all_delete_click(object sender, RoutedEventArgs e)
+        {
+            if (sendingFiles.SelectedIndex == -1)
+                return;
+            List<SendingFile> tmp = new List<SendingFile>();
+            foreach (SendingFile sf in FilesToSend)
+                if (sf.File_state == Constants.FILE_STATE.CANCELED || sf.File_state == Constants.FILE_STATE.COMPLETED)
+                    tmp.Add(sf);
+            foreach (SendingFile sf in tmp)
+                FilesToSend.Remove(sf);
+        }
 
 
         public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
@@ -254,7 +258,6 @@ namespace ProjectPDSWPF
             {
                 sets.DefaultDirPath = defaultDirPath.Text;
             }
-
             Settings.writeSettings(Settings.getInstance);
         }
 

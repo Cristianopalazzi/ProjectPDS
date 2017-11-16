@@ -7,12 +7,12 @@
         mc:Ignorable="d"
         WindowStyle="None"
         WindowState="Minimized"
-         Height="400" Width="500" AllowsTransparency="True" >
+         Height="250" Width="300" AllowsTransparency="True" >
     <Window.Background>
         <SolidColorBrush Color="#FF3D3D3D" Opacity="0.90"/>
     </Window.Background>
     <Grid>
-        <Button x:Name="bottoneOnline" HorizontalAlignment="Left" Margin="24,177,0,0" VerticalAlignment="Top" Width="145" Height="70" Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" FontSize="16" Click="Button_Click" Foreground="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" />
+        <Button x:Name="bottoneOnline" HorizontalAlignment="Left" Margin="24,144,0,0" VerticalAlignment="Top" Width="145" Height="70" Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" FontSize="16" Click="Button_Click" Foreground="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" />
         <TextBlock HorizontalAlignment="Left" Margin="24,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="20">
             <Hyperlink NavigateUri="impostazioni" Foreground="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Click="openSettings">impostazioni</Hyperlink>
         </TextBlock>
