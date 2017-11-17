@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace ProjectPDSWPF
 {
@@ -14,8 +15,7 @@ namespace ProjectPDSWPF
     {
         private NeighborProtocol()
         {
-            neighbors = new ConcurrentDictionary<string, int>();
-            neighborsImage = new ConcurrentDictionary<string, byte[]>();
+            Neighbors = new ConcurrentDictionary<string, Neighbor>();
             settings = Settings.getInstance;
             senderEvent = new ManualResetEvent(settings.Online);
 
@@ -81,37 +81,38 @@ namespace ProjectPDSWPF
                 //Console.WriteLine("senderIPPPP {0} ", remoteIpAddress);
                 if (String.Compare(command, Constants.HELL, false) == 0)
                 {
-                    if (neighbors.ContainsKey(senderID))
-                        neighbors[senderID] = Constants.MAX_COUNTER;
-                    else
-                        neighbors.TryAdd(senderID, Constants.MAX_COUNTER);
+                    if (!Neighbors.ContainsKey(senderID))
+                        Neighbors.TryAdd(senderID, new Neighbor(senderID, null));
+                    Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                 }
                 else if (String.Compare(command, Constants.QUIT, false) == 0)
-                {
-                    int value;
-                    if (neighbors.ContainsKey(senderID))
-                    {
-                        neighbors.TryRemove(senderID, out value);
+                    if (Neighbors.TryRemove(senderID, out Neighbor n))
                         neighborsEvent(senderID, null, false);
-                    }
-                }
+
 
                 byte[] requestImage;
                 IPEndPoint ipImg = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
                 socketImg.Connect(ipImg);
-                if (!neighborsImage.ContainsKey(senderID))
+                if (Neighbors.TryGetValue(senderID, out Neighbor n1))
                 {
-                    //chiedo la foto 
-                    //Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
-                    requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
-                    socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                    receiveImg(senderID);
+                    if (n1.NeighborImage == null)
+                    {
+
+                        //chiedo la foto 
+                        //Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
+                        requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
+                        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
+                        receiveImg(senderID);
+                    }
+                    else
+                    {
+                        //TODO vedere se gestire updateFoto del tizio
+                        requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
+                        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
+                    }
                 }
                 else
                 {
-                    //TODO vedere se gestire updateFoto del tizio
-                    neighborsImage.TryGetValue(senderID, out byte[] img);
-                    neighborsEvent(senderID, img, true);
                     requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
                     socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                 }
@@ -120,19 +121,11 @@ namespace ProjectPDSWPF
             socketImg.Close();
         }
 
-
-        private void print()
-        {
-            foreach (KeyValuePair<string, int> pair in neighbors)
-                Console.WriteLine("Key: {0} Values: {1}", pair.Key, pair.Value);
-            Console.WriteLine("Dimensione neighborImage {0} ", neighborsImage.Count);
-        }
-
         public string getUserFromIp(string ipSender)
         {
-            foreach (KeyValuePair<string, int> pair in neighbors)
-                if (pair.Key.IndexOf(ipSender) != -1)
-                    return pair.Key.Substring(0, pair.Key.LastIndexOf("@"));
+            foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
+                if (String.Compare(pair.Value.NeighborIp, ipSender) == 0)
+                    return pair.Value.NeighborName;
             return null;
         }
 
@@ -140,32 +133,29 @@ namespace ProjectPDSWPF
         {
             while (true)
             {
-                if (neighbors.Count == 0)
+                if (Neighbors.Count == 0)
                     Console.WriteLine("Niente da pulire");
 
                 //lista temporanea degli oggetti da rimuovere dalla mappa
                 List<string> toRemove = new List<string>();
 
-                foreach (KeyValuePair<string, int> pair in neighbors)
+                foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
                 {
-                    if (pair.Value == 0)
+                    if (pair.Value.Counter == 0)
                     {
                         Console.WriteLine("Rimuovo {0} ", pair.Key);
                         toRemove.Add(pair.Key);
                     }
-                    else if (pair.Value == Constants.MAX_COUNTER)
-                        neighbors[pair.Key] = 0;
+                    else if (pair.Value.Counter == Constants.MAX_COUNTER)
+                        Neighbors[pair.Key].Counter = 0;
                 }
 
                 //rimuovo dalla mappa gli oggetti della lista temporanea
                 foreach (string tmp in toRemove)
                 {
-                    int value;
-                    neighbors.TryRemove(tmp, out value);
-                    neighborsEvent(tmp, null, false);
+                    if (Neighbors.TryRemove(tmp, out Neighbor value))
+                        neighborsEvent(tmp, null, false);
                 }
-
-                print();
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
         }
@@ -213,12 +203,13 @@ namespace ProjectPDSWPF
         }
 
 
-        private void quitMe()
+        public void quitMe()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             byte[] toBytes = Encoding.ASCII.GetBytes(Constants.QUIT + Environment.UserName);
             socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipep);
+            socket.Shutdown(SocketShutdown.Both);
             socket.Close();
         }
 
@@ -237,6 +228,7 @@ namespace ProjectPDSWPF
             byte[] buffer = new byte[sizeof(int)];
             handler.Receive(buffer, buffer.Length, SocketFlags.None);
             int sizeImg = BitConverter.ToInt32(buffer, 0);
+            //Non ha la foto profilo
             if (sizeImg == -1)
             {
                 Console.WriteLine("Prendo placeholder perchè il tizio nn ha la foto");
@@ -246,8 +238,11 @@ namespace ProjectPDSWPF
                 byte[] placeholderByte = new byte[placeholderLength];
                 placeholderByte = File.ReadAllBytes(placeholderPath);
                 fsp.Close();
-                neighborsImage.TryAdd(neighbor, placeholderByte);
-                neighborsEvent(neighbor, placeholderByte, true);
+                if (Neighbors.TryGetValue(neighbor, out Neighbor n))
+                {
+                    n.setImage(placeholderByte);
+                    neighborsEvent(neighbor, placeholderByte, true);
+                }
                 return;
             }
             byte[] img = new byte[sizeImg];
@@ -258,8 +253,11 @@ namespace ProjectPDSWPF
                 temp += bytesRec;
                 if (temp == sizeImg) break;
             }
-            neighborsImage.TryAdd(neighbor, img);
-            neighborsEvent(neighbor, img, true);
+            if (Neighbors.TryGetValue(neighbor, out Neighbor n1))
+            {
+                n1.setImage(img);
+                neighborsEvent(neighbor, img, true);
+            }
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
             listener.Close();
@@ -277,7 +275,6 @@ namespace ProjectPDSWPF
             FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
             if (images.Length == 0)
             {
-                Console.WriteLine("Non ho l'immagine");
                 sender.Send(BitConverter.GetBytes(-1), sizeof(int), SocketFlags.None);
                 return;
             }
@@ -302,7 +299,6 @@ namespace ProjectPDSWPF
                 temp += sent;
                 if (temp == accountImage.Length) break;
             }
-
             sender.Shutdown(SocketShutdown.Both);
             sender.Close();
         }
@@ -365,20 +361,14 @@ namespace ProjectPDSWPF
             }
         }
 
+        public ConcurrentDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
 
-        public ConcurrentDictionary<string, byte[]> getNeighbors()
-        {
-            return neighborsImage;
-        }
-
-
-        private ConcurrentDictionary<string, int> neighbors;
-        private ConcurrentDictionary<string, byte[]> neighborsImage;
+        private ConcurrentDictionary<string, Neighbor> neighbors;
         private Thread listener, clean, sender;
         private static NeighborProtocol instance = null;
         private Settings settings;
         public static ManualResetEvent senderEvent;
-        public delegate void modifyNeighbors(string neighborID, byte[] image, bool addOrRemove);
+        public delegate void modifyNeighbors(string neighborID, byte [] image, bool addOrRemove);
         public static event modifyNeighbors neighborsEvent;
     }
 }

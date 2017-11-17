@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace ProjectPDSWPF
 {
@@ -25,7 +26,7 @@ namespace ProjectPDSWPF
             DataContext = this;
             NeighborProtocol n = NeighborProtocol.getInstance;
             NeighborProtocol.neighborsEvent += modify_neighbors;
-            neighbors = new ObservableCollection<Neighbor>();
+            Neighbors = new ObservableCollection<Neighbor>();
             listNeighborSelection.ItemsSource = Neighbors;
             Closing += neighborSelectinClosing;
         }
@@ -54,6 +55,7 @@ namespace ProjectPDSWPF
                 sendSelectedNeighbors(sendingFiles);
                 Hide();
             }
+            //TODO cambiare
             else MessageBox.Show("Seleziona almeno un vicino");
         }
 
@@ -61,13 +63,16 @@ namespace ProjectPDSWPF
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare
-            foreach (Neighbor n in neighbors)
+            foreach (Neighbor n in Neighbors)
             {
                 if (String.Compare(id, n.NeighborName + "@" + n.NeighborIp) == 0)
                 {
                     isPresent = true;
                     if (!addOrRemove)
-                        Application.Current.Dispatcher.Invoke(new Action(() => { neighbors.Remove(n); }));
+                        Application.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            Neighbors.Remove(n);
+                        }));
                     break;
                 }
             }
@@ -75,8 +80,7 @@ namespace ProjectPDSWPF
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
-                    neighbors.Add(n1);
-
+                    Neighbors.Add(n1);
                 }));
         }
     }

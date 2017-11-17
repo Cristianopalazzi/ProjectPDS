@@ -6,16 +6,18 @@ namespace ProjectPDSWPF
 {
     public class Neighbor : INotifyPropertyChanged
     {
-        public Neighbor(string neighorID, byte[] image)
+        public Neighbor(string neighorID, byte[] bytes)
         {
             int temp = neighorID.LastIndexOf("@");
             NeighborName = neighorID.Substring(0, temp);
             NeighborIp = neighorID.Substring(temp + 1);
-            if (image != null)
-                NeighborImage = ToImage(image);
+            Counter = 0;
+            neighborImage = null;
+            if (bytes != null)
+                setImage(bytes);
         }
 
-        private BitmapImage ToImage(byte[] array)
+        public static BitmapImage ToImage(byte[] array)
         {
             BitmapImage image = new BitmapImage();
             image.BeginInit();
@@ -37,19 +39,33 @@ namespace ProjectPDSWPF
             }
         }
 
-        public string NeighborIp { get => neighborIp; set => neighborIp = value; }
+
         public BitmapImage NeighborImage
         {
-            get => neighborImage; set
+            get => neighborImage;
+
+            //set 
+            //{
+            //    if (neighborImage != value)
+            //    {
+            //        neighborImage = value;
+
+            //    }
+            //}
+        }
+
+        public void setImage(byte[] bytes)
+        {
+            BitmapImage bitmap = ToImage(bytes);
+            if (NeighborImage != bitmap)
             {
-                if (neighborImage != value)
-                {
-                    neighborImage = value;
-                    NotifyPropertyChanged("NeighborImage");
-                }
+                neighborImage = bitmap;
+                NotifyPropertyChanged("NeighborImage");
             }
         }
 
+        public int Counter { get => counter; set => counter = value; }
+        public string NeighborIp { get => neighborIp; set => neighborIp = value; }
 
         public void NotifyPropertyChanged(string propName)
         {
@@ -59,6 +75,7 @@ namespace ProjectPDSWPF
 
         private string neighborName, neighborIp;
         private BitmapImage neighborImage;
+        private int counter;
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

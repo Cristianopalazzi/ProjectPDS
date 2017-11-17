@@ -103,7 +103,7 @@ namespace ProjectPDSWPF
             }));
         }
 
-        private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
+        private void updateReceivingFiles(string senderID, byte [] image, string fileName, string id)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -212,7 +212,7 @@ namespace ProjectPDSWPF
         }
 
 
-        public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
+        public void modify_neighbors(string id, byte [] bytes, bool addOrRemove)
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare
@@ -230,18 +230,6 @@ namespace ProjectPDSWPF
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
-                    neighborsValues.Add(n1);
                     neighborsValues.Add(n1);
                 }));
         }

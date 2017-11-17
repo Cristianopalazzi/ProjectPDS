@@ -6,10 +6,10 @@
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:local="clr-namespace:ProjectPDSWPF"
         mc:Ignorable="d"
-        Title="NeighborSelection" Height="300" Width="300" SizeToContent="Width">
+        Title="NeighborSelection" Width="300" SizeToContent="WidthAndHeight">
     <Grid>
         <StackPanel>
-            <TextBlock Name="sendingFile" FontSize="14" FontWeight="Bold" Background="MediumSeaGreen" HorizontalAlignment="Stretch" Foreground="White"/>
+            <TextBlock Name="sendingFile" FontSize="16" FontWeight="Bold" Background="MediumSeaGreen" HorizontalAlignment="Stretch" Foreground="White" VerticalAlignment="Top"/>
             <ListView x:Name="listNeighborSelection" ItemsSource="{Binding Neighbors}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -55,7 +55,8 @@
                 </ListView.ItemContainerStyle>
 
             </ListView>
-            <Button Content="Invia" Click="button_send_files" Background="LightBlue" Foreground="White">
+
+            <Button Content="Invia" Click="button_send_files" Background="LightBlue" Foreground="White" Width="60"  HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,30,30,10">
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Visibility" Value="Visible" />

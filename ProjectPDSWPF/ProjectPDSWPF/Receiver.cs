@@ -6,6 +6,7 @@ using System.Net;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
+using System.Windows.Media.Imaging;
 
 namespace ProjectPDSWPF
 {
@@ -18,7 +19,7 @@ namespace ProjectPDSWPF
             {
                 Name = "server",
                 IsBackground = true
-        };
+            };
             server.Start();
         }
         ~Receiver() { server.Join(); }
@@ -158,8 +159,17 @@ namespace ProjectPDSWPF
 
 
             string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
+            Neighbor ne;
             byte[] image;
-            NeighborProtocol.getInstance.getNeighbors().TryGetValue(senderID, out image);
+            NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out ne);
+            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
+            using (MemoryStream ms = new MemoryStream())
+            {
+                encoder.Save(ms);
+                image = ms.ToArray();
+                ms.Close();
+            }
             string id = Guid.NewGuid().ToString();
             updateReceivingFiles(senderID, image, fileNameString, id);
             int percentage = 0;

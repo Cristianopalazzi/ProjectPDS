@@ -111,7 +111,7 @@ namespace ProjectPDSWPF
                     us.WindowState = WindowState.Normal;
                 }
             };
-            item5.Click += delegate { nIcon.Dispose(); App.Current.Shutdown(); Settings.writeSettings(Settings.getInstance); };
+            item5.Click += delegate { n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance); App.Current.Shutdown(); };
             nIcon.Visible = true;
         }
 
