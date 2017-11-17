@@ -109,7 +109,6 @@ namespace ProjectPDSWPF
             {
                 ReceivingFile rf = new ReceivingFile(new Neighbor(senderID, image), fileName, id);
                 FilesToReceive.Add(rf);
-                //TODO mettere notifiche
             }));
         }
 

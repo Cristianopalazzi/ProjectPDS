@@ -32,8 +32,8 @@ namespace ProjectPDSWPF
             {
                 settings.Online = false;
                 bottoneOnline.Content = "Offline";
-                NeighborProtocol.senderEvent.Reset();
                 NeighborProtocol.getInstance.quitMe();
+                NeighborProtocol.senderEvent.Reset();
             }
             else
             {

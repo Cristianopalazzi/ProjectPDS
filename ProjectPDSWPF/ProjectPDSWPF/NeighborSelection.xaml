@@ -6,10 +6,13 @@
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:local="clr-namespace:ProjectPDSWPF"
         mc:Ignorable="d"
-        Title="NeighborSelection" Width="300" SizeToContent="WidthAndHeight"   BorderThickness="0" GlowBrush="Black">
+        Name="windowNeighborSelection"
+        Title="NeighborSelection" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
     <Grid>
         <StackPanel>
-            <TextBlock Name="sendingFile" ToolTip="{Binding Text, ElementName=sendingFile}" FontSize="20"  Margin="5" TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" MaxWidth="300"  VerticalAlignment="Top"/>
+            <TextBlock Name="sendingFile" Width="{Binding ActualWidth, ElementName=windowNeighborSelection}" ToolTip="{Binding Text, ElementName=sendingFile}" FontSize="18"  Margin="5"
+                       TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold" />
+            <Border BorderThickness="1" BorderBrush="LightGray"/>
             <ListView x:Name="listNeighborSelection" ItemsSource="{Binding Neighbors}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -64,7 +67,7 @@
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Items.Count, ElementName = listNeighborSelection}"
                              Value="0">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Visibility" Value="Hidden"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>

@@ -14,7 +14,6 @@ namespace ProjectPDSWPF
     /// </summary>
     /// 
 
-
     public partial class App : Application
     {
         private NeighborSelection ns;
@@ -30,7 +29,6 @@ namespace ProjectPDSWPF
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             mw = new MainWindow();
-            //todo nel caso volessimo far partire MW da qua, bisogna aggiungere show
             ns = new NeighborSelection();
             queue = new MyQueue();
             r = new Receiver();
@@ -77,6 +75,7 @@ namespace ProjectPDSWPF
 
         private void initializeNotifyIcon()
         {
+            //TODO click sinistro sull'icona
             nIcon.Icon = new System.Drawing.Icon(Directory.GetCurrentDirectory() + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
@@ -122,12 +121,13 @@ namespace ProjectPDSWPF
             Current.Dispatcher.Invoke(new Action(() =>
             {
                 ns.sendingFile.Text = file;
-                //TODO sistemare la scritta del file che stiamo mandando
                 //TODO vedere perchè non va in activate
                 ns.Show();
                 ns.Activate();
                 ns.WindowState = WindowState.Normal;
-             
+                ns.Topmost = true;
+                ns.Topmost = false;
+                ns.Focus();
             }));
         }
     }
