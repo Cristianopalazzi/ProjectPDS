@@ -1,28 +1,31 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Xml.Serialization;
 
 namespace ProjectPDSWPF
 {
     [Serializable]
-    public class Settings
+    public class Settings :INotifyPropertyChanged
     {
         public Boolean DefaultDir
         {
             get { return _defaultDir; }
-            set { _defaultDir = value; }
+            set { _defaultDir = value; NotifyPropertyChanged("DefaultDir"); }
         }
+
+      
 
         public Boolean AutoAccept
         {
             get { return _autoAccept; }
-            set { _autoAccept = value; }
+            set { _autoAccept = value; NotifyPropertyChanged("AutoAccept"); }
         }
 
         public string DefaultDirPath
         {
             get { return _defaultDirPath; }
-            set { _defaultDirPath = value; }
+            set { _defaultDirPath = value; NotifyPropertyChanged("DefaultDirPath"); }
         }
 
         public Boolean Online
@@ -31,6 +34,7 @@ namespace ProjectPDSWPF
             set
             {
                 _online = value;
+                NotifyPropertyChanged("Online");
             }
         }
 
@@ -82,10 +86,18 @@ namespace ProjectPDSWPF
             }
         }
 
+
+        private void NotifyPropertyChanged(string v)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(v));
+        }
+
         private static Settings instance = null;
         private Boolean _online;
         private Boolean _defaultDir;
         private Boolean _autoAccept;
         private string _defaultDirPath;
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

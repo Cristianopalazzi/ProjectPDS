@@ -28,6 +28,9 @@ namespace ProjectPDSWPF
         public MainWindow()
         {
             InitializeComponent();
+            sets = Settings.getInstance;
+            gridSettings.DataContext = sets;
+            
             Closing += MainWindow_Closing;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
@@ -48,10 +51,7 @@ namespace ProjectPDSWPF
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
 
-            sets = Settings.getInstance;
-            CheckAutoAccept.IsChecked = sets.AutoAccept;
-            CheckDefaultDir.IsChecked = sets.DefaultDir;
-            defaultDirPath.Text = sets.DefaultDirPath;
+           
         }
 
         private void tabChange()
@@ -161,7 +161,7 @@ namespace ProjectPDSWPF
         }
 
 
-        //Right Click on receiving files
+ 
         private void receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (listReceivingFiles.SelectedIndex == -1)
@@ -173,7 +173,6 @@ namespace ProjectPDSWPF
         }
 
 
-        //Right Click on receiving files
         private void receiving_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
             if (listReceivingFiles.SelectedIndex == -1)
@@ -186,7 +185,6 @@ namespace ProjectPDSWPF
                 FilesToReceive.Remove(rf);
         }
 
-        //Right Click on sending files
         private void sending_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (sendingFiles.SelectedIndex == -1)
@@ -198,7 +196,6 @@ namespace ProjectPDSWPF
         }
 
 
-        //Right Click on sending files
         private void sending_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
             if (sendingFiles.SelectedIndex == -1)
@@ -240,26 +237,15 @@ namespace ProjectPDSWPF
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                defaultDirPath.Text = dialog.SelectedPath;
+                sets.DefaultDirPath = dialog.SelectedPath;
             }
         }
 
-        public void confirmSettings(object sender, EventArgs e)
-        {
-            Settings.writeSettings(Settings.getInstance);
-        }
+
 
         public void tabChanged(object Sender, EventArgs e)
         {
-            //TODO aggiungere dei controlli?
-            Settings sets = Settings.getInstance;
-            sets.AutoAccept = CheckAutoAccept.IsChecked ?? false;
-            sets.DefaultDir = CheckDefaultDir.IsChecked ?? false;
-            if (sets.DefaultDir)
-            {
-                sets.DefaultDirPath = defaultDirPath.Text;
-            }
-            Settings.writeSettings(Settings.getInstance);
+            Settings.writeSettings(sets);
         }
 
 
