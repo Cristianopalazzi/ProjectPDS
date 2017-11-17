@@ -228,6 +228,7 @@ namespace ProjectPDSWPF
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
                     neighborsValues.Add(n1);
+                    //neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1);
                 }));
         }
 
@@ -260,5 +261,7 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate(string filename, string username, int type);
         public static event myDelegate triggerBalloon;
+
+        
     }
 }

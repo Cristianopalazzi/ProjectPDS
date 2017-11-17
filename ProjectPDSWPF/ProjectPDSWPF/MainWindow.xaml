@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:ProjectPDSWPF"
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
-        Title="PDSProject" Height="350" Width="650">
+        Title="PDSProject" Height="350" Width="650"
+        GlowBrush="Black"
+        BorderThickness="0">
     <Grid>
         <TabControl Name="tabControl"  Width="Auto" >
             <TabItem Header="File in ricezione" Controls:ControlsHelper.HeaderFontSize="20" >
@@ -30,15 +32,24 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListView">
-                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Non ci sono file in ricezione" FontSize="24"/>
+                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Non ci sono file in ricezione" FontSize="24">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                            <Setter Property="FontSize" Value="24" />
+                                                            <Setter Property="FontFamily" Value="Arial" />
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
                             </Style.Triggers>
+                            <Setter Property="BorderThickness" Value="0" />
                         </Style>
                     </ListView.Resources>
-                    
+
 
                     <ListView.View>
                         <GridView>
@@ -62,7 +73,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <!--Serve per fare in modo che la colonna si adatti al contenuto-->
-                                        <TextBlock ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center"/>
+                                        <TextBlock ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center" MaxWidth="100"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -99,7 +110,6 @@
                     </ListView.ItemContainerStyle>
                 </ListView>
             </TabItem>
-
             <TabItem Header="File in invio" Controls:ControlsHelper.HeaderFontSize="20">
                 <ListView Name="sendingFiles" ItemsSource="{Binding FilesToSend}">
                     <ListView.Resources>
@@ -112,12 +122,21 @@
                                     <Setter Property="Template">
                                         <Setter.Value>
                                             <ControlTemplate TargetType="ListView">
-                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Non ci sono file in invio" FontSize="24"/>
+                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Non ci sono file in invio" FontSize="24">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                        <Setter Property="Foreground" Value="Black" />
+                                                        <Setter Property="FontSize" Value="24" />
+                                                        <Setter Property="FontFamily" Value="Arial" />
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </ControlTemplate>
                                         </Setter.Value>
                                     </Setter>
                                 </Trigger>
                             </Style.Triggers>
+                            <Setter Property="BorderThickness" Value="0" />
                         </Style>
                     </ListView.Resources>
 
@@ -204,7 +223,7 @@
                         <GroupStyle>
                             <GroupStyle.HeaderTemplate>
                                 <DataTemplate>
-                                    <TextBlock FontWeight="Bold" FontSize="14" Text="{Binding Name}"/>
+                                    <TextBlock FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" MaxWidth="550" TextTrimming="CharacterEllipsis" Margin="5" ToolTip="{Binding Name}" Text="{Binding Name}"/>
                                 </DataTemplate>
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
@@ -215,30 +234,26 @@
             </TabItem>
             <TabItem Header="Contatti online" Controls:ControlsHelper.HeaderFontSize="20" >
                 <Grid>
-                    <StackPanel>
-                        <ListView x:Name="Neighbors" ItemsSource="{Binding NeighborsValues}" HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+                    <DockPanel LastChildFill="True">
+                        <ListView x:Name="Neighbors" ItemsSource="{Binding NeighborsValues}" HorizontalAlignment="Stretch" VerticalAlignment="Top" DockPanel.Dock="Top">
+                            <ListView.Resources>
+                                <Style TargetType="GridViewColumnHeader">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </Style>
+                                <Style TargetType="ListView">
+                                    <Style.Triggers>
+                                        <Trigger Property="HasItems" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Style>
+                            </ListView.Resources>
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
                                 </Style>
                             </ListView.ItemContainerStyle>
-
-                            <ListView.Resources>
-                            <Style TargetType="ListView">
-                                <Style.Triggers>
-                                    <Trigger Property= "HasItems" Value="False">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ListView">
-                                                    <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Nessun contatto online" FontSize="24"/>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                            </ListView.Resources>
-                            
                             <ListView.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
@@ -253,18 +268,34 @@
                                                 <ImageBrush  ImageSource="{Binding NeighborImage}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
-                                        <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
 
                         </ListView>
-                    </StackPanel>
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Nessun contatto online" >
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock" >
+                                    <Setter Property="Foreground" Value="Black" />
+                                    <Setter Property="FontSize" Value="24" />
+                                    <Setter Property="FontFamily" Value="Arial" /> 
+                                    <Setter Property="Visibility" Value="Hidden" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Items.Count, ElementName = Neighbors}"
+                             Value="0">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </DockPanel>
                 </Grid>
             </TabItem>
             <TabItem Header="Impostazioni" Selector.Unselected="tabChanged" Controls:ControlsHelper.HeaderFontSize="20">
 
-                <Grid Name="gridSettings">
+                <Grid Name="gridSettings" Margin="15">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -275,13 +306,14 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="AutoAccept"  FontSize="14" Margin="5,5,5,10"/>
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Default Directory"  FontSize="14" Margin="5,5,5,10"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Directory Path"  FontSize="14" Margin="5,5,5,10" VerticalAlignment="Center"/>
-                    <CheckBox IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
-                    <CheckBox IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="AutoAccept"  FontSize="20" Margin="5,5,5,10" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Default Directory"  FontSize="20" Margin="5,5,5,10"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Directory Path"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
+                    <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
+                    <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
                     <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog" />
-                    <TextBox Text ="{Binding Path= DefaultDirPath}" Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="14" VerticalContentAlignment="Center"/>
+                    <TextBox Margin ="10,0,0,0" Text ="{Binding Path= DefaultDirPath}" Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" />
+
                 </Grid>
 
 
@@ -289,7 +321,4 @@
             </TabItem>
         </TabControl>
     </Grid>
-    <Window.Resources>
-
-    </Window.Resources>
 </Controls:MetroWindow>
