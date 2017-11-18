@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace ProjectPDSWPF
 {
@@ -80,8 +82,8 @@ namespace ProjectPDSWPF
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
+                    n1.NeighborName = "francischiellobello";
                     Neighbors.Add(n1);
-                    Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1); Neighbors.Add(n1);
                 }));
         }
     }

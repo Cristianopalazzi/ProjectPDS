@@ -120,8 +120,8 @@ namespace ProjectPDSWPF
         {
             Current.Dispatcher.Invoke(new Action(() =>
             {
+                ns.listNeighborSelection.UnselectAll();
                 ns.sendingFile.Text = file;
-                //TODO vedere perchè non va in activate
                 ns.Show();
                 ns.Activate();
                 ns.WindowState = WindowState.Normal;

@@ -8,7 +8,8 @@
         mc:Ignorable="d"
         Title="PDSProject" Height="350" Width="650"
         GlowBrush="Black"
-        BorderThickness="0">
+        BorderThickness="0"
+        Name="myMainWindow">
     <Grid>
         <TabControl Name="tabControl"  Width="Auto" >
             <TabItem Header="File in ricezione" Controls:ControlsHelper.HeaderFontSize="20" >
@@ -125,9 +126,9 @@
                                                 <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Non ci sono file in invio" FontSize="24">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="Black" />
-                                                        <Setter Property="FontSize" Value="24" />
-                                                        <Setter Property="FontFamily" Value="Arial" />
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                            <Setter Property="FontSize" Value="24" />
+                                                            <Setter Property="FontFamily" Value="Arial" />
                                                         </Style>
                                                     </TextBlock.Style>
                                                 </TextBlock>
@@ -251,7 +252,55 @@
                             </ListView.Resources>
                             <ListView.ItemContainerStyle>
                                 <Style TargetType="ListViewItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="true" >
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListViewItem">
+                                                        <Border
+                BorderThickness="{TemplateBinding Border.BorderThickness}"
+                Padding="{TemplateBinding Control.Padding}"
+                BorderBrush="{TemplateBinding Border.BorderBrush}"
+                Background="{TemplateBinding Panel.Background}"
+                SnapsToDevicePixels="True">
+                                                            <ContentPresenter
+                    Content="{TemplateBinding ContentControl.Content}"
+                    ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}"
+                    HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
+                    VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}"
+                    SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Background" Value="Transparent" />
+                                        </Trigger>
+
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListViewItem">
+                                                        <Border
+                BorderThickness="{TemplateBinding Border.BorderThickness}"
+                Padding="{TemplateBinding Control.Padding}"
+                BorderBrush="{TemplateBinding Border.BorderBrush}"
+                Background="{TemplateBinding Panel.Background}"
+                SnapsToDevicePixels="True">
+                                                            <ContentPresenter
+                    Content="{TemplateBinding ContentControl.Content}"
+                    ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}"
+                    HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
+                    VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}"
+                    SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderBrush" Value="Transparent" />
+                                        </Trigger>
+                                    </Style.Triggers>
                                 </Style>
                             </ListView.ItemContainerStyle>
                             <ListView.ItemsPanel>
@@ -262,13 +311,15 @@
 
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="5">
+                                    <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="5"
+                                                 ToolTip="{Binding NeighborName}">
                                         <Ellipse Height="64" Width="64" HorizontalAlignment="Center">
                                             <Ellipse.Fill>
                                                 <ImageBrush  ImageSource="{Binding NeighborImage}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
-                                        <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom"/>
+                                        <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Left" FontSize="16" VerticalAlignment="Bottom"
+                                                   MaxWidth="80" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
@@ -279,7 +330,7 @@
                                 <Style TargetType="TextBlock" >
                                     <Setter Property="Foreground" Value="Black" />
                                     <Setter Property="FontSize" Value="24" />
-                                    <Setter Property="FontFamily" Value="Arial" /> 
+                                    <Setter Property="FontFamily" Value="Arial" />
                                     <Setter Property="Visibility" Value="Hidden" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Items.Count, ElementName = Neighbors}"

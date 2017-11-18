@@ -18,9 +18,7 @@ namespace ProjectPDSWPF
     public partial class MainWindow : MetroWindow
     {
         //TODO cercare come mettere le immagini come risorse
-        // controllare invii e ricezioni con placeholder al posto della foto utente
-        // placeholder per le liste vuote
-        // rifare la window per le impostazioni
+        //fare prove per la dimensione dei nomi nella schermata dei file in invio e in ricezione ( maxWidth, ellipsize e tooltip)
         // resize della finestra principale
         // rifare le scritte con il tasto destro sulla liste dei file in invio e in ricezione
 
@@ -227,7 +225,6 @@ namespace ProjectPDSWPF
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
                     neighborsValues.Add(n1);
-                    //neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1); neighborsValues.Add(n1);
                 }));
         }
 
