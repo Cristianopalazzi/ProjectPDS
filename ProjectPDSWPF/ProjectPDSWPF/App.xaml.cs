@@ -96,7 +96,7 @@ namespace ProjectPDSWPF
             nIcon.ContextMenu = cMenu;
             item1.Text = "File in ricezione";
             item2.Text = "File in invio";
-            item3.Text = "Tizi online";
+            item3.Text = "Contatti online";
             item4.Text = "Impostazioni";
             item5.Text = "Esci";
             item1.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 0; };
