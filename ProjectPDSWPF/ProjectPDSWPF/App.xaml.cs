@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.IO;
 
@@ -36,6 +31,7 @@ namespace ProjectPDSWPF
             s = Settings.getInstance;
             us = new UserSettings();
             MyQueue.openNeighbors += neighbor_selection;
+            Sender.fileRejected += createBalloons;
             ProjectPDSWPF.MainWindow.triggerBalloon += createBalloons;
             initializeNotifyIcon();
         }
@@ -70,12 +66,21 @@ namespace ProjectPDSWPF
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
+                case 3:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipText = userName + " ha rifiutato il tuo file";
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
             }
         }
 
         private void initializeNotifyIcon()
         {
             //TODO click sinistro sull'icona
+            //TODO time estimation
             nIcon.Icon = new System.Drawing.Icon(Directory.GetCurrentDirectory() + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();

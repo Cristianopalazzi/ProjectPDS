@@ -1,6 +1,6 @@
 ﻿namespace ProjectPDSWPF
 {
-    static class Constants
+    public static class Constants
     {
         public const int MAX_COUNTER = 1;
         public const string MULTICAST = "239.0.0.222"; // ip multicast
@@ -16,7 +16,6 @@
         public const int FILE_NAME = 256;
         public const string FILE_COMMAND = "FIL";
         public const string ZIP_COMMAND = "ZIP";
-        public const string DEFAULT_DIRECTORY = @"C:\Users\Cristiano\Desktop\Prove";
         public const string DIR_COMMAND = "DIR";
         public const string ZIP_EXTENSION = ".zip";
         public const string NEED_IMG = "YIMG";

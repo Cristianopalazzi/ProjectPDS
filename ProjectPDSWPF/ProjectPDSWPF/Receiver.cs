@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace ProjectPDSWPF
 {
@@ -90,21 +91,15 @@ namespace ProjectPDSWPF
             else
             {
                 byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
-                string adjustedSize = null;
-                if (fileSize < 1024)
-                    adjustedSize = fileSize + " B";
-                else if (fileSize > 1024 && fileSize < (1024 * 1024))
-                    adjustedSize = fileSize / 1024 + " KB";
-                else if (fileSize > (1024 * 1024))
-                    adjustedSize = fileSize / (1024 * 1024) + " MB";
+                string adjustedSize = SizeSuffix(fileSize);
 
-                DialogResult dialogResult = MessageBox.Show(fileNameString + " di: " + adjustedSize, "Vuoi accettare:", MessageBoxButtons.YesNo);
-                if (dialogResult == DialogResult.Yes)
+                MessageDialogResult dialogResult = askToAccept(NeighborProtocol.getInstance.getUserFromIp(ipSender),fileNameString,adjustedSize);
+                if (dialogResult == MessageDialogResult.Affirmative)
                 {
                     responseToClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
                     handler.Send(responseToClient, responseToClient.Length, SocketFlags.None);
                 }
-                else if (dialogResult == DialogResult.No)
+                else if (dialogResult == MessageDialogResult.Negative )
                 {
                     responseToClient = Encoding.ASCII.GetBytes(Constants.DECLINE_FILE);
                     handler.Send(responseToClient, responseToClient.Length, SocketFlags.None);
@@ -163,6 +158,8 @@ namespace ProjectPDSWPF
             byte[] image;
             NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out ne);
             JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+            if (ne.NeighborImage == null)
+                ne.setImage(File.ReadAllBytes(Constants.PLACEHOLDER_IMAGE));
             encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
             using (MemoryStream ms = new MemoryStream())
             {
@@ -260,6 +257,39 @@ namespace ProjectPDSWPF
             handler.Shutdown(SocketShutdown.Both);
             handler.Close();
         }
+
+
+        static string SizeSuffix(Int64 value, int decimalPlaces = 2)
+        {
+            if (decimalPlaces < 0) { throw new ArgumentOutOfRangeException("decimalPlaces"); }
+            if (value < 0) { return "-" + SizeSuffix(-value); }
+            if (value == 0) { return string.Format("{0:n" + decimalPlaces + "} bytes", 0); }
+
+            // mag is 0 for bytes, 1 for KB, 2, for MB, etc.
+            int mag = (int)Math.Log(value, 1024);
+
+            // 1L << (mag * 10) == 2 ^ (10 * mag) 
+            // [i.e. the number of bytes in the unit corresponding to mag]
+            decimal adjustedSize = (decimal)value / (1L << (mag * 10));
+
+            // make adjustment when the value is large enough that
+            // it would round up to 1000 or more
+            if (Math.Round(adjustedSize, decimalPlaces) >= 1000)
+            {
+                mag += 1;
+                adjustedSize /= 1024;
+            }
+
+            return string.Format("{0:n" + decimalPlaces + "} {1}",
+                adjustedSize,
+                SizeSuffixes[mag]);
+        }
+
+        static readonly string[] SizeSuffixes =
+                   { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+
+
+
         private Thread server;
         private Settings settings;
 
@@ -271,5 +301,8 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate2(string id);
         public static event myDelegate2 fileCancel;
+
+        public delegate MessageDialogResult  myDelegate3(string userName,string fileName, string dimension);
+        public static event myDelegate3 askToAccept;
     }
 }

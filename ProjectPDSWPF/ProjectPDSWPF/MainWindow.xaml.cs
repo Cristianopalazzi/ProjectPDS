@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.IO;
 using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace ProjectPDSWPF
 {
@@ -28,7 +29,7 @@ namespace ProjectPDSWPF
             InitializeComponent();
             sets = Settings.getInstance;
             gridSettings.DataContext = sets;
-            
+
             Closing += MainWindow_Closing;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
@@ -37,6 +38,9 @@ namespace ProjectPDSWPF
             UserSettings.openTabSettings += tabChange;
             Receiver.fileCancel += file_cancel;
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
+            Receiver.askToAccept += Receiver_askToAccept;
+            Sender.fileRejectedGUI += Sender_fileRejectedGUI;
+
 
             NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
@@ -49,8 +53,45 @@ namespace ProjectPDSWPF
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
 
-           
+
         }
+
+        private void Sender_fileRejectedGUI(Socket sender)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+           {
+               foreach (SendingFile sf in FilesToSend)
+               {
+                   if (sf.Sock == sender)
+                   {
+                       //TODO Capire perchè non funziona mentre la finestra è aperta.
+                       //sf.File_state = Constants.FILE_STATE.CANCELED;
+                       //sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
+                       //break;
+                       FilesToSend.Remove(sf);
+                       break;
+                   }
+               }
+           }));
+        }
+
+        private MessageDialogResult Receiver_askToAccept(string userName, string fileName, string dimension)
+        {
+            MessageDialogResult mr = MessageDialogResult.Negative;
+            myMainWindow.Dispatcher.Invoke(new Action(() =>
+            {
+                MetroWindow mw = Application.Current.MainWindow as MetroWindow;
+                mw.Show();
+                mr = mw.ShowModalMessageExternal("File in arrivo", userName + " vuole condividere " + fileName + " di: " + dimension + "\nAccetti?", MessageDialogStyle.AffirmativeAndNegative);
+                if (mr == MessageDialogResult.Negative)
+                    mw.Hide();
+                else
+                    tabControl.SelectedIndex = 0;
+            }));
+            return mr;
+        }
+
+
 
         private void tabChange()
         {
@@ -101,7 +142,7 @@ namespace ProjectPDSWPF
             }));
         }
 
-        private void updateReceivingFiles(string senderID, byte [] image, string fileName, string id)
+        private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -158,14 +199,14 @@ namespace ProjectPDSWPF
         }
 
 
- 
+
         private void receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (listReceivingFiles.SelectedIndex == -1)
                 return;
             ReceivingFile rf = listReceivingFiles.SelectedItem as ReceivingFile;
             if (rf.File_state == Constants.FILE_STATE.PROGRESS)
-                MessageBox.Show("Attendi il completamento del file");
+                this.ShowMessageAsync("Ops", "Attendi il completamento del file");
             else FilesToReceive.Remove(rf);
         }
 
@@ -178,6 +219,10 @@ namespace ProjectPDSWPF
             foreach (ReceivingFile rf in FilesToReceive)
                 if (rf.File_state == Constants.FILE_STATE.CANCELED || rf.File_state == Constants.FILE_STATE.COMPLETED)
                     tmp.Add(rf);
+            if (tmp.Count == 0)
+            {
+                this.ShowMessageAsync("Ops", "Non ci sono file da archiviare.");
+            }
             foreach (ReceivingFile rf in tmp)
                 FilesToReceive.Remove(rf);
         }
@@ -188,7 +233,7 @@ namespace ProjectPDSWPF
                 return;
             SendingFile sf = sendingFiles.SelectedItem as SendingFile;
             if (sf.File_state == Constants.FILE_STATE.PROGRESS)
-                MessageBox.Show("Non puoi cancellare un file in invio\nPremi annulla per fermare l'invio");
+                this.ShowMessageAsync("Ops", "Non puoi cancellare un file in invio.\nPremi annulla per fermarlo.");
             else FilesToSend.Remove(sf);
         }
 
@@ -201,12 +246,16 @@ namespace ProjectPDSWPF
             foreach (SendingFile sf in FilesToSend)
                 if (sf.File_state == Constants.FILE_STATE.CANCELED || sf.File_state == Constants.FILE_STATE.COMPLETED)
                     tmp.Add(sf);
+            if (tmp.Count == 0)
+            {
+                this.ShowMessageAsync("Ops", "Non ci sono file da archiviare.");
+            }
             foreach (SendingFile sf in tmp)
                 FilesToSend.Remove(sf);
         }
 
 
-        public void modify_neighbors(string id, byte [] bytes, bool addOrRemove)
+        public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare
@@ -258,6 +307,6 @@ namespace ProjectPDSWPF
         public delegate void myDelegate(string filename, string username, int type);
         public static event myDelegate triggerBalloon;
 
-        
+
     }
 }

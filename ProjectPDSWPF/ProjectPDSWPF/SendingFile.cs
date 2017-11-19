@@ -1,10 +1,6 @@
 ﻿using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
-using System.Collections.Generic;
-using System.Collections;
 using System.Net.Sockets;
-using System;
 
 namespace ProjectPDSWPF
 {
@@ -27,7 +23,7 @@ namespace ProjectPDSWPF
         public string Name { get => name; set => name = value; }
         public Socket Sock { get => sock; set => sock = value; }
         public BitmapImage Immagine { get => immagine; set => immagine = value; }
-        internal Constants.FILE_STATE File_state { get => file_state; set => file_state = value; }
+        public Constants.FILE_STATE File_state { get => file_state; set => file_state = value; }
 
         public BitmapImage Pic
         {

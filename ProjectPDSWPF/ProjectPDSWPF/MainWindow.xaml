@@ -185,12 +185,21 @@
 
 
                                             <Button.Style>
-                                                <Style TargetType="Button">
+                                                <Style TargetType="Button" BasedOn="{StaticResource MetroButton}">
                                                     <Setter Property="Visibility" Value="Visible" />
                                                     <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Value}" Value="100">
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Value}" Value="100" />
+                                                            </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
-                                                        </DataTrigger>
+                                                        </MultiDataTrigger>
+                                                        <!--<MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Hidden" />
+                                                        </MultiDataTrigger>-->
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>
@@ -362,7 +371,11 @@
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Directory Path"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
-                    <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog" />
+                    <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog"  >
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" />
+                        </Button.Style>
+                    </Button>
                     <TextBox Margin ="10,0,0,0" Text ="{Binding Path= DefaultDirPath}" Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" />
 
                 </Grid>

@@ -5,8 +5,6 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
-using System.Threading;
-using System.Windows.Forms;
 
 namespace ProjectPDSWPF
 {
@@ -99,8 +97,8 @@ namespace ProjectPDSWPF
             string response = Encoding.ASCII.GetString(responseFromServer);
             if (String.Compare(response, Constants.DECLINE_FILE) == 0)
             {
-                //TODO cambiare
-                MessageBox.Show("File rifiutato");
+                fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr),3);
+                fileRejectedGUI(sender);
                 File.Delete(path + zipToSend);
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
@@ -191,5 +189,11 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate(string filename, Socket sock, int percentage);
         public static event myDelegate updateProgress;
+
+        public delegate void myDelegate1(string fileName, string username, int type);
+        public static event myDelegate1 fileRejected;
+
+        public delegate void myDelegate2(Socket sender);
+        public static event myDelegate2 fileRejectedGUI;
     }
 }

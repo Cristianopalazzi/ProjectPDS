@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace ProjectPDSWPF
 {
@@ -58,7 +60,9 @@ namespace ProjectPDSWPF
                 Hide();
             }
             //TODO cambiare
-            else MessageBox.Show("Seleziona almeno un vicino");
+            else
+                this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
+                
         }
 
         public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
@@ -82,7 +86,6 @@ namespace ProjectPDSWPF
                 Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
-                    n1.NeighborName = "francischiellobello";
                     Neighbors.Add(n1);
                 }));
         }
