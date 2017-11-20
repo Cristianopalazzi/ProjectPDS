@@ -20,6 +20,7 @@ namespace ProjectPDSWPF
     public partial class MainWindow : MetroWindow
     {
         //TODO cercare come mettere le immagini come risorse
+        //TODO gestire errori delle socket e propagare le modifica alla GUI
         // fare prove per la dimensione dei nomi nella schermata dei file in invio e in ricezione ( maxWidth, ellipsize e tooltip)
         // resize della finestra principale
 
