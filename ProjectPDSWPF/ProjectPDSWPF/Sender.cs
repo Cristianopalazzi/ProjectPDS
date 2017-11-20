@@ -156,6 +156,7 @@ namespace ProjectPDSWPF
 
                     decimal transferRate = (decimal)(sent * 1000) / ((decimal)milliSeconds);
 
+
                     //TODO provare con countdown 
                     //TODO implementare progress bar mahapps durante lo zipping
                     decimal remainingTime = (fileContent.Length - temp) / transferRate;
