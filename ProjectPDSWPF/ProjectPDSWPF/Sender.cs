@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
+using System.Diagnostics;
 
 namespace ProjectPDSWPF
 {
@@ -69,10 +70,8 @@ namespace ProjectPDSWPF
 
 
             //leggo contenuto dello zip e lo salvo in fileContent
-            FileStream fs = File.OpenRead(path + zipToSend);
             byte[] fileContent = new byte[fileLength];
             fileContent = File.ReadAllBytes(path + zipToSend);
-            fs.Close();
 
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), Constants.PORT_TCP);
 
@@ -97,7 +96,7 @@ namespace ProjectPDSWPF
             string response = Encoding.ASCII.GetString(responseFromServer);
             if (String.Compare(response, Constants.DECLINE_FILE) == 0)
             {
-                fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr),3);
+                fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), 3);
                 fileRejectedGUI(sender);
                 File.Delete(path + zipToSend);
                 sender.Shutdown(SocketShutdown.Both);
@@ -121,29 +120,52 @@ namespace ProjectPDSWPF
             //mando zip file neighborName + lunghezza file zip
             sent = sender.Send(tot, tot.Length, SocketFlags.None);
 
-            int temp = 0,percentage = 0;
+            int temp = 0, percentage = 0;
             SocketError error;
 
             //mando zip
             while (true)
             {
-
+                Stopwatch timer = new Stopwatch();
+                timer.Start();
                 if (fileContent.Length - temp >= 1400)
                     sent = sender.Send(fileContent, temp, 1400, SocketFlags.None, out error);
                 else
                     sent = sender.Send(fileContent, temp, fileContent.Length - temp, SocketFlags.None, out error);
-                if(error != SocketError.Success)
+
+                if (error != SocketError.Success)
                 {
                     //TODO aggiungere controlli come receiver
                 }
+
                 temp += sent;
+
                 ulong temporary = (ulong)temp * 100;
                 int tempPercentage = (int)(temporary / (ulong)fileContent.Length);
-                if( tempPercentage > percentage)
+                if (tempPercentage > percentage)
                 {
-
                     updateProgress(fileName, sender, tempPercentage);
                     percentage = tempPercentage;
+
+                    timer.Stop();
+                    long ticks = timer.ElapsedTicks;
+
+
+                    if (milliSeconds == 0)
+                        milliSeconds = (decimal)(ticks * 1000) / (decimal)Stopwatch.Frequency;
+
+                    decimal transferRate = (decimal)(sent * 1000) / ((decimal)milliSeconds);
+
+                    //TODO provare con countdown 
+                    //TODO implementare progress bar mahapps durante lo zipping
+                    decimal remainingTime = (fileContent.Length - temp) / transferRate;
+                    TimeSpan t = TimeSpan.FromSeconds(Convert.ToDouble(remainingTime));
+
+                    string answer = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
+                                    t.Hours,
+                                    t.Minutes,
+                                    t.Seconds);
+                    updateRemainingTime(sender, answer);
                 }
 
                 if (error == SocketError.Shutdown)
@@ -195,5 +217,12 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate2(Socket sender);
         public static event myDelegate2 fileRejectedGUI;
+
+
+        public delegate void myDelegate3(Socket sock, string remainingTime);
+        public static event myDelegate3 updateRemainingTime;
+
+        private decimal milliSeconds = 0;
     }
+
 }

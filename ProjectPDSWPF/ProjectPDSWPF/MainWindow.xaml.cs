@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using System.IO;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
+using System.Windows.Threading;
 
 namespace ProjectPDSWPF
 {
@@ -32,6 +33,7 @@ namespace ProjectPDSWPF
             Closing += MainWindow_Closing;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
+            Sender.updateRemainingTime += updateRemainingTime;
             Receiver.updateProgress += updateReceivingProgressBar;
             Receiver.updateReceivingFiles += updateReceivingFiles;
             UserSettings.openTabSettings += tabChange;
@@ -54,6 +56,8 @@ namespace ProjectPDSWPF
 
 
         }
+
+
 
         private void Sender_fileRejectedGUI(Socket sender)
         {
@@ -149,6 +153,21 @@ namespace ProjectPDSWPF
                 FilesToReceive.Add(rf);
             }));
         }
+
+
+        private void updateRemainingTime(Socket sock, string remainingTime)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (SendingFile sf in FilesToSend)
+                    if (sf.Sock == sock)
+                    {
+                        sf.RemainingTime = remainingTime;
+                        break;
+                    }
+            }));
+        }
+
 
         private void updateProgressBar(string filename, Socket sock, int percentage)
         {

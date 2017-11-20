@@ -170,10 +170,13 @@
                             <GridViewColumn Width="240">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Grid>
-                                            <ProgressBar Value="{Binding Value}" Height="20"/>
-                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Grid>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}"  Foreground="Black" HorizontalAlignment="Center"  Margin="0,0,0,10"/>
+                                            <Grid>
+                                                <ProgressBar Value="{Binding Value}" Height="20"  VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Grid>
+                                        </StackPanel>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

@@ -45,12 +45,21 @@ namespace ProjectPDSWPF
             }
         }
 
+        public string RemainingTime
+        {
+            get => remainingTime; set
+            {
+                remainingTime = value;
+                NotifyPropertyChanged("RemainingTime");
+            }
+        }
+
         public void NotifyPropertyChanged(string propName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
-        private string ipAddr, name, fileName;
+        private string ipAddr, name, fileName, remainingTime;
         private BitmapImage immagine, pic;
         private Socket sock;
         private double value;

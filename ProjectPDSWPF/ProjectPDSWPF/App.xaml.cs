@@ -79,7 +79,6 @@ namespace ProjectPDSWPF
 
         private void initializeNotifyIcon()
         {
-            //TODO click sinistro sull'icona
             //TODO time estimation
             nIcon.Icon = new System.Drawing.Icon(Directory.GetCurrentDirectory() + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
@@ -117,9 +116,25 @@ namespace ProjectPDSWPF
             };
             item5.Click += delegate { n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance); App.Current.Shutdown(); };
             nIcon.Visible = true;
+            nIcon.MouseClick += NIcon_MouseClick;
         }
 
-
+        private void NIcon_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                if (us.WindowState == WindowState.Normal)
+                {
+                    us.Hide();
+                    us.WindowState = WindowState.Minimized;
+                }
+                else
+                {
+                    us.Show();
+                    us.WindowState = WindowState.Normal;
+                }
+            }
+        }
 
         private void neighbor_selection(string file)
         {
