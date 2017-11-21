@@ -28,220 +28,280 @@ namespace ProjectPDSWPF
         private void startServer()
         {
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
-
             // Create a TCP/IP socket.
-            Socket listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(localEndPoint);
-
-            listener.Listen(10);
-
-            while (true)
+            Socket listener = null;
+            try
             {
-                Console.WriteLine("Waiting for a connection...");
-                Socket handler = listener.Accept();
-                Thread myThread = new Thread(() => receiveFromSocket(handler));
-                myThread.SetApartmentState(ApartmentState.STA);
-                myThread.IsBackground = true;
-                myThread.Start();
+             listener  = new Socket(AddressFamily.InterNetwork,
+                    SocketType.Stream, ProtocolType.Tcp);
+                listener.Bind(localEndPoint);
+
+                listener.Listen(10);
+
+                while (true)
+                {
+                    Console.WriteLine("Waiting for a connection...");
+                    Socket handler = listener.Accept();
+                    Thread myThread = new Thread(() => receiveFromSocket(handler));
+                    myThread.SetApartmentState(ApartmentState.STA);
+                    myThread.IsBackground = true;
+                    myThread.Start();
+                }
             }
+            catch
+            {
+                //GUI (Controlla la tua connessione) ?????
+            }
+            finally
+            {
+                if (listener != null)
+                {
+                    listener.Shutdown(SocketShutdown.Both);
+                    listener.Close();
+                }
+            }
+
         }
 
         private void receiveFromSocket(Socket handler)
         {
-            string ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
-
-            byte[] request = new byte[Constants.FILE_NAME + Constants.FILE_COMMAND.Length];
-
-            //Ricevo comando + lunghezza file neighborName
-            int received = handler.Receive(request, Constants.FILE_COMMAND.Length + sizeof(int), SocketFlags.None);
-
-            Array.Resize(ref request, received);
-
-            string requestString = Encoding.UTF8.GetString(request);
-
-            //Ricavo comando e dimensione del fileName
-            string commandString = requestString.Substring(0, Constants.FILE_COMMAND.Length);
-            int fileNameDimension = BitConverter.ToInt32(request, Constants.FILE_COMMAND.Length);
-
-
-            byte[] fileNameAndLength = new byte[fileNameDimension + sizeof(long)];
-            received = handler.Receive(fileNameAndLength, fileNameDimension + sizeof(long), SocketFlags.None);
-
-
-            //Ricevo fileName e lunghezza del file
-            string fileNameAndLengthString = Encoding.UTF8.GetString(fileNameAndLength);
-            string fileNameString = fileNameAndLengthString.Substring(0, fileNameDimension);
-            long fileSize = BitConverter.ToInt64(fileNameAndLength, fileNameDimension);
-
-            if (settings.AutoAccept)
+            string zipLocation = String.Empty;
+            ZipArchive archive = null;
+            try
             {
-                byte[] responseClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
-                handler.Send(responseClient, responseClient.Length, SocketFlags.None);
-            }
-            else
-            {
-                byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
-                string adjustedSize = SizeSuffix(fileSize);
 
-                MessageDialogResult dialogResult = askToAccept(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, adjustedSize);
-                if (dialogResult == MessageDialogResult.Affirmative)
+                string ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
+
+                byte[] request = new byte[Constants.FILE_NAME + Constants.FILE_COMMAND.Length];
+
+                SocketError sockError;
+
+                //Ricevo comando + lunghezza file neighborName
+                int received = handler.Receive(request, 0, Constants.FILE_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
                 {
-                    responseToClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
-                    handler.Send(responseToClient, responseToClient.Length, SocketFlags.None);
+                    throw new SocketException();
                 }
-                else if (dialogResult == MessageDialogResult.Negative)
+
+                Array.Resize(ref request, received);
+
+                string requestString = Encoding.UTF8.GetString(request);
+
+                //Ricavo comando e dimensione del fileName
+                string commandString = requestString.Substring(0, Constants.FILE_COMMAND.Length);
+                int fileNameDimension = BitConverter.ToInt32(request, Constants.FILE_COMMAND.Length);
+
+
+                byte[] fileNameAndLength = new byte[fileNameDimension + sizeof(long)];
+                received = handler.Receive(fileNameAndLength, 0,fileNameDimension + sizeof(long), SocketFlags.None,out sockError);
+                if (sockError != SocketError.Success)
                 {
-                    responseToClient = Encoding.ASCII.GetBytes(Constants.DECLINE_FILE);
-                    handler.Send(responseToClient, responseToClient.Length, SocketFlags.None);
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
+                    throw new SocketException();
+                }
+
+                //Ricevo fileName e lunghezza del file
+                string fileNameAndLengthString = Encoding.UTF8.GetString(fileNameAndLength);
+                string fileNameString = fileNameAndLengthString.Substring(0, fileNameDimension);
+                long fileSize = BitConverter.ToInt64(fileNameAndLength, fileNameDimension);
+
+                if (settings.AutoAccept)
+                {
+                    byte[] responseClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
+                    handler.Send(responseClient,0, responseClient.Length, SocketFlags.None, out sockError);
+                    if (sockError != SocketError.Success)
+                    {
+                        throw new SocketException();
+                    }
+                }
+                else
+                {
+                    byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
+                    string adjustedSize = SizeSuffix(fileSize);
+
+                    MessageDialogResult dialogResult = askToAccept(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, adjustedSize);
+                    if (dialogResult == MessageDialogResult.Affirmative)
+                    {
+                        responseToClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
+                        handler.Send(responseToClient,0, responseToClient.Length, SocketFlags.None,out sockError);
+                        if (sockError != SocketError.Success)
+                        {
+                            throw new SocketException();
+                        }
+                    }
+                    else if (dialogResult == MessageDialogResult.Negative)
+                    {
+                        responseToClient = Encoding.ASCII.GetBytes(Constants.DECLINE_FILE);
+                        handler.Send(responseToClient,0, responseToClient.Length, SocketFlags.None, out sockError);
+                        if (sockError != SocketError.Success)
+                        {
+                            throw new SocketException();
+                        }
+                        releaseResources(handler);
+                        return;
+                    }
+                }
+
+                string currentDirectory = String.Empty;
+                while (String.IsNullOrEmpty(currentDirectory))
+                {
+                    if (!settings.DefaultDir)
+                    {
+                        FolderBrowserDialog fbd = new FolderBrowserDialog
+                        {
+                            Description = "Selezione la cartella in cui salvare il file"
+                        };
+                        if (fbd.ShowDialog() == DialogResult.OK)
+                            currentDirectory = fbd.SelectedPath;
+                    }
+                    else
+                        currentDirectory = settings.DefaultDirPath;
+                }
+
+                //ricevo zip command + zipFileNameLength
+                byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
+                received = handler.Receive(zipCommand,0, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                {
+                    throw new SocketException();
+                }
+
+                string zipCommandString = Encoding.ASCII.GetString(zipCommand);
+                int zipFileNameLength = BitConverter.ToInt32(zipCommand, Constants.ZIP_COMMAND.Length);
+
+
+                //ricevo zip file neighborName e lunghezza
+                byte[] zipFileNameAndLength = new byte[zipFileNameLength + sizeof(long)];
+
+                received = handler.Receive(zipFileNameAndLength,0,zipFileNameLength + sizeof(long), SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                {
+                    throw new SocketException();
+                }
+                string zipFileNameAndLengthString = Encoding.ASCII.GetString(zipFileNameAndLength);
+                string zipFileName = zipFileNameAndLengthString.Substring(0, zipFileNameLength);
+                long zipFileSize = BitConverter.ToInt64(zipFileNameAndLength, zipFileNameLength);
+
+
+                string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
+                byte[] image;
+                NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne);
+                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
+                if (ne.NeighborImage == null)
+                    ne.setImage(File.ReadAllBytes(Constants.PLACEHOLDER_IMAGE));
+                encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    encoder.Save(ms);
+                    image = ms.ToArray();
+                    ms.Close();
+                }
+                string id = Guid.NewGuid().ToString();
+
+                // INIZIA A SERVIRE IL CONTROLLO GUI
+                updateReceivingFiles(senderID, image, fileNameString, id);
+                int percentage = 0;
+                zipLocation = App.defaultFolder + "\\" + zipFileName;
+                FileStream fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
+                byte[] data = new byte[1400];
+                int temp = 0, bytesRec = 0;
+                while (temp < zipFileSize)
+                {
+                    if (zipFileSize - temp > 1400)
+                    {
+                        bytesRec = handler.Receive(data, 0, 1400, SocketFlags.None, out sockError);
+                    }
+                    else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
+
+                    if (bytesRec == 0)
+                        break;
+
+                    if (sockError == SocketError.Success)
+                    {
+                        temp += bytesRec;
+                        fs.Write(data, 0, bytesRec);
+                        fs.Flush();
+                        ulong temporary = (ulong)temp * 100;
+                        int tempPercentage = (int)(temporary / (ulong)zipFileSize);
+                        if (tempPercentage > percentage)
+                        {
+                            updateProgress(id, tempPercentage);
+                            percentage = tempPercentage;
+                        }
+                    }
+                    else
+                    {
+                        if (fs != null)
+                            fs.Close();
+                        throw new SocketException();
+                    }
+                }
+
+                if (temp != zipFileSize)
+                {
+                    fileCancel(id);
+                    fs.Close();
+                    releaseResources(handler);
                     return;
                 }
-            }
+                fs.Close();
 
-            string currentDirectory = String.Empty;
-            while (String.IsNullOrEmpty(currentDirectory))
-            {
-                if (!settings.DefaultDir)
+                NeighborProtocol n = NeighborProtocol.getInstance;
+                if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                 {
-                    FolderBrowserDialog fbd = new FolderBrowserDialog
+                   archive = ZipFile.OpenRead(zipLocation);
+                    foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        Description = "Selezione la cartella in cui salvare il file"
-                    };
-                    if (fbd.ShowDialog() == DialogResult.OK)
-                        currentDirectory = fbd.SelectedPath;
-                }
-                else
-                    currentDirectory = settings.DefaultDirPath;
-            }
-
-            //ricevo zip command + zipFileNameLength
-            byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
-            received = handler.Receive(zipCommand, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None);
-
-            string zipCommandString = Encoding.ASCII.GetString(zipCommand);
-            int zipFileNameLength = BitConverter.ToInt32(zipCommand, Constants.ZIP_COMMAND.Length);
-
-
-            //ricevo zip file neighborName e lunghezza
-            byte[] zipFileNameAndLength = new byte[zipFileNameLength + sizeof(long)];
-
-            received = handler.Receive(zipFileNameAndLength, zipFileNameLength + sizeof(long), SocketFlags.None);
-            string zipFileNameAndLengthString = Encoding.ASCII.GetString(zipFileNameAndLength);
-            string zipFileName = zipFileNameAndLengthString.Substring(0, zipFileNameLength);
-            long zipFileSize = BitConverter.ToInt64(zipFileNameAndLength, zipFileNameLength);
-
-
-            string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
-            byte[] image;
-            NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne);
-            JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-            if (ne.NeighborImage == null)
-                ne.setImage(File.ReadAllBytes(Constants.PLACEHOLDER_IMAGE));
-            encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
-            using (MemoryStream ms = new MemoryStream())
-            {
-                encoder.Save(ms);
-                image = ms.ToArray();
-                ms.Close();
-            }
-            string id = Guid.NewGuid().ToString();
-            updateReceivingFiles(senderID, image, fileNameString, id);
-            int percentage = 0;
-            string zipLocation = App.defaultFolder + "\\" + zipFileName;
-            FileStream fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
-            byte[] data = new byte[1400];
-            int temp = 0, bytesRec = 0;
-            SocketError error;
-            while (temp < zipFileSize)
-            {
-                if (zipFileSize - temp > 1400)
-                {
-                    bytesRec = handler.Receive(data, 0, 1400, SocketFlags.None, out error);
-                }
-                else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out error);
-
-                if (bytesRec == 0) break;
-
-                if (error == SocketError.Success)
-                {
-                    temp += bytesRec;
-                    fs.Write(data, 0, bytesRec);
-                    fs.Flush();
-                    ulong temporary = (ulong)temp * 100;
-                    int tempPercentage = (int)(temporary / (ulong)zipFileSize);
-                    if (tempPercentage > percentage)
-                    {
-                        updateProgress(id, tempPercentage);
-                        percentage = tempPercentage;
+                        if (File.Exists(currentDirectory + "\\" + entry.Name))
+                        {
+                            string user = n.getUserFromIp(ipSender);
+                            string extension = Path.GetExtension(currentDirectory + "\\" + entry.Name);
+                            string onlyName = Path.GetFileNameWithoutExtension(currentDirectory + "\\" + entry.Name);
+                            string newName = onlyName + user + extension;
+                            if (File.Exists(currentDirectory + "\\" + newName))
+                            {
+                                string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                                entry.ExtractToFile(currentDirectory + "\\" + onlyName + user + timeStamp + extension, true);
+                            }
+                            else entry.ExtractToFile(currentDirectory + "\\" + newName);
+                        }
+                        else entry.ExtractToFile(currentDirectory + "\\" + entry.Name);
                     }
                 }
-                else
+                else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
                 {
-                    //TODO cose
-                }
-            }
-
-            if (temp != zipFileSize)
-            {
-                Console.WriteLine("Connessione interrotta dal client");
-                fileCancel(id);
-                fs.Close();
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
-                return;
-            }
-            fs.Close();
-
-            //controllo se FIL o DIR per vedere come estrarre
-            //scrivo il file zip a prescindere, poi devo vedere i file dentro e vedere se già
-            //ne esistono altri con lo stesso nome
-
-            NeighborProtocol n = NeighborProtocol.getInstance;
-            if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
-            {
-                //controllo se esiste già il file dentro lo zip
-                ZipArchive archive = ZipFile.OpenRead(zipLocation);
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                {
-                    if (File.Exists(currentDirectory + "\\" + entry.Name))
+                    if (Directory.Exists(currentDirectory + "\\" + fileNameString))
                     {
-                        string user = n.getUserFromIp(ipSender);
-                        string extension = Path.GetExtension(currentDirectory + "\\" + entry.Name);
-                        string onlyName = Path.GetFileNameWithoutExtension(currentDirectory + "\\" + entry.Name);
-                        string newName = onlyName + user + extension;
-                        if (File.Exists(currentDirectory + "\\" + newName))
+                        if (Directory.Exists(currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender)))
                         {
                             string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            entry.ExtractToFile(currentDirectory + "\\" + onlyName + user + timeStamp + extension, true);
+                            ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender) + timeStamp);
                         }
-                        else entry.ExtractToFile(currentDirectory + "\\" + newName);
+                        else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender));
                     }
-                    else entry.ExtractToFile(currentDirectory + "\\" + entry.Name);
+                    else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString);
                 }
-                archive.Dispose();
+                //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
+                //cancella lo zip
             }
-            else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
+            catch (SocketException e)
             {
-                if (Directory.Exists(currentDirectory + "\\" + fileNameString))
-                {
-                    if (Directory.Exists(currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender)))
-                    {
-                        string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                        ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender) + timeStamp);
-                    }
-                    else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender));
-                }
-                else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString);
+                /* GUI solo per l'ultimo
+                 * errore generico su connessione per tutti gli altri
+                 */
             }
-            //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
-            //cancella lo zip
-
-            File.Delete(zipLocation);
-
-            handler.Shutdown(SocketShutdown.Both);
-            handler.Close();
+            catch
+            { 
+                //Errori di filestream, encoder, cast  -> GUI (Errore nella creazione del file.)
+            }
+            finally
+            {
+                if (archive != null)
+                    archive.Dispose();
+                if (!String.IsNullOrEmpty(zipLocation))
+                    if (File.Exists(zipLocation))
+                        File.Delete(zipLocation);
+                releaseResources(handler);
+            }
         }
 
 
@@ -264,6 +324,14 @@ namespace ProjectPDSWPF
                 SizeSuffixes[mag]);
         }
 
+        private void releaseResources(Socket sock)
+        {
+            if( sock != null)
+            {
+                sock.Shutdown(SocketShutdown.Both);
+                sock.Close();
+            }
+        }
         static readonly string[] SizeSuffixes =
                    { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 

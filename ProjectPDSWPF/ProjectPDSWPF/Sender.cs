@@ -53,122 +53,154 @@ namespace ProjectPDSWPF
             byte[] request = command.Concat(fileNameLength).ToArray();
             long zipLength = new FileInfo(zipLocation).Length;
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), Constants.PORT_TCP);
-            sender.Connect(remoteEP);
-
-            //mando comando + lunghezza nome file
-            int sent = sender.Send(request, request.Length, SocketFlags.None);
-
-            //preparo filename + lunghezza file
-            byte[] fileNameByte = Encoding.ASCII.GetBytes(fileName);
-            byte[] fileLengthByte = BitConverter.GetBytes(fileLength);
-            byte[] fileNameAndLength = fileNameByte.Concat(fileLengthByte).ToArray();
-            //mando filename + lunghezza file
-            sent = sender.Send(fileNameAndLength, fileNameAndLength.Length, SocketFlags.None);
-
-
-            byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
-            sender.Receive(responseFromServer, responseFromServer.Length, SocketFlags.None);
-            string response = Encoding.ASCII.GetString(responseFromServer);
-
-            if (String.Compare(response, Constants.DECLINE_FILE) == 0)
+            FileStream fs = null;
+            try
             {
-                fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), 3);
-                fileRejectedGUI(sender);
-                File.Delete(zipLocation);
-                sender.Shutdown(SocketShutdown.Both);
-                sender.Close();
-                return;
-            }
+                sender.Connect(remoteEP);
 
-
-            //preparo zip command + zip file neighborName length
-            byte[] zipCommand = Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND);
-            byte[] zipAndFileNameLength = zipCommand.Concat(BitConverter.GetBytes(zipToSend.Length)).ToArray();
-
-            //mando zip command + zip file neighborName length
-            sent = sender.Send(zipAndFileNameLength, zipAndFileNameLength.Length, SocketFlags.None);
-
-            //preparo zip file neighborName + lunghezza file zip
-            byte[] zipFileName = Encoding.ASCII.GetBytes(zipToSend);
-            byte[] zipFileLength = BitConverter.GetBytes(zipLength);
-            byte[] tot = zipFileName.Concat(zipFileLength).ToArray();
-
-            //mando zip file neighborName + lunghezza file zip
-            sent = sender.Send(tot, tot.Length, SocketFlags.None);
-
-            int temp = 0, percentage = 0;
-            SocketError error;
-
-            FileStream fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
-            byte[] data = new byte[1400];
-            int readBytes = 0;
-
-            while (temp < zipLength)
-            {
-                Stopwatch timer = new Stopwatch();
-                timer.Start();
-                if (zipLength - temp > 1400)
+                SocketError sockError;
+                //mando comando + lunghezza nome file
+                int sent = sender.Send(request, 0, request.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
                 {
-                    readBytes = fs.Read(data, 0, 1400);
-                }
-                else
-                {
-                    readBytes = fs.Read(data, 0, (int)zipLength - temp);
+                    throw new SocketException();
                 }
 
-                sent = sender.Send(data, 0, readBytes, SocketFlags.None, out error);
-
-                if (error == SocketError.Success)
+                //preparo filename + lunghezza file
+                byte[] fileNameByte = Encoding.ASCII.GetBytes(fileName);
+                byte[] fileLengthByte = BitConverter.GetBytes(fileLength);
+                byte[] fileNameAndLength = fileNameByte.Concat(fileLengthByte).ToArray();
+                //mando filename + lunghezza file
+                sent = sender.Send(fileNameAndLength, 0, fileNameAndLength.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
                 {
-                    temp += sent;
-                    ulong temporary = (ulong)temp * 100;
-                    int tempPercentage = (int)(temporary / (ulong)zipLength);
-                    if (tempPercentage > percentage)
-                    {
-                        updateProgress(fileName, sender, tempPercentage);
-                        percentage = tempPercentage;
-
-                        timer.Stop();
-                        long ticks = timer.ElapsedTicks;
-
-
-                        if (milliSeconds == 0)
-                            milliSeconds = (decimal)(ticks * 1000) / (decimal)Stopwatch.Frequency;
-
-                        decimal transferRate = (decimal)(sent * 1000) / ((decimal)milliSeconds);
-
-
-                        //TODO provare con countdown 
-                        decimal remainingTime = (zipLength - temp) / transferRate;
-                        TimeSpan t = TimeSpan.FromSeconds(Convert.ToDouble(remainingTime));
-
-                        string answer = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
-                                        t.Hours,
-                                        t.Minutes,
-                                        t.Seconds);
-                        updateRemainingTime(sender, answer);
-                    }
+                    throw new SocketException();
                 }
-                else
+
+
+                byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
+                sender.Receive(responseFromServer, 0, responseFromServer.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
                 {
-                    //TODO cose
-                    Console.WriteLine("****** DEBUG ******* THREAD SHUTDOWN ********");
-                    fs.Close();
+                    throw new SocketException();
+                }
+                string response = Encoding.ASCII.GetString(responseFromServer);
+
+                if (String.Compare(response, Constants.DECLINE_FILE) == 0)
+                {
+                    fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), 3);
+                    fileRejectedGUI(sender);
                     if (File.Exists(zipLocation))
                         File.Delete(zipLocation);
-                    sender.Close();
+                    releaseResources(sender);
                     return;
                 }
-                if (temp == zipLength) break;
+
+
+                //preparo zip command + zip file neighborName length
+                byte[] zipCommand = Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND);
+                byte[] zipAndFileNameLength = zipCommand.Concat(BitConverter.GetBytes(zipToSend.Length)).ToArray();
+
+                //mando zip command + zip file neighborName length
+                sent = sender.Send(zipAndFileNameLength, 0, zipAndFileNameLength.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                {
+                    throw new SocketException();
+                }
+
+                //preparo zip file neighborName + lunghezza file zip
+                byte[] zipFileName = Encoding.ASCII.GetBytes(zipToSend);
+                byte[] zipFileLength = BitConverter.GetBytes(zipLength);
+                byte[] tot = zipFileName.Concat(zipFileLength).ToArray();
+
+                //mando zip file neighborName + lunghezza file zip
+                sent = sender.Send(tot, 0, tot.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                {
+                    throw new SocketException();
+                }
+
+                int temp = 0, percentage = 0;
+                fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
+
+                byte[] data = new byte[1400];
+                int readBytes = 0;
+
+                while (temp < zipLength)
+                {
+                    Stopwatch timer = new Stopwatch();
+                    timer.Start();
+                    if (zipLength - temp > 1400)
+                        readBytes = fs.Read(data, 0, 1400);
+                    else
+                        readBytes = fs.Read(data, 0, (int)zipLength - temp);
+
+                    sent = sender.Send(data, 0, readBytes, SocketFlags.None, out sockError);
+
+                    if (sockError == SocketError.Success)
+                    {
+                        temp += sent;
+                        ulong temporary = (ulong)temp * 100;
+                        int tempPercentage = (int)(temporary / (ulong)zipLength);
+                        if (tempPercentage > percentage)
+                        {
+                            updateProgress(fileName, sender, tempPercentage);
+                            percentage = tempPercentage;
+
+                            timer.Stop();
+                            long ticks = timer.ElapsedTicks;
+
+
+                            if (milliSeconds == 0)
+                                milliSeconds = (decimal)(ticks * 1000) / (decimal)Stopwatch.Frequency;
+
+                            decimal transferRate = (decimal)(sent * 1000) / ((decimal)milliSeconds);
+
+
+                            //TODO provare con countdown 
+                            decimal remainingTime = (zipLength - temp) / transferRate;
+                            TimeSpan t = TimeSpan.FromSeconds(Convert.ToDouble(remainingTime));
+
+                            string answer = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
+                                            t.Hours,
+                                            t.Minutes,
+                                            t.Seconds);
+                            updateRemainingTime(sender, answer);
+                        }
+                    }
+                    else
+                    {
+                        throw new SocketException();
+                        ////TODO cose
+                        //Console.WriteLine("****** DEBUG ******* THREAD SHUTDOWN ********");
+                        //fs.Close();
+                        //if (File.Exists(zipLocation))
+                        //    File.Delete(zipLocation);
+                        //sender.Close();
+                        //return;
+                    }
+                }
+            }
+            catch (SocketException e)
+            {
+                //EVENTO GUI ( Invio annullato. Errore nella connessione con l'host. ) 
             }
 
-            fs.Close();
-            //cancello zip temporaneo
-            if (File.Exists(zipLocation))
-                File.Delete(zipLocation);
-            // Release the socket.
-            sender.Shutdown(SocketShutdown.Both);
-            sender.Close();
+            catch
+            {
+
+                //ALTRI DANNI SUCCESSI NEL CODICE (Si è verificato un errore nella lettura del file)
+            }
+
+            finally
+            {
+                if (fs != null)
+                    fs.Close();
+                //cancello zip temporaneo
+                if (File.Exists(zipLocation))
+                    File.Delete(zipLocation);
+                releaseResources(sender);
+            }
         }
 
         public static string RandomStr()
@@ -190,6 +222,13 @@ namespace ProjectPDSWPF
             foreach (DirectoryInfo di in dis)
                 size += DirSize(di);
             return size;
+        }
+
+
+        private void releaseResources(Socket s)
+        {
+            s.Shutdown(SocketShutdown.Both);
+            s.Close();
         }
 
 
