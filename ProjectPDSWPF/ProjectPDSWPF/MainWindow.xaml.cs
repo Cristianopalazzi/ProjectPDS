@@ -23,6 +23,7 @@ namespace ProjectPDSWPF
         //TODO gestire errori delle socket e propagare le modifica alla GUI
         // fare prove per la dimensione dei nomi nella schermata dei file in invio e in ricezione ( maxWidth, ellipsize e tooltip)
         // resize della finestra principale
+        //TODO tooltip progress bar
 
 
         public MainWindow()
@@ -54,8 +55,6 @@ namespace ProjectPDSWPF
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
-
-
         }
 
 
@@ -178,6 +177,8 @@ namespace ProjectPDSWPF
                     if (sf.Sock == sock)
                     {
                         sf.Value = percentage;
+                        if (sf.Ready)
+                            sf.Ready = false;
                         if (sf.Value == 100)
                         {
                             sf.File_state = Constants.FILE_STATE.COMPLETED;

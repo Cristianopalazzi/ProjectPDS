@@ -19,10 +19,19 @@ namespace ProjectPDSWPF
         private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
         private MainWindow mw;
         private UserSettings us;
+        public static string defaultFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.projectName;
 
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            if (Directory.Exists(defaultFolder))
+                foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles())
+                {
+                    if (f.Name != Constants.SETTINGS)
+                        f.Delete();
+                }
+            else Directory.CreateDirectory(defaultFolder);
+
             mw = new MainWindow();
             ns = new NeighborSelection();
             queue = new MyQueue();
@@ -33,6 +42,7 @@ namespace ProjectPDSWPF
             MyQueue.openNeighbors += neighbor_selection;
             Sender.fileRejected += createBalloons;
             ProjectPDSWPF.MainWindow.triggerBalloon += createBalloons;
+
             initializeNotifyIcon();
         }
 

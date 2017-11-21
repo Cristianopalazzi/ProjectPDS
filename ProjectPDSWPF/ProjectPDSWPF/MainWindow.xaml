@@ -165,8 +165,6 @@
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
 
-
-
                             <GridViewColumn Width="240">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
@@ -216,7 +214,10 @@
                             <GridViewColumn Width="100">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
+                                        <Grid>
+                                            <Controls:ProgressRing IsActive="{ Binding Ready }" VerticalAlignment="Center" Foreground="{DynamicResource AccentColorBrush}"/>
+                                            <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
+                                        </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
@@ -382,8 +383,6 @@
                     <TextBox Margin ="10,0,0,0" Text ="{Binding Path= DefaultDirPath}" Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" />
 
                 </Grid>
-
-
 
             </TabItem>
         </TabControl>

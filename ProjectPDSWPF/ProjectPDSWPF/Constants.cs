@@ -27,5 +27,6 @@
         public const string DECLINE_FILE = "NO";
         public const string SETTINGS = "Settings.xml";
         public enum FILE_STATE { COMPLETED, PROGRESS, CANCELED };
+        public const string projectName = "ProjectPDS";
     }
 }

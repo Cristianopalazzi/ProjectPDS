@@ -47,10 +47,19 @@ namespace ProjectPDSWPF
 
         public string RemainingTime
         {
-            get => remainingTime; set
+            get => remainingTime;
+            set
             {
                 remainingTime = value;
                 NotifyPropertyChanged("RemainingTime");
+            }
+        }
+
+        public bool Ready { get => ready;
+            set
+            {
+                ready = value;
+                NotifyPropertyChanged("Ready");
             }
         }
 
@@ -63,6 +72,7 @@ namespace ProjectPDSWPF
         private BitmapImage immagine, pic;
         private Socket sock;
         private double value;
+        private bool ready = true;
         private Constants.FILE_STATE file_state;
 
         public event PropertyChangedEventHandler PropertyChanged;
