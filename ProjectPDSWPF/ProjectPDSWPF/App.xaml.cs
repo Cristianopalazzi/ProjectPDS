@@ -20,12 +20,12 @@ namespace ProjectPDSWPF
         private MainWindow mw;
         private UserSettings us;
         public static string defaultFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.projectName;
-
+        public static string defaultResourcesFolder = defaultFolder + "\\Resources";
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             if (Directory.Exists(defaultFolder))
-                foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles())
+                foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
                 {
                     if (f.Name != Constants.SETTINGS)
                         f.Delete();
@@ -90,7 +90,7 @@ namespace ProjectPDSWPF
         private void initializeNotifyIcon()
         {
             //TODO time estimation
-            nIcon.Icon = new System.Drawing.Icon(Directory.GetCurrentDirectory() + "/check.ico");
+            nIcon.Icon = new System.Drawing.Icon(defaultResourcesFolder + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item3 = new System.Windows.Forms.MenuItem();

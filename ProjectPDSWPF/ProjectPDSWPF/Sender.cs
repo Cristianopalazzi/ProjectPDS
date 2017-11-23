@@ -227,7 +227,16 @@ namespace ProjectPDSWPF
 
         private void releaseResources(Socket s)
         {
-            s.Shutdown(SocketShutdown.Both);
+            if (s.Connected) 
+                try
+                {
+                    s.Shutdown(SocketShutdown.Both);
+                }
+                catch (SocketException e)
+                {
+                    var variable = e.ErrorCode;
+                    int i = 4;
+                }
             s.Close();
         }
 

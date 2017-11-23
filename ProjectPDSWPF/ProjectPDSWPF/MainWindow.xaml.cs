@@ -136,7 +136,7 @@ namespace ProjectPDSWPF
                         if (r.Value == 100)
                         {
                             r.File_state = Constants.FILE_STATE.COMPLETED;
-                            r.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/check.ico", UriKind.RelativeOrAbsolute));
+                            r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico", UriKind.RelativeOrAbsolute));
                             triggerBalloon(r.Filename, r.Name, 0);
                             break;
                         }
@@ -182,7 +182,7 @@ namespace ProjectPDSWPF
                         if (sf.Value == 100)
                         {
                             sf.File_state = Constants.FILE_STATE.COMPLETED;
-                            sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/check.ico", UriKind.RelativeOrAbsolute));
+                            sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico", UriKind.RelativeOrAbsolute));
                             if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
                                 triggerBalloon(sf.FileName, sf.Name, 1);
                         }
@@ -213,7 +213,7 @@ namespace ProjectPDSWPF
             finally
             {
                 sf.File_state = Constants.FILE_STATE.CANCELED;
-                sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
+                sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico", UriKind.RelativeOrAbsolute));
                 b.Visibility = Visibility.Hidden;
             }
         }

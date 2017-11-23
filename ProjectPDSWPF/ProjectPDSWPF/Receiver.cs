@@ -187,7 +187,7 @@ namespace ProjectPDSWPF
                 NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne);
                 JpegBitmapEncoder encoder = new JpegBitmapEncoder();
                 if (ne.NeighborImage == null)
-                    ne.setImage(File.ReadAllBytes(Constants.PLACEHOLDER_IMAGE));
+                    ne.setImage(File.ReadAllBytes(App.defaultResourcesFolder+"/guest.png"));
                 encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
                 using (MemoryStream ms = new MemoryStream())
                 {

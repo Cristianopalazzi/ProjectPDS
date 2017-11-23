@@ -62,9 +62,9 @@ namespace ProjectPDSWPF
 
         private static void readSettings()
         {
-            if (File.Exists(App.defaultFolder + "\\" + Constants.SETTINGS))
+            if (File.Exists(App.defaultResourcesFolder + "\\" + Constants.SETTINGS))
             {
-                using (FileStream s = new FileStream(App.defaultFolder+"\\"+ Constants.SETTINGS, FileMode.Open))
+                using (FileStream s = new FileStream(App.defaultResourcesFolder+"\\"+ Constants.SETTINGS, FileMode.Open))
                 {
                     XmlSerializer xSer = new XmlSerializer(typeof(Settings));
                     instance = (Settings)xSer.Deserialize(s);
@@ -77,7 +77,7 @@ namespace ProjectPDSWPF
 
         public static void writeSettings(Settings values)
         {
-            using (FileStream s = new FileStream(App.defaultFolder + "\\" + Constants.SETTINGS, FileMode.Create))
+            using (FileStream s = new FileStream(App.defaultResourcesFolder + "\\" + Constants.SETTINGS, FileMode.Create))
             {
                 XmlSerializer xSer = new XmlSerializer(typeof(Settings));
                 xSer.Serialize(s, values);
