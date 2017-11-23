@@ -6,6 +6,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace ProjectPDSWPF
 {
@@ -14,13 +15,20 @@ namespace ProjectPDSWPF
         public Sender() { }
         public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
-            int idx = pathFile.LastIndexOf('\\');
-
             string fileName = Path.GetFileName(pathFile);
-            string path = pathFile.Substring(0, idx + 1);
+
+            Ping p = new Ping();
+            PingReply rep = p.Send(ipAddr,2000);
+            
+            if (rep.Status != IPStatus.Success)
+            {
+                fileRejectedGUI(sender);
+                fileRejected(fileName,ipAddr,4);
+                return;
+            }
+            
 
             byte[] command;
-
             byte[] fileNameLength = BitConverter.GetBytes(fileName.Length);
             long fileLength = 0;
 
@@ -126,6 +134,8 @@ namespace ProjectPDSWPF
                 byte[] data = new byte[1400];
                 int readBytes = 0;
 
+                sender.SendTimeout = 2500;
+
                 while (temp < zipLength)
                 {
                     Stopwatch timer = new Stopwatch();
@@ -183,12 +193,15 @@ namespace ProjectPDSWPF
             }
             catch (SocketException e)
             {
+                sendingFailure(sender);
+                fileRejected(fileName,ipAddr, 5);
                 //EVENTO GUI ( Invio annullato. Errore nella connessione con l'host. ) 
             }
 
             catch
             {
-
+                sendingFailure(sender);
+                fileRejected(fileName, ipAddr, 6);
                 //ALTRI DANNI SUCCESSI NEL CODICE (Si è verificato un errore nella lettura del file)
             }
 
@@ -227,16 +240,8 @@ namespace ProjectPDSWPF
 
         private void releaseResources(Socket s)
         {
-            if (s.Connected) 
-                try
-                {
-                    s.Shutdown(SocketShutdown.Both);
-                }
-                catch (SocketException e)
-                {
-                    var variable = e.ErrorCode;
-                    int i = 4;
-                }
+            if (s.Connected)
+                s.Shutdown(SocketShutdown.Both);
             s.Close();
         }
 
@@ -250,9 +255,11 @@ namespace ProjectPDSWPF
         public delegate void myDelegate2(Socket sender);
         public static event myDelegate2 fileRejectedGUI;
 
-
         public delegate void myDelegate3(Socket sock, string remainingTime);
         public static event myDelegate3 updateRemainingTime;
+
+        public delegate void myDelegate4(Socket sock);
+        public static event myDelegate4 sendingFailure;
 
         private decimal milliSeconds = 0;
     }

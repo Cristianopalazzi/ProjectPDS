@@ -43,7 +43,7 @@ namespace ProjectPDSWPF
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
             Receiver.askToAccept += Receiver_askToAccept;
             Sender.fileRejectedGUI += Sender_fileRejectedGUI;
-
+            Sender.sendingFailure += Sender_sendingFailure;
 
             NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
@@ -57,21 +57,19 @@ namespace ProjectPDSWPF
             view.GroupDescriptions.Add(groupDescription);
         }
 
-
+      
 
         private void Sender_fileRejectedGUI(Socket sender)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            sendingFiles.Dispatcher.Invoke(new Action(() =>
            {
                foreach (SendingFile sf in FilesToSend)
                {
                    if (sf.Sock == sender)
                    {
-                       //TODO Capire perchè non funziona mentre la finestra è aperta.
-                       //sf.File_state = Constants.FILE_STATE.CANCELED;
-                       //sf.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
-                       //break;
-                       FilesToSend.Remove(sf);
+                       sf.File_state = Constants.FILE_STATE.CANCELED;
+                       sf.Ready = false;
+                       sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
                        break;
                    }
                }
@@ -111,13 +109,13 @@ namespace ProjectPDSWPF
 
         private void file_cancel(string id)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (ReceivingFile r in FilesToReceive)
                     if (String.Compare(r.Guid, id) == 0)
                     {
                         r.File_state = Constants.FILE_STATE.CANCELED;
-                        r.Pic = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "/cross.ico", UriKind.RelativeOrAbsolute));
+                        r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
                         triggerBalloon(r.Filename, r.Name, 2);
                         break;
                     }
@@ -126,7 +124,7 @@ namespace ProjectPDSWPF
 
         private void updateReceivingProgressBar(string id, int percentage)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (ReceivingFile r in FilesToReceive)
                 {
@@ -136,7 +134,7 @@ namespace ProjectPDSWPF
                         if (r.Value == 100)
                         {
                             r.File_state = Constants.FILE_STATE.COMPLETED;
-                            r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico", UriKind.RelativeOrAbsolute));
+                            r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico"));
                             triggerBalloon(r.Filename, r.Name, 0);
                             break;
                         }
@@ -147,7 +145,7 @@ namespace ProjectPDSWPF
 
         private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
                 ReceivingFile rf = new ReceivingFile(new Neighbor(senderID, image), fileName, id);
                 FilesToReceive.Add(rf);
@@ -157,7 +155,7 @@ namespace ProjectPDSWPF
 
         private void updateRemainingTime(Socket sock, string remainingTime)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            sendingFiles.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (SendingFile sf in FilesToSend)
                     if (sf.Sock == sock)
@@ -171,7 +169,7 @@ namespace ProjectPDSWPF
 
         private void updateProgressBar(string filename, Socket sock, int percentage)
         {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
+            sendingFiles.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (SendingFile sf in FilesToSend)
                     if (sf.Sock == sock)
@@ -182,7 +180,7 @@ namespace ProjectPDSWPF
                         if (sf.Value == 100)
                         {
                             sf.File_state = Constants.FILE_STATE.COMPLETED;
-                            sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico", UriKind.RelativeOrAbsolute));
+                            sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico"));
                             if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
                                 triggerBalloon(sf.FileName, sf.Name, 1);
                         }
@@ -213,9 +211,25 @@ namespace ProjectPDSWPF
             finally
             {
                 sf.File_state = Constants.FILE_STATE.CANCELED;
+                sf.Ready = false;
                 sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico", UriKind.RelativeOrAbsolute));
-                b.Visibility = Visibility.Hidden;
             }
+        }
+
+        private void Sender_sendingFailure(Socket sock)
+        {
+            sendingFiles.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (SendingFile sf in FilesToSend)
+                {
+                    if (sf.Sock == sock)
+                    {
+                        sf.File_state = Constants.FILE_STATE.CANCELED;
+                        sf.Ready = false;
+                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico", UriKind.RelativeOrAbsolute));
+                    }
+                }
+            }));
         }
 
 
@@ -290,7 +304,7 @@ namespace ProjectPDSWPF
                 }
             }
             if (addOrRemove && !isPresent)
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                Dispatcher.Invoke(new Action(() =>
                 {
                     Neighbor n1 = new Neighbor(id, bytes);
                     neighborsValues.Add(n1);

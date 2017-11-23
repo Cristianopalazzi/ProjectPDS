@@ -23,7 +23,14 @@ namespace ProjectPDSWPF
         public string Name { get => name; set => name = value; }
         public Socket Sock { get => sock; set => sock = value; }
         public BitmapImage Immagine { get => immagine; set => immagine = value; }
-        public Constants.FILE_STATE File_state { get => file_state; set => file_state = value; }
+        public Constants.FILE_STATE File_state {
+            get => file_state;
+            set
+            {
+                file_state = value;
+                NotifyPropertyChanged("File_state");
+            }
+        }
 
         public BitmapImage Pic
         {

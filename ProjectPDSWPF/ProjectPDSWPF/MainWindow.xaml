@@ -187,7 +187,6 @@
 
                                             <Button.Style>
                                                 <Style TargetType="Button" BasedOn="{StaticResource MetroButton}">
-                                                    <Setter Property="Visibility" Value="Visible" />
                                                     <Style.Triggers>
                                                         <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
@@ -195,12 +194,12 @@
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
                                                         </MultiDataTrigger>
-                                                        <!--<MultiDataTrigger>
+                                                        <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
                                                                 <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
-                                                        </MultiDataTrigger>-->
+                                                        </MultiDataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>

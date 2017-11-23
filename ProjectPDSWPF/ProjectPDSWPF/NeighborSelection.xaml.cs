@@ -45,6 +45,7 @@ namespace ProjectPDSWPF
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
+              
                 sendingFiles = new List<SendingFile>();
                 selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
                 foreach (Neighbor n in selected)

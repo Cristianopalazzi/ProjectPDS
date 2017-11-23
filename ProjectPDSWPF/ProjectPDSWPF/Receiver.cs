@@ -32,8 +32,8 @@ namespace ProjectPDSWPF
             Socket listener = null;
             try
             {
-             listener  = new Socket(AddressFamily.InterNetwork,
-                    SocketType.Stream, ProtocolType.Tcp);
+                listener = new Socket(AddressFamily.InterNetwork,
+                       SocketType.Stream, ProtocolType.Tcp);
                 listener.Bind(localEndPoint);
 
                 listener.Listen(10);
@@ -93,7 +93,7 @@ namespace ProjectPDSWPF
 
 
                 byte[] fileNameAndLength = new byte[fileNameDimension + sizeof(long)];
-                received = handler.Receive(fileNameAndLength, 0,fileNameDimension + sizeof(long), SocketFlags.None,out sockError);
+                received = handler.Receive(fileNameAndLength, 0, fileNameDimension + sizeof(long), SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
@@ -107,7 +107,7 @@ namespace ProjectPDSWPF
                 if (settings.AutoAccept)
                 {
                     byte[] responseClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
-                    handler.Send(responseClient,0, responseClient.Length, SocketFlags.None, out sockError);
+                    handler.Send(responseClient, 0, responseClient.Length, SocketFlags.None, out sockError);
                     if (sockError != SocketError.Success)
                     {
                         throw new SocketException();
@@ -122,7 +122,7 @@ namespace ProjectPDSWPF
                     if (dialogResult == MessageDialogResult.Affirmative)
                     {
                         responseToClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
-                        handler.Send(responseToClient,0, responseToClient.Length, SocketFlags.None,out sockError);
+                        handler.Send(responseToClient, 0, responseToClient.Length, SocketFlags.None, out sockError);
                         if (sockError != SocketError.Success)
                         {
                             throw new SocketException();
@@ -131,7 +131,7 @@ namespace ProjectPDSWPF
                     else if (dialogResult == MessageDialogResult.Negative)
                     {
                         responseToClient = Encoding.ASCII.GetBytes(Constants.DECLINE_FILE);
-                        handler.Send(responseToClient,0, responseToClient.Length, SocketFlags.None, out sockError);
+                        handler.Send(responseToClient, 0, responseToClient.Length, SocketFlags.None, out sockError);
                         if (sockError != SocketError.Success)
                         {
                             throw new SocketException();
@@ -159,7 +159,7 @@ namespace ProjectPDSWPF
 
                 //ricevo zip command + zipFileNameLength
                 byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
-                received = handler.Receive(zipCommand,0, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
+                received = handler.Receive(zipCommand, 0, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
@@ -172,7 +172,7 @@ namespace ProjectPDSWPF
                 //ricevo zip file neighborName e lunghezza
                 byte[] zipFileNameAndLength = new byte[zipFileNameLength + sizeof(long)];
 
-                received = handler.Receive(zipFileNameAndLength,0,zipFileNameLength + sizeof(long), SocketFlags.None, out sockError);
+                received = handler.Receive(zipFileNameAndLength, 0, zipFileNameLength + sizeof(long), SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
@@ -187,7 +187,7 @@ namespace ProjectPDSWPF
                 NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne);
                 JpegBitmapEncoder encoder = new JpegBitmapEncoder();
                 if (ne.NeighborImage == null)
-                    ne.setImage(File.ReadAllBytes(App.defaultResourcesFolder+"/guest.png"));
+                    ne.setImage(File.ReadAllBytes(App.defaultResourcesFolder + "/guest.png"));
                 encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
                 using (MemoryStream ms = new MemoryStream())
                 {
@@ -248,7 +248,7 @@ namespace ProjectPDSWPF
                 NeighborProtocol n = NeighborProtocol.getInstance;
                 if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                 {
-                   archive = ZipFile.OpenRead(zipLocation);
+                    archive = ZipFile.OpenRead(zipLocation);
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
                         if (File.Exists(currentDirectory + "\\" + entry.Name))
@@ -290,7 +290,7 @@ namespace ProjectPDSWPF
                  */
             }
             catch
-            { 
+            {
                 //Errori di filestream, encoder, cast  -> GUI (Errore nella creazione del file.)
             }
             finally
@@ -326,11 +326,10 @@ namespace ProjectPDSWPF
 
         private void releaseResources(Socket sock)
         {
-            if( sock != null)
-            {
+            if (sock.Connected)
                 sock.Shutdown(SocketShutdown.Both);
-                sock.Close();
-            }
+            sock.Close();
+
         }
         static readonly string[] SizeSuffixes =
                    { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };

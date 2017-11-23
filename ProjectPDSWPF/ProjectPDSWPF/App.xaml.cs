@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.IO;
+using Microsoft.Win32;
 
 namespace ProjectPDSWPF
 {
@@ -26,10 +27,7 @@ namespace ProjectPDSWPF
         {
             if (Directory.Exists(defaultFolder))
                 foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
-                {
-                    if (f.Name != Constants.SETTINGS)
-                        f.Delete();
-                }
+                    f.Delete();
             else Directory.CreateDirectory(defaultFolder);
 
             mw = new MainWindow();
@@ -42,8 +40,16 @@ namespace ProjectPDSWPF
             MyQueue.openNeighbors += neighbor_selection;
             Sender.fileRejected += createBalloons;
             ProjectPDSWPF.MainWindow.triggerBalloon += createBalloons;
+            SystemEvents.SessionEnded += SystemEvents_SessionEnded;
 
             initializeNotifyIcon();
+        }
+
+        private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
+        {
+            Settings.writeSettings(Settings.getInstance);
+            n.quitMe();
+            nIcon.Dispose();
         }
 
         private void createBalloons(string fileName, string userName, int type)
@@ -80,6 +86,38 @@ namespace ProjectPDSWPF
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipText = userName + " ha rifiutato il tuo file";
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case 4:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string user = NeighborProtocol.getInstance.getUserFromIp(userName);
+                        string text = "Errore nella connessione con l'host";
+                        if (!String.IsNullOrEmpty(user))
+                            text = String.Concat(text, ": " + user);
+                        nIcon.BalloonTipText = text;
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case 5:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string user = NeighborProtocol.getInstance.getUserFromIp(userName);
+                        string text = "Errore durante l'invio ";
+                        if (!String.IsNullOrEmpty(user))
+                            text = String.Concat(text, "a: "+user);
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case 6:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = "Errore durante la preparazione del file";
+                        nIcon.BalloonTipText = text;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
