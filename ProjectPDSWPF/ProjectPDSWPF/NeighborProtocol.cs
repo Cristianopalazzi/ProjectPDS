@@ -62,8 +62,6 @@ namespace ProjectPDSWPF
             //Non ricevo pacchetti da me stesso
             socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, false);
 
-            //costruire qualcosa che binda finchè non trova una porta libera
-
             socket.Bind(localEndPoint);
             while (true)
             {
@@ -76,16 +74,11 @@ namespace ProjectPDSWPF
                     recv = Encoding.UTF8.GetString(buffer);
                     remoteIpAddress = ((IPEndPoint)senderRemote).Address.ToString();
                     remotePort = ((IPEndPoint)senderRemote).Port.ToString();
-                    //Console.WriteLine("mittente {0} ", remoteIpAddress
-                    //    + "on port number " + remotePort);
-                    //Console.WriteLine("ricevuto {0} ", recv);
                     string command = recv.Substring(0, 4);
-                    //Console.WriteLine("command {0} ", command);
                     string senderName = recv.Substring(4);
 
                     string senderID = String.Concat(senderName, String.Concat("@", remoteIpAddress));
                     Console.WriteLine("HELLO FROM {0} ", senderID);
-                    //Console.WriteLine("senderIPPPP {0} ", remoteIpAddress);
                     if (String.Compare(command, Constants.HELL, false) == 0)
                     {
                         if (!Neighbors.ContainsKey(senderID))
@@ -99,15 +92,10 @@ namespace ProjectPDSWPF
 
                     byte[] requestImage;
                     IPEndPoint ipImg = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
-                    //sembra inutile questa connect
-                    //socketImg.Connect(ipImg);
                     if (Neighbors.TryGetValue(senderID, out Neighbor n1))
                     {
                         if (n1.NeighborImage == null)
                         {
-
-                            //chiedo la foto 
-                            //Console.WriteLine("Non ho la foto del tizio, gliela chiedo");
                             requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
                             socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                             receiveImg(senderID);
@@ -132,7 +120,7 @@ namespace ProjectPDSWPF
                 }
             }
 
-            //capire come chiuderle
+            //TODO capire come chiuderle
             socket.Close();
             socketImg.Close();
 
@@ -150,8 +138,6 @@ namespace ProjectPDSWPF
         {
             while (true)
             {
-
-                //lista temporanea degli oggetti da rimuovere dalla mappa
                 List<string> toRemove = new List<string>();
 
                 foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
@@ -165,7 +151,7 @@ namespace ProjectPDSWPF
                         Neighbors[pair.Key].Counter = 0;
                 }
 
-                //rimuovo dalla mappa gli oggetti della lista temporanea
+
                 foreach (string tmp in toRemove)
                 {
                     if (Neighbors.TryRemove(tmp, out Neighbor value))
@@ -186,7 +172,6 @@ namespace ProjectPDSWPF
             EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
             string remoteIpAddress, remotePort;
 
-            //ripetere loop per bind 
             socketImg.Bind(ipImg);
             socketImg.ReceiveTimeout = 2000;
             byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + Environment.UserName);
@@ -197,7 +182,7 @@ namespace ProjectPDSWPF
                 try
                 {
                     socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipMulticast);
-                    if (socketImg.Available > 0 )
+                    if (socketImg.Available > 0)
                     {
                         socketImg.ReceiveFrom(requestImg, requestImg.Length, SocketFlags.None, ref senderRemote);
                         if (String.Compare(Encoding.UTF8.GetString(requestImg), Constants.NEED_IMG) == 0)
@@ -252,10 +237,9 @@ namespace ProjectPDSWPF
                 SocketType.Stream, ProtocolType.Tcp);
 
             Socket handler = null;
-            //aggiungere di nuovo la struttura per il binde
             listener.Bind(localEndPoint);
 
-            listener.Listen(1); //changed 1 to 5
+            listener.Listen(1);
 
             Console.WriteLine("Waiting for img...");
             try
@@ -273,7 +257,7 @@ namespace ProjectPDSWPF
                     string placeholderPath = App.defaultResourcesFolder + "/guest.png";
                     int placeholderLength = (int)new FileInfo(placeholderPath).Length;
                     byte[] placeholderByte = new byte[placeholderLength];
-                    placeholderByte = File.ReadAllBytes(placeholderPath); //cambiare path placeholder
+                    placeholderByte = File.ReadAllBytes(placeholderPath);
                     if (Neighbors.TryGetValue(neighbor, out Neighbor n))
                     {
                         n.setImage(placeholderByte);
@@ -301,13 +285,10 @@ namespace ProjectPDSWPF
             }
             catch (SocketException e)
             {
-
-                MessageBox.Show(e.Message);
                 //something
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
                 //something
             }
             finally
@@ -370,7 +351,6 @@ namespace ProjectPDSWPF
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
                 //something
             }
             finally

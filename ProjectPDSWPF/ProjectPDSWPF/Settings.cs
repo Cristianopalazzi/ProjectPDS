@@ -14,8 +14,6 @@ namespace ProjectPDSWPF
             set { _defaultDir = value; NotifyPropertyChanged("DefaultDir"); }
         }
 
-      
-
         public Boolean AutoAccept
         {
             get { return _autoAccept; }

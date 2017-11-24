@@ -7,7 +7,6 @@ using System.Windows.Media.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
-using System.IO;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Threading;
@@ -19,8 +18,6 @@ namespace ProjectPDSWPF
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        //TODO cercare come mettere le immagini come risorse
-        //TODO gestire errori delle socket e propagare le modifica alla GUI
         // fare prove per la dimensione dei nomi nella schermata dei file in invio e in ricezione ( maxWidth, ellipsize e tooltip)
         // resize della finestra principale
         //TODO tooltip progress bar
@@ -57,8 +54,8 @@ namespace ProjectPDSWPF
             view.GroupDescriptions.Add(groupDescription);
         }
 
-      
 
+        //aggiornamento GUI dopo che il file è stato rifiutato dal receiver
         private void Sender_fileRejectedGUI(Socket sender)
         {
             sendingFiles.Dispatcher.Invoke(new Action(() =>
@@ -76,6 +73,7 @@ namespace ProjectPDSWPF
            }));
         }
 
+        //chiedo al receiver se vuole accettare il file che sto mandando
         private MessageDialogResult Receiver_askToAccept(string userName, string fileName, string dimension)
         {
             MessageDialogResult mr = MessageDialogResult.Negative;
@@ -93,7 +91,7 @@ namespace ProjectPDSWPF
         }
 
 
-
+        //mostro la tab delle impostazioni dopo aver cliccato su "impostazioni"
         private void tabChange()
         {
             Show();
@@ -101,13 +99,15 @@ namespace ProjectPDSWPF
             tabControl.SelectedIndex = 3;
         }
 
+        //aggiungo file da inviare alla lista dopo aver cliccato invia nella finestra di selezione dei vicini
         private void addSendingFiles(List<SendingFile> sf)
         {
             foreach (SendingFile s in sf)
                 FilesToSend.Add(s);
         }
 
-        private void file_cancel(string id)
+        //file annullato da parte del sender => aggiorno la lista dei file in ricezione
+        private void file_cancel(string id, string statusFile)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
@@ -116,12 +116,16 @@ namespace ProjectPDSWPF
                     {
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
-                        triggerBalloon(r.Filename, r.Name, 2);
+                        if (String.Compare(statusFile, Constants.FILE_STATE.CANCELED.ToString()) == 0)
+                            triggerBalloon(r.Filename, r.Name, 2);
+                        else if (String.Compare(statusFile, "ERROR") == 0)
+                            triggerBalloon(r.Filename, r.Name, 7);
                         break;
                     }
             }));
         }
 
+        //aggiorno la progress bar del file in ricezione
         private void updateReceivingProgressBar(string id, int percentage)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
@@ -143,6 +147,7 @@ namespace ProjectPDSWPF
             }));
         }
 
+        // aggiungo un nuovo file in ricezione alla lista
         private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
@@ -152,7 +157,7 @@ namespace ProjectPDSWPF
             }));
         }
 
-
+        //aggiorno il tempo rimanente ad un file in invio
         private void updateRemainingTime(Socket sock, string remainingTime)
         {
             sendingFiles.Dispatcher.Invoke(new Action(() =>
@@ -166,7 +171,7 @@ namespace ProjectPDSWPF
             }));
         }
 
-
+        //aggiorno la progress bar del file in invio
         private void updateProgressBar(string filename, Socket sock, int percentage)
         {
             sendingFiles.Dispatcher.Invoke(new Action(() =>
@@ -189,6 +194,7 @@ namespace ProjectPDSWPF
             }));
         }
 
+        //chiusura della finestra principale
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
             e.Cancel = true;
@@ -196,6 +202,7 @@ namespace ProjectPDSWPF
             Hide();
         }
 
+        //click a seguito della cancellazione di un file in invio
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
@@ -206,6 +213,7 @@ namespace ProjectPDSWPF
             }
             catch (ObjectDisposedException exc)
             {
+                //TODO questo messagebox
                 MessageBox.Show(exc.ToString());
             }
             finally
@@ -216,6 +224,7 @@ namespace ProjectPDSWPF
             }
         }
 
+        //errore durante l'invio di un file
         private void Sender_sendingFailure(Socket sock)
         {
             sendingFiles.Dispatcher.Invoke(new Action(() =>
@@ -233,7 +242,7 @@ namespace ProjectPDSWPF
         }
 
 
-
+        //context menu sui file in ricezione (cancella un file ricevuto correttamente)
         private void receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (listReceivingFiles.SelectedIndex == -1)
@@ -244,7 +253,7 @@ namespace ProjectPDSWPF
             else FilesToReceive.Remove(rf);
         }
 
-
+        //context menu sui file in ricezione (cancella tutti i file ricevuti correttamente)
         private void receiving_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
             if (listReceivingFiles.SelectedIndex == -1)
@@ -260,7 +269,7 @@ namespace ProjectPDSWPF
             foreach (ReceivingFile rf in tmp)
                 FilesToReceive.Remove(rf);
         }
-
+        //context menu sui file in invio (cancella un file inviato correttamente)
         private void sending_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (sendingFiles.SelectedIndex == -1)
@@ -271,7 +280,7 @@ namespace ProjectPDSWPF
             else FilesToSend.Remove(sf);
         }
 
-
+        //context menu sui file in invio (cancella tutti i file inviati correttamente)
         private void sending_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
             if (sendingFiles.SelectedIndex == -1)
@@ -288,7 +297,7 @@ namespace ProjectPDSWPF
                 FilesToSend.Remove(sf);
         }
 
-
+        //aggiorno la lista dei vicini online
         public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
         {
             bool isPresent = false;
@@ -311,7 +320,7 @@ namespace ProjectPDSWPF
                 }));
         }
 
-
+        //mostro il dialog per scegliere la cartella in cui salvare il file in ricezione
         public void openFolderBrowserDialog(object sender, EventArgs e)
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
@@ -322,7 +331,7 @@ namespace ProjectPDSWPF
         }
 
 
-
+        //scrivo su file i settings ogni volta che cambio tab (rispetto a quella delle impostazioni)
         public void tabChanged(object Sender, EventArgs e)
         {
             Settings.writeSettings(sets);
@@ -340,7 +349,5 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate(string filename, string username, int type);
         public static event myDelegate triggerBalloon;
-
-
     }
 }

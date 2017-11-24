@@ -37,9 +37,7 @@ namespace ProjectPDSWPF
             NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.In);
             while (true)
             {
-                Console.WriteLine("Waiting for client connection...");
                 pipeServer.WaitForConnection();
-                Console.WriteLine("Client connected.");
                 StreamReader sr = new StreamReader(pipeServer);
                 string file = sr.ReadLine();
                 Console.WriteLine(file);
@@ -54,7 +52,6 @@ namespace ProjectPDSWPF
         {
             while (true)
             {
-                Console.WriteLine("Aspetto il prossimo work");
                 List<SendingFile> sf = filesToSend.Take();
                 Sender sender = new Sender();
                 List<Thread> threads = new List<Thread>();
@@ -74,7 +71,6 @@ namespace ProjectPDSWPF
                 }
                 foreach (var t in threads)
                     t.Join();
-                Console.WriteLine("Finiti tutti");
             }
         }
 

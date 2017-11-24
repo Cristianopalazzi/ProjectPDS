@@ -15,18 +15,20 @@ namespace ProjectPDSWPF
         public Sender() { }
         public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
+            sender.SendTimeout = 2500;
+            sender.ReceiveTimeout = 2500;
             string fileName = Path.GetFileName(pathFile);
 
             Ping p = new Ping();
-            PingReply rep = p.Send(ipAddr,2000);
-            
+            PingReply rep = p.Send(ipAddr, 2000);
+
             if (rep.Status != IPStatus.Success)
             {
                 fileRejectedGUI(sender);
-                fileRejected(fileName,ipAddr,4);
+                fileRejected(fileName, ipAddr, 4);
                 return;
             }
-            
+
 
             byte[] command;
             byte[] fileNameLength = BitConverter.GetBytes(fileName.Length);
@@ -134,8 +136,6 @@ namespace ProjectPDSWPF
                 byte[] data = new byte[1400];
                 int readBytes = 0;
 
-                sender.SendTimeout = 2500;
-
                 while (temp < zipLength)
                 {
                     Stopwatch timer = new Stopwatch();
@@ -178,38 +178,30 @@ namespace ProjectPDSWPF
                             updateRemainingTime(sender, answer);
                         }
                     }
+                    else if (sockError == SocketError.Shutdown)
+                        return;
                     else
                     {
                         throw new SocketException();
-                        ////TODO cose
-                        //Console.WriteLine("****** DEBUG ******* THREAD SHUTDOWN ********");
-                        //fs.Close();
-                        //if (File.Exists(zipLocation))
-                        //    File.Delete(zipLocation);
-                        //sender.Close();
-                        //return;
                     }
                 }
             }
             catch (SocketException e)
             {
                 sendingFailure(sender);
-                fileRejected(fileName,ipAddr, 5);
-                //EVENTO GUI ( Invio annullato. Errore nella connessione con l'host. ) 
+                fileRejected(fileName, ipAddr, 5);
             }
 
             catch
             {
                 sendingFailure(sender);
                 fileRejected(fileName, ipAddr, 6);
-                //ALTRI DANNI SUCCESSI NEL CODICE (Si è verificato un errore nella lettura del file)
             }
 
             finally
             {
                 if (fs != null)
                     fs.Close();
-                //cancello zip temporaneo
                 if (File.Exists(zipLocation))
                     File.Delete(zipLocation);
                 releaseResources(sender);

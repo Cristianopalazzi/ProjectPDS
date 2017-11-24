@@ -65,15 +65,17 @@ namespace ProjectPDSWPF
 
         private void receiveFromSocket(Socket handler)
         {
-            string zipLocation = String.Empty;
+            handler.ReceiveTimeout = 2500;
+            handler.SendTimeout = 2500;
+            string zipLocation = String.Empty, fileNameString = String.Empty, ipSender = String.Empty, id = String.Empty;
             ZipArchive archive = null;
+            int temp = 0;
+            long zipFileSize = 0;
+            FileStream fs = null;
             try
             {
-
-                string ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
-
+                ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
                 byte[] request = new byte[Constants.FILE_NAME + Constants.FILE_COMMAND.Length];
-
                 SocketError sockError;
 
                 //Ricevo comando + lunghezza file neighborName
@@ -84,13 +86,10 @@ namespace ProjectPDSWPF
                 }
 
                 Array.Resize(ref request, received);
-
                 string requestString = Encoding.UTF8.GetString(request);
-
                 //Ricavo comando e dimensione del fileName
                 string commandString = requestString.Substring(0, Constants.FILE_COMMAND.Length);
                 int fileNameDimension = BitConverter.ToInt32(request, Constants.FILE_COMMAND.Length);
-
 
                 byte[] fileNameAndLength = new byte[fileNameDimension + sizeof(long)];
                 received = handler.Receive(fileNameAndLength, 0, fileNameDimension + sizeof(long), SocketFlags.None, out sockError);
@@ -101,7 +100,7 @@ namespace ProjectPDSWPF
 
                 //Ricevo fileName e lunghezza del file
                 string fileNameAndLengthString = Encoding.UTF8.GetString(fileNameAndLength);
-                string fileNameString = fileNameAndLengthString.Substring(0, fileNameDimension);
+                fileNameString = fileNameAndLengthString.Substring(0, fileNameDimension);
                 long fileSize = BitConverter.ToInt64(fileNameAndLength, fileNameDimension);
 
                 if (settings.AutoAccept)
@@ -179,7 +178,7 @@ namespace ProjectPDSWPF
                 }
                 string zipFileNameAndLengthString = Encoding.ASCII.GetString(zipFileNameAndLength);
                 string zipFileName = zipFileNameAndLengthString.Substring(0, zipFileNameLength);
-                long zipFileSize = BitConverter.ToInt64(zipFileNameAndLength, zipFileNameLength);
+                zipFileSize = BitConverter.ToInt64(zipFileNameAndLength, zipFileNameLength);
 
 
                 string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
@@ -195,15 +194,16 @@ namespace ProjectPDSWPF
                     image = ms.ToArray();
                     ms.Close();
                 }
-                string id = Guid.NewGuid().ToString();
+                id = Guid.NewGuid().ToString();
 
                 // INIZIA A SERVIRE IL CONTROLLO GUI
                 updateReceivingFiles(senderID, image, fileNameString, id);
                 int percentage = 0;
                 zipLocation = App.defaultFolder + "\\" + zipFileName;
-                FileStream fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
+                fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
                 byte[] data = new byte[1400];
-                int temp = 0, bytesRec = 0;
+                int bytesRec = 0;
+
                 while (temp < zipFileSize)
                 {
                     if (zipFileSize - temp > 1400)
@@ -212,8 +212,7 @@ namespace ProjectPDSWPF
                     }
                     else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
 
-                    if (bytesRec == 0)
-                        break;
+
 
                     if (sockError == SocketError.Success)
                     {
@@ -234,11 +233,14 @@ namespace ProjectPDSWPF
                             fs.Close();
                         throw new SocketException();
                     }
+
+                    if (bytesRec == 0)
+                        break;
                 }
 
                 if (temp != zipFileSize)
                 {
-                    fileCancel(id);
+                    fileCancel(id, Constants.FILE_STATE.CANCELED.ToString());
                     fs.Close();
                     releaseResources(handler);
                     return;
@@ -246,6 +248,7 @@ namespace ProjectPDSWPF
                 fs.Close();
 
                 NeighborProtocol n = NeighborProtocol.getInstance;
+                string user = n.getUserFromIp(ipSender);
                 if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                 {
                     archive = ZipFile.OpenRead(zipLocation);
@@ -253,7 +256,6 @@ namespace ProjectPDSWPF
                     {
                         if (File.Exists(currentDirectory + "\\" + entry.Name))
                         {
-                            string user = n.getUserFromIp(ipSender);
                             string extension = Path.GetExtension(currentDirectory + "\\" + entry.Name);
                             string onlyName = Path.GetFileNameWithoutExtension(currentDirectory + "\\" + entry.Name);
                             string newName = onlyName + user + extension;
@@ -271,12 +273,12 @@ namespace ProjectPDSWPF
                 {
                     if (Directory.Exists(currentDirectory + "\\" + fileNameString))
                     {
-                        if (Directory.Exists(currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender)))
+                        if (Directory.Exists(currentDirectory + "\\" + fileNameString + user))
                         {
                             string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender) + timeStamp);
+                            ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + user + timeStamp);
                         }
-                        else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + n.getUserFromIp(ipSender));
+                        else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + user);
                     }
                     else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString);
                 }
@@ -285,16 +287,25 @@ namespace ProjectPDSWPF
             }
             catch (SocketException e)
             {
-                /* GUI solo per l'ultimo
-                 * errore generico su connessione per tutti gli altri
-                 */
+                Console.WriteLine(e.SocketErrorCode);
+                if (zipFileSize == 0)
+                {
+                    receivingFailure(fileNameString, ipSender, 4);
+                }
+                else
+                {
+                    //TODO cambiare
+                    fileCancel(id, "ERROR");
+                }
             }
             catch
             {
-                //Errori di filestream, encoder, cast  -> GUI (Errore nella creazione del file.)
+                receivingFailure(fileNameString, ipSender, 6);
             }
             finally
             {
+                if (fs != null)
+                    fs.Close();
                 if (archive != null)
                     archive.Dispose();
                 if (!String.IsNullOrEmpty(zipLocation))
@@ -307,9 +318,9 @@ namespace ProjectPDSWPF
 
         static string SizeSuffix(Int64 value, int decimalPlaces = 2)
         {
-            if (decimalPlaces < 0) { throw new ArgumentOutOfRangeException("decimalPlaces"); }
-            if (value < 0) { return "-" + SizeSuffix(-value); }
-            if (value == 0) { return string.Format("{0:n" + decimalPlaces + "} bytes", 0); }
+            if (decimalPlaces < 0) throw new ArgumentOutOfRangeException("decimalPlaces");
+            if (value < 0) return "-" + SizeSuffix(-value);
+            if (value == 0) return string.Format("{0:n" + decimalPlaces + "} bytes", 0);
 
             int mag = (int)Math.Log(value, 1024);
             decimal adjustedSize = (decimal)value / (1L << (mag * 10));
@@ -319,9 +330,7 @@ namespace ProjectPDSWPF
                 adjustedSize /= 1024;
             }
 
-            return string.Format("{0:n" + decimalPlaces + "} {1}",
-                adjustedSize,
-                SizeSuffixes[mag]);
+            return string.Format("{0:n" + decimalPlaces + "} {1}", adjustedSize, SizeSuffixes[mag]);
         }
 
         private void releaseResources(Socket sock)
@@ -331,9 +340,7 @@ namespace ProjectPDSWPF
             sock.Close();
 
         }
-        static readonly string[] SizeSuffixes =
-                   { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-
+        static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
         private Thread server;
         private Settings settings;
@@ -344,10 +351,13 @@ namespace ProjectPDSWPF
         public delegate void myDelegate1(string senderID, byte[] image, string fileName, string id);
         public static event myDelegate1 updateReceivingFiles;
 
-        public delegate void myDelegate2(string id);
+        public delegate void myDelegate2(string id, string statusFile);
         public static event myDelegate2 fileCancel;
 
         public delegate MessageDialogResult myDelegate3(string userName, string fileName, string dimension);
         public static event myDelegate3 askToAccept;
+
+        public delegate void myDelegate4(string fileName, string userName, int type);
+        public static event myDelegate4 receivingFailure;
     }
 }

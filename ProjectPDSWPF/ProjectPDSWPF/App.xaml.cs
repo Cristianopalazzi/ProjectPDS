@@ -41,6 +41,7 @@ namespace ProjectPDSWPF
             Sender.fileRejected += createBalloons;
             ProjectPDSWPF.MainWindow.triggerBalloon += createBalloons;
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
+            Receiver.receivingFailure += createBalloons;
 
             initializeNotifyIcon();
         }
@@ -107,7 +108,7 @@ namespace ProjectPDSWPF
                         string user = NeighborProtocol.getInstance.getUserFromIp(userName);
                         string text = "Errore durante l'invio ";
                         if (!String.IsNullOrEmpty(user))
-                            text = String.Concat(text, "a: "+user);
+                            text = String.Concat(text, "a: " + user);
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
@@ -122,12 +123,21 @@ namespace ProjectPDSWPF
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
+                case 7:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = "Errore durante la ricezione da"+userName;
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
             }
         }
 
         private void initializeNotifyIcon()
         {
-            //TODO time estimation
+            //TODO provare time estimation con lo stesso evento e non 2 separati
             nIcon.Icon = new System.Drawing.Icon(defaultResourcesFolder + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
@@ -186,8 +196,9 @@ namespace ProjectPDSWPF
 
         private void neighbor_selection(string file)
         {
-            Current.Dispatcher.Invoke(new Action(() =>
+            Dispatcher.Invoke(new Action(() =>
             {
+                //TODO alcune istruzioni sono provabilmente inutili
                 ns.listNeighborSelection.UnselectAll();
                 ns.sendingFile.Text = file;
                 ns.Show();

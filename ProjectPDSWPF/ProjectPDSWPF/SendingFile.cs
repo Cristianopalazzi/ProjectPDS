@@ -13,8 +13,7 @@ namespace ProjectPDSWPF
             FileName = fileName;
             Immagine = immagine;
             Value = 0.0;
-            Sock = new Socket(AddressFamily.InterNetwork,
-              SocketType.Stream, ProtocolType.Tcp);
+            Sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             File_state = Constants.FILE_STATE.PROGRESS;
         }
 
@@ -23,7 +22,9 @@ namespace ProjectPDSWPF
         public string Name { get => name; set => name = value; }
         public Socket Sock { get => sock; set => sock = value; }
         public BitmapImage Immagine { get => immagine; set => immagine = value; }
-        public Constants.FILE_STATE File_state {
+
+        public Constants.FILE_STATE File_state
+        {
             get => file_state;
             set
             {
@@ -62,7 +63,9 @@ namespace ProjectPDSWPF
             }
         }
 
-        public bool Ready { get => ready;
+        public bool Ready
+        {
+            get => ready;
             set
             {
                 ready = value;

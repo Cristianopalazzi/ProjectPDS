@@ -43,15 +43,6 @@ namespace ProjectPDSWPF
         public BitmapImage NeighborImage
         {
             get => neighborImage;
-
-            //set 
-            //{
-            //    if (neighborImage != value)
-            //    {
-            //        neighborImage = value;
-
-            //    }
-            //}
         }
 
         public void setImage(byte[] bytes)

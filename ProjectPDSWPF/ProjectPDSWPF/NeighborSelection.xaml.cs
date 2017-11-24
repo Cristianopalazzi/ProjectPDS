@@ -45,7 +45,7 @@ namespace ProjectPDSWPF
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
-              
+
                 sendingFiles = new List<SendingFile>();
                 selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
                 foreach (Neighbor n in selected)
@@ -59,7 +59,7 @@ namespace ProjectPDSWPF
             //TODO cambiare
             else
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
-                
+
         }
 
         public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
