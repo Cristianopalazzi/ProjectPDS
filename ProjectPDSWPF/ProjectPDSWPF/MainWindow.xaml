@@ -85,7 +85,7 @@
                                     <DataTemplate>
                                         <Grid>
                                             <ProgressBar Value="{Binding Value}" Height="20"/>
-                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="White"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black"  HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -169,7 +169,38 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}"  Foreground="Black" HorizontalAlignment="Center"  Margin="0,0,0,10"/>
+                                            <TextBlock Text="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}"  Foreground="Black" HorizontalAlignment="Center"  Margin="0,0,0,10">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Visible" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                             <Grid>
                                                 <ProgressBar Value="{Binding Value}" Height="20"  VerticalAlignment="Center" />
                                                 <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -190,13 +221,25 @@
                                                     <Style.Triggers>
                                                         <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Value}" Value="100" />
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
                                                         </MultiDataTrigger>
                                                         <MultiDataTrigger>
                                                             <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Hidden" />
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
                                                         </MultiDataTrigger>
@@ -214,7 +257,38 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <Controls:ProgressRing IsActive="{ Binding Ready }" VerticalAlignment="Center" Foreground="{DynamicResource AccentColorBrush}"/>
+                                            <Controls:ProgressRing  VerticalAlignment="Center" Foreground="{DynamicResource AccentColorBrush}">
+                                                <Controls:ProgressRing.Style>
+                                                    <Style TargetType="Controls:ProgressRing">
+                                                        <Style.Triggers>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="True" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="False" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="False" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="False" />
+                                                            </MultiDataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Controls:ProgressRing.Style>
+                                            </Controls:ProgressRing>
                                             <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>

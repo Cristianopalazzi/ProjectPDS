@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using System.IO.Pipes;
 using System.IO;
+
 
 namespace FileNameSender
 {
@@ -12,13 +9,28 @@ namespace FileNameSender
     {
         static void Main(string[] args)
         {
-            NamedPipeClientStream pipeClient =
-                new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);
-            pipeClient.Connect(3000);
-            StreamWriter sw = new StreamWriter(pipeClient);
-            sw.WriteLine(args[0]);
-            sw.Flush();
-            pipeClient.Close();
+            NamedPipeClientStream pipeClient = null;
+            StreamWriter sw = null;
+            try
+            {
+                pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);
+                pipeClient.Connect(3000);
+                sw = new StreamWriter(pipeClient);
+                sw.WriteLine(args[0]);
+                sw.Flush();
+            }
+            catch
+            {
+                //Notifica o qualcosa di visuale per dire all'utente che la nostra app è chiusa.
+            }
+            finally
+            {
+                if (pipeClient != null)
+                    pipeClient.Close();
+                if (sw != null)
+                    sw.Close();
+
+            }
         }
     }
 }

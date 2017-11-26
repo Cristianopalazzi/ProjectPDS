@@ -159,7 +159,7 @@ namespace ProjectPDSWPF
                 //ricevo zip command + zipFileNameLength
                 byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
                 received = handler.Receive(zipCommand, 0, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
-                if (sockError != SocketError.Success)
+                if (sockError != SocketError.Success || received == 0 )
                 {
                     throw new SocketException();
                 }
@@ -240,7 +240,7 @@ namespace ProjectPDSWPF
 
                 if (temp != zipFileSize)
                 {
-                    fileCancel(id, Constants.FILE_STATE.CANCELED.ToString());
+                    fileCancel(id, Constants.NOTIFICATION_STATE.CANCELED);
                     fs.Close();
                     releaseResources(handler);
                     return;
@@ -283,24 +283,22 @@ namespace ProjectPDSWPF
                     else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString);
                 }
                 //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
-                //cancella lo zip
             }
             catch (SocketException e)
             {
                 Console.WriteLine(e.SocketErrorCode);
                 if (zipFileSize == 0)
                 {
-                    receivingFailure(fileNameString, ipSender, 4);
+                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR); // era 4
                 }
                 else
                 {
-                    //TODO cambiare
-                    fileCancel(id, "ERROR");
+                    fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
                 }
             }
             catch
             {
-                receivingFailure(fileNameString, ipSender, 6);
+                receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR); // era 6
             }
             finally
             {
@@ -316,21 +314,20 @@ namespace ProjectPDSWPF
         }
 
 
-        static string SizeSuffix(Int64 value, int decimalPlaces = 2)
+        static string SizeSuffix(Int64 value)
         {
-            if (decimalPlaces < 0) throw new ArgumentOutOfRangeException("decimalPlaces");
             if (value < 0) return "-" + SizeSuffix(-value);
-            if (value == 0) return string.Format("{0:n" + decimalPlaces + "} bytes", 0);
+            if (value == 0) return string.Format("{0:n" + 2 + "} bytes", 0);
 
             int mag = (int)Math.Log(value, 1024);
             decimal adjustedSize = (decimal)value / (1L << (mag * 10));
-            if (Math.Round(adjustedSize, decimalPlaces) >= 1000)
+            if (Math.Round(adjustedSize, 2) >= 1000)
             {
                 mag += 1;
                 adjustedSize /= 1024;
             }
 
-            return string.Format("{0:n" + decimalPlaces + "} {1}", adjustedSize, SizeSuffixes[mag]);
+            return string.Format("{0:n" + 2 + "} {1}", adjustedSize, SizeSuffixes[mag]);
         }
 
         private void releaseResources(Socket sock)
@@ -351,13 +348,13 @@ namespace ProjectPDSWPF
         public delegate void myDelegate1(string senderID, byte[] image, string fileName, string id);
         public static event myDelegate1 updateReceivingFiles;
 
-        public delegate void myDelegate2(string id, string statusFile);
+        public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);
         public static event myDelegate2 fileCancel;
 
         public delegate MessageDialogResult myDelegate3(string userName, string fileName, string dimension);
         public static event myDelegate3 askToAccept;
 
-        public delegate void myDelegate4(string fileName, string userName, int type);
+        public delegate void myDelegate4(string fileName, string userName, Constants.NOTIFICATION_STATE state);
         public static event myDelegate4 receivingFailure;
     }
 }

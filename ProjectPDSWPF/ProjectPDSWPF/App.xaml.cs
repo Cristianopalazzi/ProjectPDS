@@ -9,7 +9,7 @@ namespace ProjectPDSWPF
     /// Logica di interazione per App.xaml
     /// </summary>
     /// 
-
+    //TODO cambiare le stringhe per compatibilità UTF8
     public partial class App : Application
     {
         private NeighborSelection ns;
@@ -53,47 +53,52 @@ namespace ProjectPDSWPF
             nIcon.Dispose();
         }
 
-        private void createBalloons(string fileName, string userName, int type)
+        private void createBalloons(string fileName, string userName, Constants.NOTIFICATION_STATE state)
         {
-            switch (type)
+            switch (state)
             {
-                case 0:
+                case Constants.NOTIFICATION_STATE.RECEIVED:
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipText = "ricevuto correttamente da " + userName;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.None;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
 
-                case 1:
+                case Constants.NOTIFICATION_STATE.SENT:
                     {
                         nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.None;
                         nIcon.BalloonTipText = "inviato correttamente a " + userName;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     };
 
-                case 2:
+                case Constants.NOTIFICATION_STATE.CANCELED:
                     {
                         nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipText = userName + " ha annullato l'invio";
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case 3:
+                case Constants.NOTIFICATION_STATE.REFUSED:
                     {
                         nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipText = userName + " ha rifiutato il tuo file";
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case 4:
+                case Constants.NOTIFICATION_STATE.NET_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         string user = NeighborProtocol.getInstance.getUserFromIp(userName);
                         string text = "Errore nella connessione con l'host";
                         if (!String.IsNullOrEmpty(user))
@@ -102,9 +107,10 @@ namespace ProjectPDSWPF
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case 5:
+                case Constants.NOTIFICATION_STATE.SEND_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         string user = NeighborProtocol.getInstance.getUserFromIp(userName);
                         string text = "Errore durante l'invio ";
                         if (!String.IsNullOrEmpty(user))
@@ -114,20 +120,22 @@ namespace ProjectPDSWPF
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case 6:
+                case Constants.NOTIFICATION_STATE.FILE_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
                         string text = "Errore durante la preparazione del file";
                         nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case 7:
+                case Constants.NOTIFICATION_STATE.REC_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
                         string text = "Errore durante la ricezione da"+userName;
                         nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
@@ -198,6 +206,7 @@ namespace ProjectPDSWPF
         {
             Dispatcher.Invoke(new Action(() =>
             {
+                NeighborProtocol.getInstance.clean(); //aggiunto pulizia
                 //TODO alcune istruzioni sono provabilmente inutili
                 ns.listNeighborSelection.UnselectAll();
                 ns.sendingFile.Text = file;

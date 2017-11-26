@@ -14,7 +14,7 @@ namespace ProjectPDSWPF
             Immagine = immagine;
             Value = 0.0;
             Sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            File_state = Constants.FILE_STATE.PROGRESS;
+            File_state = Constants.FILE_STATE.PREPARATION;
         }
 
         public string IpAddr { get => ipAddr; set => ipAddr = value; }
@@ -63,15 +63,7 @@ namespace ProjectPDSWPF
             }
         }
 
-        public bool Ready
-        {
-            get => ready;
-            set
-            {
-                ready = value;
-                NotifyPropertyChanged("Ready");
-            }
-        }
+       
 
         public void NotifyPropertyChanged(string propName)
         {
@@ -82,7 +74,6 @@ namespace ProjectPDSWPF
         private BitmapImage immagine, pic;
         private Socket sock;
         private double value;
-        private bool ready = true;
         private Constants.FILE_STATE file_state;
 
         public event PropertyChangedEventHandler PropertyChanged;

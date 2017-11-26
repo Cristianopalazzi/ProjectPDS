@@ -34,15 +34,37 @@ namespace ProjectPDSWPF
 
         private void listenOnPipe()
         {
-            NamedPipeServerStream pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.In);
-            while (true)
+            NamedPipeServerStream pipeServer = null;
+            StreamReader sr = null;
+            try
             {
-                pipeServer.WaitForConnection();
-                StreamReader sr = new StreamReader(pipeServer);
-                string file = sr.ReadLine();
-                Console.WriteLine(file);
-                openNeighbors(file);
-                pipeServer.Disconnect();
+                pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.In);
+
+                while (true)
+                {
+                    pipeServer.WaitForConnection();
+                    sr = new StreamReader(pipeServer);
+                    string file = sr.ReadLine();
+                    sr.Close();
+                    //Console.WriteLine(file);
+                    openNeighbors(file);
+                    pipeServer.Disconnect();
+                }
+            }
+            catch
+            {
+                if (sr != null)
+                    sr.Close();
+                if (pipeServer != null)
+                    pipeServer.Close();
+                listenOnPipe();
+            }
+            finally
+            {
+                if (sr != null)
+                    sr.Close();
+                if (pipeServer != null)
+                    pipeServer.Close();
             }
         }
 

@@ -33,14 +33,14 @@ namespace ProjectPDSWPF
                 IsBackground = true
             };
             sender.Start();
-            clean = new Thread(cleanMap)
+            cleanT = new Thread(cleanMap)
             {
                 Name = "cleaner",
                 IsBackground = true
             };
-            clean.Start();
+            cleanT.Start();
         }
-        ~NeighborProtocol() { listener.Join(); sender.Join(); clean.Join(); }
+        ~NeighborProtocol() { listener.Join(); sender.Join(); cleanT.Join(); }
 
         private void listen()
         {
@@ -102,7 +102,6 @@ namespace ProjectPDSWPF
                         }
                         else
                         {
-                            //TODO vedere se gestire updateFoto del tizio
                             requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
                             socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                         }
@@ -147,7 +146,7 @@ namespace ProjectPDSWPF
                         Console.WriteLine("Rimuovo {0} ", pair.Key);
                         toRemove.Add(pair.Key);
                     }
-                    else if (pair.Value.Counter == Constants.MAX_COUNTER)
+                    else
                         Neighbors[pair.Key].Counter = 0;
                 }
 
@@ -161,6 +160,29 @@ namespace ProjectPDSWPF
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
         }
+
+        public void clean()
+        {
+            List<string> toRemove = new List<string>();
+
+            foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
+            {
+                if (pair.Value.Counter == 0)
+                {
+                    Console.WriteLine("Rimuovo {0} ", pair.Key);
+                    toRemove.Add(pair.Key);
+                }
+            }
+
+
+            foreach (string tmp in toRemove)
+            {
+                if (Neighbors.TryRemove(tmp, out Neighbor value))
+                    neighborsEvent(tmp, null, false);
+            }
+        }
+
+
 
         private void sendMe()
         {
@@ -436,7 +458,7 @@ namespace ProjectPDSWPF
 
         public ConcurrentDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
         private ConcurrentDictionary<string, Neighbor> neighbors;
-        private Thread listener, clean, sender;
+        private Thread listener, cleanT, sender;
         private static NeighborProtocol instance = null;
         private Settings settings;
         public static ManualResetEvent senderEvent;

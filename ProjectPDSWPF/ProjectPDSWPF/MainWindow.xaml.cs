@@ -18,17 +18,12 @@ namespace ProjectPDSWPF
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        // fare prove per la dimensione dei nomi nella schermata dei file in invio e in ricezione ( maxWidth, ellipsize e tooltip)
-        // resize della finestra principale
-        //TODO tooltip progress bar
-
-
         public MainWindow()
         {
             InitializeComponent();
             sets = Settings.getInstance;
             gridSettings.DataContext = sets;
-
+            Deactivated += MainWindow_Deactivated;
             Closing += MainWindow_Closing;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
@@ -54,6 +49,11 @@ namespace ProjectPDSWPF
             view.GroupDescriptions.Add(groupDescription);
         }
 
+        private void MainWindow_Deactivated(object sender, EventArgs e)
+        {
+            Topmost = false;
+        }
+
 
         //aggiornamento GUI dopo che il file è stato rifiutato dal receiver
         private void Sender_fileRejectedGUI(Socket sender)
@@ -65,7 +65,6 @@ namespace ProjectPDSWPF
                    if (sf.Sock == sender)
                    {
                        sf.File_state = Constants.FILE_STATE.CANCELED;
-                       sf.Ready = false;
                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
                        break;
                    }
@@ -107,7 +106,7 @@ namespace ProjectPDSWPF
         }
 
         //file annullato da parte del sender => aggiorno la lista dei file in ricezione
-        private void file_cancel(string id, string statusFile)
+        private void file_cancel(string id, Constants.NOTIFICATION_STATE state)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
@@ -116,10 +115,10 @@ namespace ProjectPDSWPF
                     {
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
-                        if (String.Compare(statusFile, Constants.FILE_STATE.CANCELED.ToString()) == 0)
-                            triggerBalloon(r.Filename, r.Name, 2);
-                        else if (String.Compare(statusFile, "ERROR") == 0)
-                            triggerBalloon(r.Filename, r.Name, 7);
+                        if(state == Constants.NOTIFICATION_STATE.CANCELED)
+                            triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
+                        else if( state == Constants.NOTIFICATION_STATE.REC_ERROR)
+                            triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
                         break;
                     }
             }));
@@ -180,14 +179,13 @@ namespace ProjectPDSWPF
                     if (sf.Sock == sock)
                     {
                         sf.Value = percentage;
-                        if (sf.Ready)
-                            sf.Ready = false;
+                        sf.File_state = Constants.FILE_STATE.PROGRESS;
                         if (sf.Value == 100)
                         {
                             sf.File_state = Constants.FILE_STATE.COMPLETED;
                             sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico"));
                             if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
-                                triggerBalloon(sf.FileName, sf.Name, 1);
+                                triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
                         }
                         break;
                     }
@@ -209,18 +207,20 @@ namespace ProjectPDSWPF
             SendingFile sf = b.DataContext as SendingFile;
             try
             {
-                sf.Sock.Shutdown(SocketShutdown.Both);
+                if (sf.Sock.Connected)
+                    sf.Sock.Shutdown(SocketShutdown.Both);
             }
-            catch (ObjectDisposedException exc)
+            catch
             {
                 //TODO questo messagebox
-                MessageBox.Show(exc.ToString());
+                MessageBox.Show("ROTTO");
             }
             finally
             {
+                if (sf.Sock != null)
+                    sf.Sock.Close();
                 sf.File_state = Constants.FILE_STATE.CANCELED;
-                sf.Ready = false;
-                sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico", UriKind.RelativeOrAbsolute));
+                sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
             }
         }
 
@@ -234,8 +234,7 @@ namespace ProjectPDSWPF
                     if (sf.Sock == sock)
                     {
                         sf.File_state = Constants.FILE_STATE.CANCELED;
-                        sf.Ready = false;
-                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico", UriKind.RelativeOrAbsolute));
+                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
                     }
                 }
             }));
@@ -347,7 +346,7 @@ namespace ProjectPDSWPF
         public ObservableCollection<SendingFile> FilesToSend { get => filesToSend; set => filesToSend = value; }
         public ObservableCollection<ReceivingFile> FilesToReceive { get => filesToReceive; set => filesToReceive = value; }
 
-        public delegate void myDelegate(string filename, string username, int type);
+        public delegate void myDelegate(string filename, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate triggerBalloon;
     }
 }

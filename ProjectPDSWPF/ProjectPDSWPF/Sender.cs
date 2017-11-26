@@ -16,16 +16,17 @@ namespace ProjectPDSWPF
         public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
             sender.SendTimeout = 2500;
-            sender.ReceiveTimeout = 2500;
+            sender.ReceiveTimeout = 10000;
             string fileName = Path.GetFileName(pathFile);
 
+            //TODO togliamo ping?
             Ping p = new Ping();
             PingReply rep = p.Send(ipAddr, 2000);
 
             if (rep.Status != IPStatus.Success)
             {
                 fileRejectedGUI(sender);
-                fileRejected(fileName, ipAddr, 4);
+                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.NET_ERROR); // 4
                 return;
             }
 
@@ -98,7 +99,7 @@ namespace ProjectPDSWPF
 
                 if (String.Compare(response, Constants.DECLINE_FILE) == 0)
                 {
-                    fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), 3);
+                    fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED); //3
                     fileRejectedGUI(sender);
                     if (File.Exists(zipLocation))
                         File.Delete(zipLocation);
@@ -169,12 +170,19 @@ namespace ProjectPDSWPF
 
                             //TODO provare con countdown 
                             decimal remainingTime = (zipLength - temp) / transferRate;
-                            TimeSpan t = TimeSpan.FromSeconds(Convert.ToDouble(remainingTime));
+                            //aggiunto cose
+                            string answer;
+                            if (remainingTime < 5)
+                                answer = "pochi secondi";
+                            else
+                            {
+                                TimeSpan t = TimeSpan.FromSeconds(Convert.ToDouble(remainingTime));
 
-                            string answer = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
-                                            t.Hours,
-                                            t.Minutes,
-                                            t.Seconds);
+                                answer = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
+                                                t.Hours,
+                                                t.Minutes,
+                                                t.Seconds);
+                            }
                             updateRemainingTime(sender, answer);
                         }
                     }
@@ -189,13 +197,13 @@ namespace ProjectPDSWPF
             catch (SocketException e)
             {
                 sendingFailure(sender);
-                fileRejected(fileName, ipAddr, 5);
+                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR); //5
             }
 
             catch
             {
                 sendingFailure(sender);
-                fileRejected(fileName, ipAddr, 6);
+                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR); //6 
             }
 
             finally
@@ -241,7 +249,7 @@ namespace ProjectPDSWPF
         public delegate void myDelegate(string filename, Socket sock, int percentage);
         public static event myDelegate updateProgress;
 
-        public delegate void myDelegate1(string fileName, string username, int type);
+        public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate1 fileRejected;
 
         public delegate void myDelegate2(Socket sender);

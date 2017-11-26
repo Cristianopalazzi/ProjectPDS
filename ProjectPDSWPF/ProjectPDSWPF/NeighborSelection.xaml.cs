@@ -24,11 +24,17 @@ namespace ProjectPDSWPF
         {
             InitializeComponent();
             DataContext = this;
+            Deactivated += NeighborSelection_Deactivated;
             NeighborProtocol n = NeighborProtocol.getInstance;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Neighbors = new ObservableCollection<Neighbor>();
             listNeighborSelection.ItemsSource = Neighbors;
             Closing += neighborSelectinClosing;
+        }
+
+        private void NeighborSelection_Deactivated(object sender, EventArgs e)
+        {
+            Topmost = false;
         }
 
         private void neighborSelectinClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -56,7 +62,6 @@ namespace ProjectPDSWPF
                 sendSelectedNeighbors(sendingFiles);
                 Hide();
             }
-            //TODO cambiare
             else
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
 
