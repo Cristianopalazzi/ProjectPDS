@@ -159,7 +159,7 @@ namespace ProjectPDSWPF
                 //ricevo zip command + zipFileNameLength
                 byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
                 received = handler.Receive(zipCommand, 0, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
-                if (sockError != SocketError.Success || received == 0 )
+                if (sockError != SocketError.Success || received == 0)
                 {
                     throw new SocketException();
                 }
@@ -249,38 +249,48 @@ namespace ProjectPDSWPF
 
                 NeighborProtocol n = NeighborProtocol.getInstance;
                 string user = n.getUserFromIp(ipSender);
+                string str = String.Empty;
                 if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                 {
                     archive = ZipFile.OpenRead(zipLocation);
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (File.Exists(currentDirectory + "\\" + entry.Name))
+                        str = currentDirectory + "\\" + entry.Name;
+                        if (File.Exists(str))
                         {
-                            string extension = Path.GetExtension(currentDirectory + "\\" + entry.Name);
-                            string onlyName = Path.GetFileNameWithoutExtension(currentDirectory + "\\" + entry.Name);
-                            string newName = onlyName + user + extension;
-                            if (File.Exists(currentDirectory + "\\" + newName))
+                            string extension = Path.GetExtension(str);
+                            string onlyName = Path.GetFileNameWithoutExtension(str);
+                            str = currentDirectory + "\\" + onlyName + user + extension;
+
+                            if (File.Exists(str))
                             {
                                 string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                                entry.ExtractToFile(currentDirectory + "\\" + onlyName + user + timeStamp + extension, true);
+                                str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
                             }
-                            else entry.ExtractToFile(currentDirectory + "\\" + newName);
                         }
-                        else entry.ExtractToFile(currentDirectory + "\\" + entry.Name);
+                        entry.ExtractToFile(str, true);
                     }
                 }
                 else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
                 {
-                    if (Directory.Exists(currentDirectory + "\\" + fileNameString))
+                    str = currentDirectory + "\\" + fileNameString;
+                    if (Directory.Exists(str))
                     {
-                        if (Directory.Exists(currentDirectory + "\\" + fileNameString + user))
+                        str += user;
+                        if (Directory.Exists(str))
                         {
                             string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + user + timeStamp);
+                            str += timeStamp;
                         }
-                        else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString + user);
                     }
-                    else ZipFile.ExtractToDirectory(zipLocation, currentDirectory + "\\" + fileNameString);
+                    try
+                    {
+                        ZipFile.ExtractToDirectory(zipLocation, str);
+                    }
+                    catch (PathTooLongException e)
+                    {
+                        //scegli tu il percorso
+                    }
                 }
                 //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
             }
@@ -288,13 +298,9 @@ namespace ProjectPDSWPF
             {
                 Console.WriteLine(e.SocketErrorCode);
                 if (zipFileSize == 0)
-                {
                     receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR); // era 4
-                }
                 else
-                {
                     fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
-                }
             }
             catch
             {

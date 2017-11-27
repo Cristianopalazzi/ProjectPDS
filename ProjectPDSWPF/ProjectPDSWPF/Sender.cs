@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.IO.Compression;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
+using System.Collections.Generic;
 
 namespace ProjectPDSWPF
 {
@@ -136,11 +137,12 @@ namespace ProjectPDSWPF
 
                 byte[] data = new byte[1400];
                 int readBytes = 0;
+                DateTime now = DateTime.Now;
+                int inviati = 0;
+                List<double> transferRatesList = new List<double>();
 
                 while (temp < zipLength)
                 {
-                    Stopwatch timer = new Stopwatch();
-                    timer.Start();
                     if (zipLength - temp > 1400)
                         readBytes = fs.Read(data, 0, 1400);
                     else
@@ -151,39 +153,30 @@ namespace ProjectPDSWPF
                     if (sockError == SocketError.Success)
                     {
                         temp += sent;
+                        inviati += sent;
                         ulong temporary = (ulong)temp * 100;
                         int tempPercentage = (int)(temporary / (ulong)zipLength);
                         if (tempPercentage > percentage)
                         {
                             updateProgress(fileName, sender, tempPercentage);
                             percentage = tempPercentage;
+                        }
+                        var elapsedSeconds = (DateTime.Now - now).TotalSeconds;
+                        if (elapsedSeconds >= 1)
+                        {
+                            var transferRate = inviati / elapsedSeconds;
+                            transferRatesList.Add(transferRate);
+                            if (transferRatesList.Count == 6)
+                                transferRatesList.RemoveAt(0);
+                            double avg = transferRatesList.Average();
 
-                            timer.Stop();
-                            long ticks = timer.ElapsedTicks;
+                            var remainingTime = (zipLength - temp) / avg;
+                            inviati = 0;
+                            now = DateTime.Now;
+                            TimeSpan t = TimeSpan.FromSeconds(remainingTime);
+                            string remainingTimeString = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
 
-
-                            if (milliSeconds == 0)
-                                milliSeconds = (decimal)(ticks * 1000) / (decimal)Stopwatch.Frequency;
-
-                            decimal transferRate = (decimal)(sent * 1000) / ((decimal)milliSeconds);
-
-
-                            //TODO provare con countdown 
-                            decimal remainingTime = (zipLength - temp) / transferRate;
-                            //aggiunto cose
-                            string answer;
-                            if (remainingTime < 5)
-                                answer = "pochi secondi";
-                            else
-                            {
-                                TimeSpan t = TimeSpan.FromSeconds(Convert.ToDouble(remainingTime));
-
-                                answer = string.Format("{0:D2}h:{1:D2}m:{2:D2}s",
-                                                t.Hours,
-                                                t.Minutes,
-                                                t.Seconds);
-                            }
-                            updateRemainingTime(sender, answer);
+                            updateRemainingTime(sender, remainingTimeString);
                         }
                     }
                     else if (sockError == SocketError.Shutdown)
@@ -196,6 +189,7 @@ namespace ProjectPDSWPF
             }
             catch (SocketException e)
             {
+                //TODO eseguire sempre in debug perchè qualcosa va storto
                 sendingFailure(sender);
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR); //5
             }

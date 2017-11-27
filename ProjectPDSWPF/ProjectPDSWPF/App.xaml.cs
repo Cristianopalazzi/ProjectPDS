@@ -133,7 +133,7 @@ namespace ProjectPDSWPF
                 case Constants.NOTIFICATION_STATE.REC_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
-                        string text = "Errore durante la ricezione da"+userName;
+                        string text = "Errore durante la ricezione da" + userName;
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };

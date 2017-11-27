@@ -217,8 +217,6 @@ namespace ProjectPDSWPF
             }
             finally
             {
-                if (sf.Sock != null)
-                    sf.Sock.Close();
                 sf.File_state = Constants.FILE_STATE.CANCELED;
                 sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
             }
