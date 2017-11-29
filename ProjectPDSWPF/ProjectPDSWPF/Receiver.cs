@@ -28,7 +28,6 @@ namespace ProjectPDSWPF
         private void startServer()
         {
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
-            // Create a TCP/IP socket.
             Socket listener = null;
             try
             {
@@ -74,34 +73,36 @@ namespace ProjectPDSWPF
             FileStream fs = null;
             try
             {
-                ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
-                byte[] request = new byte[Constants.FILE_NAME + Constants.FILE_COMMAND.Length];
                 SocketError sockError;
+                int received = 0;
+                ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
 
-                //Ricevo comando + lunghezza file neighborName
-                int received = handler.Receive(request, 0, Constants.FILE_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
+
+                byte[] command = new byte[Constants.FILE_COMMAND.Length];
+                received = handler.Receive(command, 0, command.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
                 }
 
-                Array.Resize(ref request, received);
-                string requestString = Encoding.UTF8.GetString(request);
-                //Ricavo comando e dimensione del fileName
-                string commandString = requestString.Substring(0, Constants.FILE_COMMAND.Length);
-                int fileNameDimension = BitConverter.ToInt32(request, Constants.FILE_COMMAND.Length);
-
-                byte[] fileNameAndLength = new byte[fileNameDimension + sizeof(long)];
-                received = handler.Receive(fileNameAndLength, 0, fileNameDimension + sizeof(long), SocketFlags.None, out sockError);
+                string commandString = Encoding.ASCII.GetString(command);
+                byte[] fileNameLength = new byte[sizeof(int)];
+                received = handler.Receive(fileNameLength, 0, sizeof(int), SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
                 }
 
-                //Ricevo fileName e lunghezza del file
-                string fileNameAndLengthString = Encoding.UTF8.GetString(fileNameAndLength);
-                fileNameString = fileNameAndLengthString.Substring(0, fileNameDimension);
-                long fileSize = BitConverter.ToInt64(fileNameAndLength, fileNameDimension);
+                int fileNameDimension = BitConverter.ToInt32(fileNameLength, 0);
+                byte[] fileNameAndFileLength = new byte[fileNameDimension + sizeof(long)];
+                received = handler.Receive(fileNameAndFileLength, 0, fileNameAndFileLength.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                {
+                    throw new SocketException();
+                }
+
+                fileNameString = Encoding.ASCII.GetString(fileNameAndFileLength).Substring(0, fileNameDimension);
+                long fileSize = BitConverter.ToInt64(fileNameAndFileLength, fileNameDimension);
 
                 if (settings.AutoAccept)
                 {
@@ -156,30 +157,21 @@ namespace ProjectPDSWPF
                         currentDirectory = settings.DefaultDirPath;
                 }
 
-                //ricevo zip command + zipFileNameLength
-                byte[] zipCommand = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
-                received = handler.Receive(zipCommand, 0, Constants.ZIP_COMMAND.Length + sizeof(int), SocketFlags.None, out sockError);
+                byte[] zipCommandZipNameLength = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
+                received = handler.Receive(zipCommandZipNameLength, 0, zipCommandZipNameLength.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success || received == 0)
                 {
                     throw new SocketException();
                 }
-
-                string zipCommandString = Encoding.ASCII.GetString(zipCommand);
-                int zipFileNameLength = BitConverter.ToInt32(zipCommand, Constants.ZIP_COMMAND.Length);
-
-
-                //ricevo zip file neighborName e lunghezza
-                byte[] zipFileNameAndLength = new byte[zipFileNameLength + sizeof(long)];
-
-                received = handler.Receive(zipFileNameAndLength, 0, zipFileNameLength + sizeof(long), SocketFlags.None, out sockError);
+                int zipFileNameLength = BitConverter.ToInt32(zipCommandZipNameLength, Constants.ZIP_COMMAND.Length);
+                byte[] zipNameAndZipLength = new byte[zipFileNameLength + sizeof(long)];
+                received = handler.Receive(zipNameAndZipLength, 0, zipNameAndZipLength.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
                 }
-                string zipFileNameAndLengthString = Encoding.ASCII.GetString(zipFileNameAndLength);
-                string zipFileName = zipFileNameAndLengthString.Substring(0, zipFileNameLength);
-                zipFileSize = BitConverter.ToInt64(zipFileNameAndLength, zipFileNameLength);
-
+                string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
+                zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
 
                 string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
                 byte[] image;
@@ -196,7 +188,6 @@ namespace ProjectPDSWPF
                 }
                 id = Guid.NewGuid().ToString();
 
-                // INIZIA A SERVIRE IL CONTROLLO GUI
                 updateReceivingFiles(senderID, image, fileNameString, id);
                 int percentage = 0;
                 zipLocation = App.defaultFolder + "\\" + zipFileName;
@@ -211,8 +202,6 @@ namespace ProjectPDSWPF
                         bytesRec = handler.Receive(data, 0, 1400, SocketFlags.None, out sockError);
                     }
                     else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
-
-
 
                     if (sockError == SocketError.Success)
                     {
@@ -250,6 +239,7 @@ namespace ProjectPDSWPF
                 NeighborProtocol n = NeighborProtocol.getInstance;
                 string user = n.getUserFromIp(ipSender);
                 string str = String.Empty;
+
                 if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                 {
                     archive = ZipFile.OpenRead(zipLocation);

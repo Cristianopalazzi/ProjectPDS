@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
-using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Collections.Generic;
 
@@ -19,6 +18,8 @@ namespace ProjectPDSWPF
             sender.SendTimeout = 2500;
             sender.ReceiveTimeout = 0;
             string fileName = Path.GetFileName(pathFile);
+            byte[] fileNameLength = BitConverter.GetBytes(fileName.Length);
+            long fileLength = 0;
 
             //TODO togliamo ping?
             Ping p = new Ping();
@@ -32,9 +33,7 @@ namespace ProjectPDSWPF
             }
 
 
-            byte[] command;
-            byte[] fileNameLength = BitConverter.GetBytes(fileName.Length);
-            long fileLength = 0;
+            byte[] command = new byte[Constants.FILE_COMMAND.Length];
 
             string zipToSend = RandomStr() + Constants.ZIP_EXTENSION;
             FileAttributes attr = File.GetAttributes(pathFile);
@@ -45,24 +44,18 @@ namespace ProjectPDSWPF
                 command = Encoding.ASCII.GetBytes(Constants.DIR_COMMAND);
                 DirectoryInfo dInfo = new DirectoryInfo(pathFile);
                 fileLength = DirSize(dInfo);
-
-                //zippo cartella
                 ZipFile.CreateFromDirectory(pathFile, zipLocation, CompressionLevel.NoCompression, false);
             }
             else
             {
-                //creo comando da mandare
                 command = Encoding.ASCII.GetBytes(Constants.FILE_COMMAND);
 
-                //calcolo grandezza file
                 fileLength = new FileInfo(pathFile).Length;
                 ZipArchive newFile = ZipFile.Open(zipLocation, ZipArchiveMode.Create);
                 newFile.CreateEntryFromFile(pathFile, fileName, CompressionLevel.NoCompression);
                 newFile.Dispose();
             }
 
-            //preparo comando + lunghezza nome file
-            byte[] request = command.Concat(fileNameLength).ToArray();
             long zipLength = new FileInfo(zipLocation).Length;
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), Constants.PORT_TCP);
             FileStream fs = null;
@@ -71,34 +64,23 @@ namespace ProjectPDSWPF
                 sender.Connect(remoteEP);
 
                 SocketError sockError;
-                //mando comando + lunghezza nome file
-                int sent = sender.Send(request, 0, request.Length, SocketFlags.None, out sockError);
-                if (sockError != SocketError.Success)
-                {
-                    throw new SocketException();
-                }
+                int sent = 0;
 
-                //preparo filename + lunghezza file
-                byte[] fileNameByte = Encoding.ASCII.GetBytes(fileName);
-                byte[] fileLengthByte = BitConverter.GetBytes(fileLength);
-                byte[] fileNameAndLength = fileNameByte.Concat(fileLengthByte).ToArray();
-                //mando filename + lunghezza file
-                sent = sender.Send(fileNameAndLength, 0, fileNameAndLength.Length, SocketFlags.None, out sockError);
+                byte[] fileLine = Combine(command, fileNameLength, Encoding.ASCII.GetBytes(fileName), BitConverter.GetBytes(fileLength));
+                sent = sender.Send(fileLine, 0, fileLine.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
                 }
-                //aggiunto cambio di stato
                 updateFileState(sender, Constants.FILE_STATE.ACCEPTANCE);
-
                 byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
                 sender.Receive(responseFromServer, 0, responseFromServer.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
                 }
-                string response = Encoding.ASCII.GetString(responseFromServer);
 
+                string response = Encoding.ASCII.GetString(responseFromServer);
                 if (String.Compare(response, Constants.DECLINE_FILE) == 0)
                 {
                     fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED); //3
@@ -109,29 +91,10 @@ namespace ProjectPDSWPF
                     return;
                 }
 
+                byte[] zipLine = Combine(Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND), BitConverter.GetBytes(zipToSend.Length),
+                    Encoding.ASCII.GetBytes(zipToSend), BitConverter.GetBytes(zipLength));
+                sent = sender.Send(zipLine, 0, zipLine.Length, SocketFlags.None, out sockError);
 
-                //preparo zip command + zip file neighborName length
-                byte[] zipCommand = Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND);
-                byte[] zipAndFileNameLength = zipCommand.Concat(BitConverter.GetBytes(zipToSend.Length)).ToArray();
-
-                //mando zip command + zip file neighborName length
-                sent = sender.Send(zipAndFileNameLength, 0, zipAndFileNameLength.Length, SocketFlags.None, out sockError);
-                if (sockError != SocketError.Success)
-                {
-                    throw new SocketException();
-                }
-
-                //preparo zip file neighborName + lunghezza file zip
-                byte[] zipFileName = Encoding.ASCII.GetBytes(zipToSend);
-                byte[] zipFileLength = BitConverter.GetBytes(zipLength);
-                byte[] tot = zipFileName.Concat(zipFileLength).ToArray();
-
-                //mando zip file neighborName + lunghezza file zip
-                sent = sender.Send(tot, 0, tot.Length, SocketFlags.None, out sockError);
-                if (sockError != SocketError.Success)
-                {
-                    throw new SocketException();
-                }
 
                 int temp = 0, percentage = 0;
                 fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
@@ -197,7 +160,7 @@ namespace ProjectPDSWPF
 
             catch
             {
-                updateFileState(sender,Constants.FILE_STATE.ERROR);
+                updateFileState(sender, Constants.FILE_STATE.ERROR);
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR); //6 
             }
 
@@ -240,6 +203,18 @@ namespace ProjectPDSWPF
             s.Close();
         }
 
+        private byte[] Combine(params byte[][] arrays)
+        {
+            byte[] rv = new byte[arrays.Sum(a => a.Length)];
+            int offset = 0;
+            foreach (byte[] array in arrays)
+            {
+                Buffer.BlockCopy(array, 0, rv, offset, array.Length);
+                offset += array.Length;
+            }
+            return rv;
+        }
+
 
         public delegate void myDelegate(string filename, Socket sock, int percentage);
         public static event myDelegate updateProgress;
@@ -250,10 +225,8 @@ namespace ProjectPDSWPF
         public delegate void myDelegate3(Socket sock, string remainingTime);
         public static event myDelegate3 updateRemainingTime;
 
-        public delegate void myDelegate4(Socket sock,Constants.FILE_STATE state);
+        public delegate void myDelegate4(Socket sock, Constants.FILE_STATE state);
         public static event myDelegate4 updateFileState;
-
-        private decimal milliSeconds = 0;
     }
 
 }

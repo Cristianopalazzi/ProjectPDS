@@ -9,10 +9,23 @@
         Name="windowNeighborSelection"
         Title="NeighborSelection" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
     <Grid>
-            <DockPanel LastChildFill="True">
-                <TextBlock DockPanel.Dock="Top" Name="sendingFile" Width="{Binding ActualWidth, ElementName=windowNeighborSelection}" ToolTip="{Binding Text, ElementName=sendingFile}" FontSize="18"  Margin="5"
-                       TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" VerticalAlignment="Top" FontWeight="Bold" />
-                <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray" Margin="0,0,0,5"/>
+        <DockPanel LastChildFill="True">
+            <TextBlock Margin="0,5" Name="TBlock" HorizontalAlignment="center" FontSize="18" FontWeight="Bold" DockPanel.Dock="Top" Text="File in condivisione"/>
+            <ListView DockPanel.Dock="Top" Name="ListFiles" ItemsSource="{Binding fileList}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" >
+                            <TextBlock Text="{Binding}" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" FontWeight="Bold" FontSize="12"/>
+                            <Button Content="Annulla" HorizontalAlignment="Right" BorderThickness="1" BorderBrush="LightGray" DockPanel.Dock="Right" Click="Button_Click" Tag="{Binding}">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" ></Style>
+                                </Button.Style>
+                            </Button>
+                        </DockPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray" Margin="0,0,0,5"/>
             <Button DockPanel.Dock="Bottom" Content="Invia" Click="button_send_files" Width="80" Height="40"   HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,30,10">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource MetroButton}">
@@ -27,114 +40,114 @@
                 </Button.Style>
             </Button>
             <ListView x:Name="listNeighborSelection" ItemsSource="{Binding Neighbors}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                    <ListView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
-                        </ItemsPanelTemplate>
-                    </ListView.ItemsPanel>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
 
 
-                    <ListView.Resources>
-                        <Style TargetType="ListView">
-                            <Style.Triggers>
-                                <Trigger Property= "HasItems" Value="False">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListView">
-                                                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Nessun contatto online" FontSize="20" />
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Trigger>
-                            </Style.Triggers>
-                            <Setter Property="BorderThickness" Value="0" />
-                        </Style>
+                <ListView.Resources>
+                    <Style TargetType="ListView">
+                        <Style.Triggers>
+                            <Trigger Property= "HasItems" Value="False">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListView">
+                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Text="Nessun contatto online" FontSize="20" />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                        <Setter Property="BorderThickness" Value="0" />
+                    </Style>
 
-                    </ListView.Resources>
+                </ListView.Resources>
 
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" ToolTip="{Binding NeighborName}">
-                                <Ellipse Height="64" Width="64">
-                                    <Ellipse.Fill>
-                                        <ImageBrush  ImageSource="{Binding NeighborImage}"/>
-                                    </Ellipse.Fill>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" ToolTip="{Binding NeighborName}">
+                            <Ellipse Height="64" Width="64">
+                                <Ellipse.Fill>
+                                    <ImageBrush  ImageSource="{Binding NeighborImage}"/>
+                                </Ellipse.Fill>
 
-                                    <Ellipse.Style>
-                                        <Style TargetType="{x:Type Ellipse}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem }}, Path=IsSelected}" Value="true">
-                                                    <Setter Property="Stroke" Value="Blue"/>
-                                                    <Setter Property="StrokeThickness" Value="3"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Ellipse.Style>
-                                </Ellipse>
+                                <Ellipse.Style>
+                                    <Style TargetType="{x:Type Ellipse}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListViewItem }}, Path=IsSelected}" Value="true">
+                                                <Setter Property="Stroke" Value="Blue"/>
+                                                <Setter Property="StrokeThickness" Value="3"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Ellipse.Style>
+                            </Ellipse>
 
-                                <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom" MaxWidth="64" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
+                            <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom" MaxWidth="64" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
 
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsSelected" Value="true" >
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListViewItem">
-                                                <Border
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"></Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="true" >
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border
                 BorderThickness="{TemplateBinding Border.BorderThickness}"
                 Padding="{TemplateBinding Control.Padding}"
                 BorderBrush="{TemplateBinding Border.BorderBrush}"
                 Background="{TemplateBinding Panel.Background}"
                 SnapsToDevicePixels="True">
-                                                    <ContentPresenter
+                                                <ContentPresenter
                     Content="{TemplateBinding ContentControl.Content}"
                     ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}"
                     HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
                     VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}"
                     SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter Property="Background" Value="Transparent" />
-                                </Trigger>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Background" Value="Transparent" />
+                            </Trigger>
 
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="ListViewItem">
-                                                <Border
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListViewItem">
+                                            <Border
                 BorderThickness="{TemplateBinding Border.BorderThickness}"
                 Padding="{TemplateBinding Control.Padding}"
                 BorderBrush="{TemplateBinding Border.BorderBrush}"
                 Background="{TemplateBinding Panel.Background}"
                 SnapsToDevicePixels="True">
-                                                    <ContentPresenter
+                                                <ContentPresenter
                     Content="{TemplateBinding ContentControl.Content}"
                     ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}"
                     HorizontalAlignment="{TemplateBinding Control.HorizontalContentAlignment}"
                     VerticalAlignment="{TemplateBinding Control.VerticalContentAlignment}"
                     SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter Property="Background" Value="Transparent" />
-                                    <Setter Property="BorderBrush" Value="Transparent" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ListView.ItemContainerStyle>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
 
-                </ListView>
+            </ListView>
 
-               
-            </DockPanel>
+
+        </DockPanel>
     </Grid>
 
 </Controls:MetroWindow>

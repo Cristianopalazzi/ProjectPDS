@@ -25,6 +25,11 @@ namespace ProjectPDSWPF
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            s = Settings.getInstance;
+            queue = new MyQueue();
+            n = NeighborProtocol.getInstance;
+            r = new Receiver();
+
             if (Directory.Exists(defaultFolder))
                 foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
                     f.Delete();
@@ -32,18 +37,21 @@ namespace ProjectPDSWPF
 
             mw = new MainWindow();
             ns = new NeighborSelection();
-            queue = new MyQueue();
-            r = new Receiver();
-            n = NeighborProtocol.getInstance;
-            s = Settings.getInstance;
             us = new UserSettings();
+
             MyQueue.openNeighbors += neighbor_selection;
             Sender.fileRejected += createBalloons;
             ProjectPDSWPF.MainWindow.triggerBalloon += createBalloons;
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
             Receiver.receivingFailure += createBalloons;
+            NeighborSelection.closingSelection += NeighborSelection_closingSelection;
 
             initializeNotifyIcon();
+        }
+
+        private void NeighborSelection_closingSelection()
+        {
+            ns.Acceso = false;
         }
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
@@ -207,16 +215,24 @@ namespace ProjectPDSWPF
             Dispatcher.Invoke(new Action(() =>
             {
                 NeighborProtocol.getInstance.clean(); //aggiunto pulizia
-                //TODO alcune istruzioni sono provabilmente inutili
                 ns.listNeighborSelection.UnselectAll();
-                ns.sendingFile.Text = file;
+                if ( ns.Acceso)
+                    ns.FileList.Add(file);
+                else
+                {
+                    ns.FileList.Clear();
+                    ns.Acceso = true;
+                    ns.FileList.Add(file);
+                }
                 ns.Show();
                 ns.Activate();
-                ns.WindowState = WindowState.Normal;
                 ns.Topmost = true;
                 ns.Topmost = false;
                 ns.Focus();
+                
             }));
+
+            
         }
     }
 }

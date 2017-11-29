@@ -57,7 +57,7 @@
     <EmbeddedResource Include="warning.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="share.ico" />
+    <EmbeddedResource Include="share.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

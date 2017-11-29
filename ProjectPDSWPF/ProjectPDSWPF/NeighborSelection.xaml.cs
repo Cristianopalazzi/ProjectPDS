@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
+using System.Windows.Controls;
 
 namespace ProjectPDSWPF
 {
@@ -17,49 +18,66 @@ namespace ProjectPDSWPF
         public delegate void del(List<SendingFile> sf);
         public static event del sendSelectedNeighbors;
 
+        public delegate void myDelegate();
+        public static event myDelegate closingSelection;
+
+        private Boolean acceso;
+
         public ObservableCollection<Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
+        public ObservableCollection<string> FileList { get => fileList; set => fileList = value; }
+        public bool Acceso { get => acceso; set => acceso = value; }
+
         private ObservableCollection<Neighbor> neighbors;
+        private ObservableCollection<String> fileList;
+
+
+
 
         public NeighborSelection()
         {
             InitializeComponent();
             DataContext = this;
-            Deactivated += NeighborSelection_Deactivated;
             NeighborProtocol n = NeighborProtocol.getInstance;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Neighbors = new ObservableCollection<Neighbor>();
+            FileList = new ObservableCollection<string>();
             listNeighborSelection.ItemsSource = Neighbors;
-            Closing += neighborSelectinClosing;
+            ListFiles.ItemsSource = FileList;
+            Closing += NeighborSelection_Closing;
+            Acceso = false;
+
         }
 
-        private void NeighborSelection_Deactivated(object sender, EventArgs e)
+        private void NeighborSelection_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Topmost = false;
-        }
-
-        private void neighborSelectinClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
+            closingSelection();
             e.Cancel = true;
             WindowState = WindowState.Minimized;
             Hide();
         }
 
+
+
         private void button_send_files(object sender, RoutedEventArgs e)
         {
-            string file = sendingFile.Text;
+
+            
             List<Neighbor> selected = null;
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
-
-                sendingFiles = new List<SendingFile>();
-                selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
-                foreach (Neighbor n in selected)
+                foreach (string file in FileList)
                 {
-                    SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);
-                    sendingFiles.Add(sf);
+                    sendingFiles = new List<SendingFile>();
+                    selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
+                    foreach (Neighbor n in selected)
+                    {
+                        SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);
+                        sendingFiles.Add(sf);
+                    }
+                    sendSelectedNeighbors(sendingFiles);
                 }
-                sendSelectedNeighbors(sendingFiles);
+                Acceso = false;
                 Hide();
             }
             else
@@ -90,6 +108,23 @@ namespace ProjectPDSWPF
                     Neighbor n1 = new Neighbor(id, bytes);
                     Neighbors.Add(n1);
                 }));
+        }
+
+
+       
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+            int index = FileList.IndexOf(b.Tag.ToString());
+            if (index < 0)
+                return;
+            FileList.RemoveAt(index);
+            if (FileList.Count == 0)
+            {
+                Acceso = false;
+                Hide();
+            }
         }
     }
 }
