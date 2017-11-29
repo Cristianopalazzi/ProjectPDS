@@ -91,8 +91,8 @@ namespace ProjectPDSWPF
 
                     threads.Add(t);
                 }
-                foreach (var t in threads)
-                    t.Join();
+                //foreach (var t in threads)
+                //    t.Join();
             }
         }
 

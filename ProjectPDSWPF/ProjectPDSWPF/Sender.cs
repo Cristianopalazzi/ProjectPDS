@@ -17,7 +17,7 @@ namespace ProjectPDSWPF
         public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
             sender.SendTimeout = 2500;
-            sender.ReceiveTimeout = 10000;
+            sender.ReceiveTimeout = 0;
             string fileName = Path.GetFileName(pathFile);
 
             //TODO togliamo ping?
@@ -26,7 +26,7 @@ namespace ProjectPDSWPF
 
             if (rep.Status != IPStatus.Success)
             {
-                fileRejectedGUI(sender);
+                updateFileState(sender, Constants.FILE_STATE.ERROR);
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.NET_ERROR); // 4
                 return;
             }
@@ -88,7 +88,8 @@ namespace ProjectPDSWPF
                 {
                     throw new SocketException();
                 }
-
+                //aggiunto cambio di stato
+                updateFileState(sender, Constants.FILE_STATE.ACCEPTANCE);
 
                 byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
                 sender.Receive(responseFromServer, 0, responseFromServer.Length, SocketFlags.None, out sockError);
@@ -101,7 +102,7 @@ namespace ProjectPDSWPF
                 if (String.Compare(response, Constants.DECLINE_FILE) == 0)
                 {
                     fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED); //3
-                    fileRejectedGUI(sender);
+                    updateFileState(sender, Constants.FILE_STATE.CANCELED);
                     if (File.Exists(zipLocation))
                         File.Delete(zipLocation);
                     releaseResources(sender);
@@ -190,13 +191,13 @@ namespace ProjectPDSWPF
             catch (SocketException e)
             {
                 //TODO eseguire sempre in debug perchè qualcosa va storto
-                sendingFailure(sender);
+                updateFileState(sender, Constants.FILE_STATE.ERROR);
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR); //5
             }
 
             catch
             {
-                sendingFailure(sender);
+                updateFileState(sender,Constants.FILE_STATE.ERROR);
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR); //6 
             }
 
@@ -246,14 +247,11 @@ namespace ProjectPDSWPF
         public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate1 fileRejected;
 
-        public delegate void myDelegate2(Socket sender);
-        public static event myDelegate2 fileRejectedGUI;
-
         public delegate void myDelegate3(Socket sock, string remainingTime);
         public static event myDelegate3 updateRemainingTime;
 
-        public delegate void myDelegate4(Socket sock);
-        public static event myDelegate4 sendingFailure;
+        public delegate void myDelegate4(Socket sock,Constants.FILE_STATE state);
+        public static event myDelegate4 updateFileState;
 
         private decimal milliSeconds = 0;
     }

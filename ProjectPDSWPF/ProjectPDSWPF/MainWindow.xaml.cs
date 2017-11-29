@@ -25,17 +25,21 @@ namespace ProjectPDSWPF
             gridSettings.DataContext = sets;
             Deactivated += MainWindow_Deactivated;
             Closing += MainWindow_Closing;
+
             NeighborProtocol.neighborsEvent += modify_neighbors;
+
             Sender.updateProgress += updateProgressBar;
             Sender.updateRemainingTime += updateRemainingTime;
+            Sender.updateFileState += Sender_updateFileState;
+
             Receiver.updateProgress += updateReceivingProgressBar;
             Receiver.updateReceivingFiles += updateReceivingFiles;
-            UserSettings.openTabSettings += tabChange;
-            Receiver.fileCancel += file_cancel;
-            NeighborSelection.sendSelectedNeighbors += addSendingFiles;
             Receiver.askToAccept += Receiver_askToAccept;
-            Sender.fileRejectedGUI += Sender_fileRejectedGUI;
-            Sender.sendingFailure += Sender_sendingFailure;
+            Receiver.fileCancel += file_cancel;
+
+
+            UserSettings.openTabSettings += tabChange;
+            NeighborSelection.sendSelectedNeighbors += addSendingFiles;
 
             NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
@@ -49,27 +53,26 @@ namespace ProjectPDSWPF
             view.GroupDescriptions.Add(groupDescription);
         }
 
+
+        private void Sender_updateFileState(Socket sock, Constants.FILE_STATE state)
+        {
+            sendingFiles.Dispatcher.Invoke(new Action(() =>
+            {
+                foreach (SendingFile sf in FilesToSend)
+                {
+                    if (sf.Sock == sock)
+                    {
+                        sf.File_state = state;
+                        if(state == Constants.FILE_STATE.CANCELED || state == Constants.FILE_STATE.ERROR)
+                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
+                    }
+                }
+            }));
+        }
+
         private void MainWindow_Deactivated(object sender, EventArgs e)
         {
             Topmost = false;
-        }
-
-
-        //aggiornamento GUI dopo che il file è stato rifiutato dal receiver
-        private void Sender_fileRejectedGUI(Socket sender)
-        {
-            sendingFiles.Dispatcher.Invoke(new Action(() =>
-           {
-               foreach (SendingFile sf in FilesToSend)
-               {
-                   if (sf.Sock == sender)
-                   {
-                       sf.File_state = Constants.FILE_STATE.CANCELED;
-                       sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
-                       break;
-                   }
-               }
-           }));
         }
 
         //chiedo al receiver se vuole accettare il file che sto mandando
@@ -222,21 +225,7 @@ namespace ProjectPDSWPF
             }
         }
 
-        //errore durante l'invio di un file
-        private void Sender_sendingFailure(Socket sock)
-        {
-            sendingFiles.Dispatcher.Invoke(new Action(() =>
-            {
-                foreach (SendingFile sf in FilesToSend)
-                {
-                    if (sf.Sock == sock)
-                    {
-                        sf.File_state = Constants.FILE_STATE.CANCELED;
-                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
-                    }
-                }
-            }));
-        }
+     
 
 
         //context menu sui file in ricezione (cancella un file ricevuto correttamente)

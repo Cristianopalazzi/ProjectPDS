@@ -169,7 +169,7 @@
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <StackPanel>
-                                            <TextBlock Text="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}"  Foreground="Black" HorizontalAlignment="Center"  Margin="0,0,0,10">
+                                            <TextBlock  Foreground="Black" HorizontalAlignment="Center"  Margin="0,0,0,10">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
                                                         <Style.Triggers>
@@ -177,25 +177,37 @@
                                                                 <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Visibility" Value="Visible" />
+                                                                <Setter Property="Text" Value="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Text" Value="In attesa di conferma" />
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                                <Setter Property="Text" Value="Preparazione del file" />
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                                <Setter Property="Text" Value="Inviato con successo" />
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
                                                                 </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Visibility" Value="Hidden" />
+                                                                <Setter Property="Text" Value="Invio Annullato" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Text" Value="Si è verificato un errore durante l'invio" />
                                                             </MultiDataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -243,6 +255,18 @@
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
                                                         </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Hidden" />
+                                                        </MultiDataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>
@@ -282,6 +306,18 @@
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="False" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="False" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
                                                                 </MultiDataTrigger.Conditions>
                                                                 <Setter Property="IsActive" Value="False" />
                                                             </MultiDataTrigger>
