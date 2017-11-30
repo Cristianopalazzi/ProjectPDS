@@ -12,9 +12,9 @@ namespace ProjectPDSWPF
     /// <summary>
     /// Logica di interazione per NeighborSelection.xaml
     /// </summary>
+    /// //TODO vedere la dimensione massima del nome dei file nella lista di quelli in invio
     public partial class NeighborSelection : MetroWindow
     {
-
         public delegate void del(List<SendingFile> sf);
         public static event del sendSelectedNeighbors;
 
@@ -30,9 +30,6 @@ namespace ProjectPDSWPF
         private ObservableCollection<Neighbor> neighbors;
         private ObservableCollection<String> fileList;
 
-
-
-
         public NeighborSelection()
         {
             InitializeComponent();
@@ -42,10 +39,8 @@ namespace ProjectPDSWPF
             Neighbors = new ObservableCollection<Neighbor>();
             FileList = new ObservableCollection<string>();
             listNeighborSelection.ItemsSource = Neighbors;
-            ListFiles.ItemsSource = FileList;
             Closing += NeighborSelection_Closing;
             Acceso = false;
-
         }
 
         private void NeighborSelection_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -60,8 +55,6 @@ namespace ProjectPDSWPF
 
         private void button_send_files(object sender, RoutedEventArgs e)
         {
-
-            
             List<Neighbor> selected = null;
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
@@ -82,7 +75,6 @@ namespace ProjectPDSWPF
             }
             else
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
-
         }
 
         public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
@@ -111,15 +103,13 @@ namespace ProjectPDSWPF
         }
 
 
-       
+
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            int index = FileList.IndexOf(b.Tag.ToString());
-            if (index < 0)
-                return;
-            FileList.RemoveAt(index);
+            string s = b.DataContext as String;
+            FileList.Remove(s);
             if (FileList.Count == 0)
             {
                 Acceso = false;

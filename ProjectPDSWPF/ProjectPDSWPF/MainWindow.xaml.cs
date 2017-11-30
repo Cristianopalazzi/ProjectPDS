@@ -10,6 +10,7 @@ using System.Net.Sockets;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Threading;
+using System.Linq;
 
 namespace ProjectPDSWPF
 {
@@ -27,17 +28,13 @@ namespace ProjectPDSWPF
             Closing += MainWindow_Closing;
 
             NeighborProtocol.neighborsEvent += modify_neighbors;
-
             Sender.updateProgress += updateProgressBar;
             Sender.updateRemainingTime += updateRemainingTime;
             Sender.updateFileState += Sender_updateFileState;
-
             Receiver.updateProgress += updateReceivingProgressBar;
             Receiver.updateReceivingFiles += updateReceivingFiles;
-            Receiver.askToAccept += Receiver_askToAccept;
             Receiver.fileCancel += file_cancel;
-
-
+            Receiver.acceptance += file_to_accept;
             UserSettings.openTabSettings += tabChange;
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
 
@@ -53,6 +50,21 @@ namespace ProjectPDSWPF
             view.GroupDescriptions.Add(groupDescription);
         }
 
+        //lista dei file in attesa di essere accettati o meno
+        private void file_to_accept(string userName, string fileName, string dimension, string id)
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                Acceptance acceptance = null;
+                acceptance = Application.Current.Windows.OfType<Acceptance>().SingleOrDefault(w => w.IsActive);
+                if (acceptance == null)
+                {
+                    acceptance = new Acceptance();
+                    acceptance.Show();
+                }
+                acceptance.AcceptingFiles.Add(new Acceptance.fileToAccept(fileName, userName, dimension, id));
+            }));
+        }
 
         private void Sender_updateFileState(Socket sock, Constants.FILE_STATE state)
         {
@@ -63,8 +75,8 @@ namespace ProjectPDSWPF
                     if (sf.Sock == sock)
                     {
                         sf.File_state = state;
-                        if(state == Constants.FILE_STATE.CANCELED || state == Constants.FILE_STATE.ERROR)
-                        sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
+                        if (state == Constants.FILE_STATE.CANCELED || state == Constants.FILE_STATE.ERROR)
+                            sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
                     }
                 }
             }));
@@ -74,24 +86,6 @@ namespace ProjectPDSWPF
         {
             Topmost = false;
         }
-
-        //chiedo al receiver se vuole accettare il file che sto mandando
-        private MessageDialogResult Receiver_askToAccept(string userName, string fileName, string dimension)
-        {
-            MessageDialogResult mr = MessageDialogResult.Negative;
-            myMainWindow.Dispatcher.Invoke(new Action(() =>
-            {
-                MetroWindow mw = Application.Current.MainWindow as MetroWindow;
-                mw.Show();
-                mr = mw.ShowModalMessageExternal("File in arrivo", userName + " vuole condividere " + fileName + " di: " + dimension + "\nAccetti?", MessageDialogStyle.AffirmativeAndNegative);
-                if (mr == MessageDialogResult.Negative)
-                    mw.Hide();
-                else
-                    tabControl.SelectedIndex = 0;
-            }));
-            return mr;
-        }
-
 
         //mostro la tab delle impostazioni dopo aver cliccato su "impostazioni"
         private void tabChange()
@@ -118,9 +112,9 @@ namespace ProjectPDSWPF
                     {
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
-                        if(state == Constants.NOTIFICATION_STATE.CANCELED)
+                        if (state == Constants.NOTIFICATION_STATE.CANCELED)
                             triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
-                        else if( state == Constants.NOTIFICATION_STATE.REC_ERROR)
+                        else if (state == Constants.NOTIFICATION_STATE.REC_ERROR)
                             triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
                         break;
                     }
@@ -225,7 +219,7 @@ namespace ProjectPDSWPF
             }
         }
 
-     
+
 
 
         //context menu sui file in ricezione (cancella un file ricevuto correttamente)
@@ -246,7 +240,7 @@ namespace ProjectPDSWPF
                 return;
             List<ReceivingFile> tmp = new List<ReceivingFile>();
             foreach (ReceivingFile rf in FilesToReceive)
-                if (rf.File_state == Constants.FILE_STATE.CANCELED || rf.File_state == Constants.FILE_STATE.COMPLETED)
+                if (rf.File_state == Constants.FILE_STATE.ERROR || rf.File_state == Constants.FILE_STATE.PROGRESS || rf.File_state == Constants.FILE_STATE.COMPLETED)
                     tmp.Add(rf);
             if (tmp.Count == 0)
             {

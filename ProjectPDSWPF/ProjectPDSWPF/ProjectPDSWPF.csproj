@@ -65,6 +65,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Acceptance.xaml.cs">
+      <DependentUpon>Acceptance.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Neighbor.cs" />
     <Compile Include="NeighborSelection.xaml.cs">
       <DependentUpon>NeighborSelection.xaml</DependentUpon>
@@ -82,6 +85,10 @@
     <Compile Include="UserSettings.xaml.cs">
       <DependentUpon>UserSettings.xaml</DependentUpon>
     </Compile>
+    <Page Include="Acceptance.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

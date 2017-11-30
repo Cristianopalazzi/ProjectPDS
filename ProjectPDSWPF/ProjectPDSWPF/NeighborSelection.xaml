@@ -10,21 +10,23 @@
         Title="NeighborSelection" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
     <Grid>
         <DockPanel LastChildFill="True">
-            <TextBlock Margin="0,5" Name="TBlock" HorizontalAlignment="center" FontSize="18" FontWeight="Bold" DockPanel.Dock="Top" Text="File in condivisione"/>
-            <ListView DockPanel.Dock="Top" Name="ListFiles" ItemsSource="{Binding fileList}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Top" >
-                            <TextBlock Text="{Binding}" HorizontalAlignment="Left" VerticalAlignment="Center" DockPanel.Dock="Left" FontWeight="Bold" FontSize="12"/>
-                            <Button Content="Annulla" HorizontalAlignment="Right" BorderThickness="1" BorderBrush="LightGray" DockPanel.Dock="Right" Click="Button_Click" Tag="{Binding}">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" ></Style>
-                                </Button.Style>
-                            </Button>
-                        </DockPanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <Controls:Badged x:Name="badge" HorizontalAlignment="Stretch" Margin="12" DockPanel.Dock="Top" BadgePlacementMode="TopRight" Badge="{Binding Path = FileList.Count}">
+                <Controls:DropDownButton FontSize="18" FontWeight="Bold"  Content="File in condivisione" ItemsSource="{Binding FileList}">
+                    <Controls:DropDownButton.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock MaxWidth="200" TextTrimming="CharacterEllipsis" FontSize="16" Grid.Column="0" Text="{Binding}" HorizontalAlignment="Left" />
+                                <Button Grid.Column="2" Content="Annulla"  BorderThickness="1" BorderBrush="LightGray" Click="Button_Click" HorizontalAlignment="Right"/>
+                            </Grid>
+                        </DataTemplate>
+                    </Controls:DropDownButton.ItemTemplate>
+                </Controls:DropDownButton>
+            </Controls:Badged>
             <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray" Margin="0,0,0,5"/>
             <Button DockPanel.Dock="Bottom" Content="Invia" Click="button_send_files" Width="80" Height="40"   HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,30,10">
                 <Button.Style>

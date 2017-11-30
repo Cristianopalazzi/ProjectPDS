@@ -30,7 +30,7 @@ namespace Setup
 
                 RegistryKey rk = Registry.ClassesRoot;
                 RegistryKey sk = rk.OpenSubKey("\\*\\shell\\Condividi con");
-                if ( sk != null)
+                if (sk != null)
                 {
                     Console.WriteLine("no need for file keys");
                 }
@@ -46,7 +46,6 @@ namespace Setup
                         skCommand = sk.CreateSubKey("\\command");
                         skCommand.SetValue("@", "C:\\Users\\Gianmaria\\source\\repos\\ProjectPDS\\FileNameSender\\FileNameSender\\bin\\Debug\\FileNameSender.exe\"%1\"");
                     }
-
                 }
 
                 RegistryKey skDir = rk.OpenSubKey("\\Directory\\shell\\Condividi con");

@@ -103,7 +103,7 @@ namespace ProjectPDSWPF
 
                 fileNameString = Encoding.ASCII.GetString(fileNameAndFileLength).Substring(0, fileNameDimension);
                 long fileSize = BitConverter.ToInt64(fileNameAndFileLength, fileNameDimension);
-
+                id = Guid.NewGuid().ToString();
                 if (settings.AutoAccept)
                 {
                     byte[] responseClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
@@ -117,25 +117,25 @@ namespace ProjectPDSWPF
                 {
                     byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
                     string adjustedSize = SizeSuffix(fileSize);
+                    acceptance(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, adjustedSize, id);
 
-                    MessageDialogResult dialogResult = askToAccept(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, adjustedSize);
-                    if (dialogResult == MessageDialogResult.Affirmative)
+                    while (mre.WaitOne())
+                        if (String.Compare(Receiver.idFileToAccept, id) == 0)
+                            break;
+
+                    if (Receiver.accepted)
                     {
                         responseToClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
                         handler.Send(responseToClient, 0, responseToClient.Length, SocketFlags.None, out sockError);
                         if (sockError != SocketError.Success)
-                        {
                             throw new SocketException();
-                        }
                     }
-                    else if (dialogResult == MessageDialogResult.Negative)
+                    else if (!Receiver.accepted)
                     {
                         responseToClient = Encoding.ASCII.GetBytes(Constants.DECLINE_FILE);
                         handler.Send(responseToClient, 0, responseToClient.Length, SocketFlags.None, out sockError);
                         if (sockError != SocketError.Success)
-                        {
                             throw new SocketException();
-                        }
                         releaseResources(handler);
                         return;
                     }
@@ -186,7 +186,6 @@ namespace ProjectPDSWPF
                     image = ms.ToArray();
                     ms.Close();
                 }
-                id = Guid.NewGuid().ToString();
 
                 updateReceivingFiles(senderID, image, fileNameString, id);
                 int percentage = 0;
@@ -338,6 +337,8 @@ namespace ProjectPDSWPF
         private Thread server;
         private Settings settings;
 
+        public static ManualResetEvent mre = new ManualResetEvent(false);
+
         public delegate void myDelegate(string id, int percentage);
         public static event myDelegate updateProgress;
 
@@ -347,10 +348,13 @@ namespace ProjectPDSWPF
         public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);
         public static event myDelegate2 fileCancel;
 
-        public delegate MessageDialogResult myDelegate3(string userName, string fileName, string dimension);
-        public static event myDelegate3 askToAccept;
-
         public delegate void myDelegate4(string fileName, string userName, Constants.NOTIFICATION_STATE state);
         public static event myDelegate4 receivingFailure;
+
+        public delegate void myDelegate5(string userName, string fileName, string dimension, string id);
+        public static event myDelegate5 acceptance;
+
+        public static string idFileToAccept = String.Empty;
+        public static bool accepted = false;
     }
 }

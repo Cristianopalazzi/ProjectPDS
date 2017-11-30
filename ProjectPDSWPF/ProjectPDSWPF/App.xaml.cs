@@ -83,7 +83,7 @@ namespace ProjectPDSWPF
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
-                    };
+                    }
 
                 case Constants.NOTIFICATION_STATE.CANCELED:
                     {
@@ -214,9 +214,9 @@ namespace ProjectPDSWPF
         {
             Dispatcher.Invoke(new Action(() =>
             {
-                NeighborProtocol.getInstance.clean(); //aggiunto pulizia
+                NeighborProtocol.getInstance.clean();
                 ns.listNeighborSelection.UnselectAll();
-                if ( ns.Acceso)
+                if (ns.Acceso)
                     ns.FileList.Add(file);
                 else
                 {
@@ -229,10 +229,7 @@ namespace ProjectPDSWPF
                 ns.Topmost = true;
                 ns.Topmost = false;
                 ns.Focus();
-                
             }));
-
-            
         }
     }
 }

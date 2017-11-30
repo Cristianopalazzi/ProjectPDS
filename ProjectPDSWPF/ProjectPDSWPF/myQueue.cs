@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using System.IO.Pipes;
 using System.IO;
-using System.Collections;
 using System.Collections.Concurrent;
-using System.Windows.Forms;
-using System.Linq;
-using System.Windows;
 
 namespace ProjectPDSWPF
 {
@@ -46,8 +40,7 @@ namespace ProjectPDSWPF
                     sr = new StreamReader(pipeServer);
                     string file = sr.ReadLine();
                     sr.Close();
-                    //Console.WriteLine(file);
-                    openNeighbors(file);
+                    openNeighbors(Path.GetFileName(file));
                     pipeServer.Disconnect();
                 }
             }
@@ -91,8 +84,6 @@ namespace ProjectPDSWPF
 
                     threads.Add(t);
                 }
-                //foreach (var t in threads)
-                //    t.Join();
             }
         }
 
@@ -101,7 +92,6 @@ namespace ProjectPDSWPF
             if (sendingFiles != null)
                 filesToSend.Add(sendingFiles);
         }
-
 
         private BlockingCollection<List<SendingFile>> filesToSend;
         private Thread threadPipe, waitOnTake;
