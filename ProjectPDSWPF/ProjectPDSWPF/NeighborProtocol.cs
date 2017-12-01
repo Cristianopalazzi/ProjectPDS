@@ -7,8 +7,6 @@ using System.Net.Sockets;
 using System.Net;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Windows.Media.Imaging;
-using System.Windows;
 using System.Diagnostics;
 
 namespace ProjectPDSWPF
@@ -112,9 +110,15 @@ namespace ProjectPDSWPF
                         socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     Console.WriteLine("errore nella listen");
+                    var st = new StackTrace(ex, true);
+                    // Get the top stack frame
+                    var frame = st.GetFrame(st.FrameCount - 1);
+                    // Get the line number from the stack frame
+                    var line = frame.GetFileLineNumber();
+                    Console.WriteLine("Error at line {0} ", line);
                     continue;
                 }
             }
@@ -216,8 +220,14 @@ namespace ProjectPDSWPF
                     }
 
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
+                    var st = new StackTrace(ex, true);
+                    // Get the top stack frame
+                    var frame = st.GetFrame(st.FrameCount - 1);
+                    // Get the line number from the stack frame
+                    var line = frame.GetFileLineNumber();
+                    Console.WriteLine("Error at line {0} ", line);
                     continue;
                 }
                 finally
@@ -238,8 +248,14 @@ namespace ProjectPDSWPF
             {
                 socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipep);
             }
-            catch
+            catch(Exception ex)
             {
+                var st = new StackTrace(ex, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 //something
             }
             finally
@@ -307,10 +323,22 @@ namespace ProjectPDSWPF
             }
             catch (SocketException e)
             {
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 //something
             }
             catch (Exception e)
             {
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 //something
             }
             finally
@@ -373,6 +401,12 @@ namespace ProjectPDSWPF
             }
             catch (Exception e)
             {
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 //something
             }
             finally

@@ -40,7 +40,7 @@ namespace ProjectPDSWPF
                     sr = new StreamReader(pipeServer);
                     string file = sr.ReadLine();
                     sr.Close();
-                    openNeighbors(Path.GetFileName(file));
+                    openNeighbors(file);
                     pipeServer.Disconnect();
                 }
             }

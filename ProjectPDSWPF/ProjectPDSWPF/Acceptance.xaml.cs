@@ -1,6 +1,8 @@
 ﻿using MahApps.Metro.Controls;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,6 +12,7 @@ namespace ProjectPDSWPF
     /// Logica di interazione per Acceptance.xaml
     /// </summary>
     /// //TODO modificare layout
+    /// //TODO creare installer
     public partial class Acceptance : MetroWindow
     {
 
@@ -28,15 +31,35 @@ namespace ProjectPDSWPF
         {
             Button b = sender as Button;
             fileToAccept sf = b.DataContext as fileToAccept;
-            if (String.Compare(b.Name, "buttonOK") == 0)
+            if (String.Compare(b.Name, "accept") == 0)
                 Receiver.accepted = true;
-            else if (String.Compare(b.Name, "buttonNO") == 0)
+            else if (String.Compare(b.Name, "reject") == 0)
                 Receiver.accepted = false;
             Receiver.idFileToAccept = sf.Id;
             Receiver.mre.Set();
             AcceptingFiles.Remove(sf);
             if (acceptingFiles.Count == 0)
                 Close();
+        }
+
+        private void acceptOrRejectAll(object sender, RoutedEventArgs e)
+        {
+            List<fileToAccept> toRemove = new List<fileToAccept>();
+            Button b = sender as Button;
+            if (String.Compare(b.Name, "acceptAll") == 0)
+                Receiver.accepted = true;
+            else if (String.Compare(b.Name, "rejectAll") == 0)
+                Receiver.accepted = false;
+            foreach (fileToAccept f in AcceptingFiles)
+            {
+                Receiver.idFileToAccept = f.Id;
+                Receiver.mre.Set();
+                Thread.Sleep(50);
+                toRemove.Add(f);
+            }
+            foreach (fileToAccept f in toRemove)
+                AcceptingFiles.Remove(f);
+            Close();
         }
 
         public class fileToAccept

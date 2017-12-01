@@ -8,6 +8,9 @@
         mc:Ignorable="d"
         Name="windowNeighborSelection"
         Title="NeighborSelection" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
+    <Controls:MetroWindow.Resources>
+        <local:PathConverter x:Key="myConverter"/>
+    </Controls:MetroWindow.Resources>
     <Grid>
         <DockPanel LastChildFill="True">
             <Controls:Badged x:Name="badge" HorizontalAlignment="Stretch" Margin="12" DockPanel.Dock="Top" BadgePlacementMode="TopRight" Badge="{Binding Path = FileList.Count}">
@@ -20,7 +23,9 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock MaxWidth="200" TextTrimming="CharacterEllipsis" FontSize="16" Grid.Column="0" Text="{Binding}" HorizontalAlignment="Left" />
+                                <TextBlock MaxWidth="200" ToolTip="{Binding}" TextTrimming="CharacterEllipsis" FontSize="16" Grid.Column="0"
+                                           Text="{ Binding Converter={StaticResource myConverter}, ConverterParameter = Binding}"
+                                           HorizontalAlignment="Left" />
                                 <Button Grid.Column="2" Content="Annulla"  BorderThickness="1" BorderBrush="LightGray" Click="Button_Click" HorizontalAlignment="Right"/>
                             </Grid>
                         </DataTemplate>
@@ -151,5 +156,6 @@
 
         </DockPanel>
     </Grid>
+
 
 </Controls:MetroWindow>

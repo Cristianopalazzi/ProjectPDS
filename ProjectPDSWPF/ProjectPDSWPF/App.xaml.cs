@@ -214,12 +214,15 @@ namespace ProjectPDSWPF
         {
             Dispatcher.Invoke(new Action(() =>
             {
-                NeighborProtocol.getInstance.clean();
-                ns.listNeighborSelection.UnselectAll();
                 if (ns.Acceso)
-                    ns.FileList.Add(file);
+                {
+                    if (!ns.FileList.Contains(file))
+                        ns.FileList.Add(file);
+                }
                 else
                 {
+                    NeighborProtocol.getInstance.clean();
+                    ns.listNeighborSelection.UnselectAll();
                     ns.FileList.Clear();
                     ns.Acceso = true;
                     ns.FileList.Add(file);

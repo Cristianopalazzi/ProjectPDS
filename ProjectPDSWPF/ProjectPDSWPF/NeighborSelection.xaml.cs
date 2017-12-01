@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Controls;
+using System.IO;
 
 namespace ProjectPDSWPF
 {
@@ -24,8 +25,8 @@ namespace ProjectPDSWPF
         private Boolean acceso;
 
         public ObservableCollection<Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
-        public ObservableCollection<string> FileList { get => fileList; set => fileList = value; }
         public bool Acceso { get => acceso; set => acceso = value; }
+        public ObservableCollection<string> FileList { get => fileList; set => fileList = value; }
 
         private ObservableCollection<Neighbor> neighbors;
         private ObservableCollection<String> fileList;
@@ -37,7 +38,7 @@ namespace ProjectPDSWPF
             NeighborProtocol n = NeighborProtocol.getInstance;
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Neighbors = new ObservableCollection<Neighbor>();
-            FileList = new ObservableCollection<string>();
+            FileList = new ObservableCollection<String>();
             listNeighborSelection.ItemsSource = Neighbors;
             Closing += NeighborSelection_Closing;
             Acceso = false;
@@ -59,7 +60,7 @@ namespace ProjectPDSWPF
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
-                foreach (string file in FileList)
+                foreach (String file in FileList)
                 {
                     sendingFiles = new List<SendingFile>();
                     selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
@@ -108,7 +109,7 @@ namespace ProjectPDSWPF
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            string s = b.DataContext as String;
+            String s = b.DataContext as String;
             FileList.Remove(s);
             if (FileList.Count == 0)
             {
