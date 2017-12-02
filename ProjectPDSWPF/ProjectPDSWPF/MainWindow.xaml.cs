@@ -75,7 +75,7 @@ namespace ProjectPDSWPF
                     if (sf.Sock == sock)
                     {
                         sf.File_state = state;
-                        if (state == Constants.FILE_STATE.CANCELED || state == Constants.FILE_STATE.ERROR)
+                        if (state == Constants.FILE_STATE.CANCELED || state == Constants.FILE_STATE.ERROR || state == Constants.FILE_STATE.REJECTED)
                             sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/cross.ico"));
                     }
                 }
@@ -219,9 +219,6 @@ namespace ProjectPDSWPF
             }
         }
 
-
-
-
         //context menu sui file in ricezione (cancella un file ricevuto correttamente)
         private void receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
@@ -249,13 +246,14 @@ namespace ProjectPDSWPF
             foreach (ReceivingFile rf in tmp)
                 FilesToReceive.Remove(rf);
         }
+
         //context menu sui file in invio (cancella un file inviato correttamente)
         private void sending_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (sendingFiles.SelectedIndex == -1)
                 return;
             SendingFile sf = sendingFiles.SelectedItem as SendingFile;
-            if (sf.File_state == Constants.FILE_STATE.PROGRESS)
+            if (sf.File_state == Constants.FILE_STATE.PROGRESS || sf.File_state == Constants.FILE_STATE.ACCEPTANCE || sf.File_state == Constants.FILE_STATE.PREPARATION)
                 this.ShowMessageAsync("Ops", "Non puoi cancellare un file in invio.\nPremi annulla per fermarlo.");
             else FilesToSend.Remove(sf);
         }
@@ -267,7 +265,7 @@ namespace ProjectPDSWPF
                 return;
             List<SendingFile> tmp = new List<SendingFile>();
             foreach (SendingFile sf in FilesToSend)
-                if (sf.File_state == Constants.FILE_STATE.CANCELED || sf.File_state == Constants.FILE_STATE.COMPLETED)
+                if (sf.File_state == Constants.FILE_STATE.CANCELED || sf.File_state == Constants.FILE_STATE.COMPLETED || sf.File_state == Constants.FILE_STATE.ERROR || sf.File_state == Constants.FILE_STATE.REJECTED)
                     tmp.Add(sf);
             if (tmp.Count == 0)
             {

@@ -9,7 +9,7 @@
         public const int PORT_UDP = 9100; //The port on which to listen for incoming data
         public const int PORT_UDP_IMG = 9050;
         public const int BUFLEN = 300; //Max length of bufferThe port on which to listen for incoming data
-        public const string HELL = "HELL";
+        public const string HELL = "HELO";
         public const string QUIT = "QUIT";
         public const int PORT_TCP = 9000;
         public const int PORT_TCP_IMG = 9001;
@@ -24,8 +24,9 @@
         public const string ACCEPT_FILE = "OK";
         public const string DECLINE_FILE = "NO";
         public const string SETTINGS = "Settings.xml";
-        public enum FILE_STATE {PREPARATION,ACCEPTANCE,PROGRESS,COMPLETED,CANCELED,ERROR};
-        public enum NOTIFICATION_STATE {RECEIVED,SENT,CANCELED,REFUSED,NET_ERROR,SEND_ERROR,FILE_ERROR,REC_ERROR};
+        public enum FILE_STATE { PREPARATION, ACCEPTANCE, PROGRESS, COMPLETED, CANCELED, ERROR, REJECTED };
+        public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR, REC_ERROR };
         public const string projectName = "ProjectPDS";
+        public const string UTENTE_ANONIMO = "Utente anonimo";
     }
 }

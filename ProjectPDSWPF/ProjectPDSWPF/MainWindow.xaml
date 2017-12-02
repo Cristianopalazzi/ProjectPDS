@@ -63,7 +63,6 @@
                                                     <ImageBrush ImageSource="{Binding Image}"/>
                                                 </Ellipse.Fill>
                                             </Ellipse>
-                                            <!--Serve per fare in modo che la colonna si adatti al contenuto-->
                                             <TextBlock Text="{Binding Name}" TextAlignment="Center" FontSize="16"/>
                                         </StackPanel>
                                     </DataTemplate>
@@ -73,7 +72,6 @@
                             <GridViewColumn>
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <!--Serve per fare in modo che la colonna si adatti al contenuto-->
                                         <TextBlock ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center" MaxWidth="100"/>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
@@ -205,6 +203,12 @@
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Text" Value="File rifiutato" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
                                                                 </MultiDataTrigger.Conditions>
                                                                 <Setter Property="Text" Value="Si è verificato un errore durante l'invio" />
@@ -267,6 +271,12 @@
                                                             </MultiDataTrigger.Conditions>
                                                             <Setter Property="Visibility" Value="Hidden" />
                                                         </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Hidden" />
+                                                        </MultiDataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>
@@ -318,6 +328,12 @@
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
                                                                     <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="IsActive" Value="False" />
+                                                            </MultiDataTrigger>
+                                                            <MultiDataTrigger>
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
                                                                 </MultiDataTrigger.Conditions>
                                                                 <Setter Property="IsActive" Value="False" />
                                                             </MultiDataTrigger>

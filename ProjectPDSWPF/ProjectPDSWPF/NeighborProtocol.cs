@@ -112,7 +112,7 @@ namespace ProjectPDSWPF
                 }
                 catch(Exception ex)
                 {
-                    Console.WriteLine("errore nella listen");
+                    Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(ex, true);
                     // Get the top stack frame
                     var frame = st.GetFrame(st.FrameCount - 1);
@@ -222,6 +222,7 @@ namespace ProjectPDSWPF
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(ex, true);
                     // Get the top stack frame
                     var frame = st.GetFrame(st.FrameCount - 1);
@@ -250,6 +251,7 @@ namespace ProjectPDSWPF
             }
             catch(Exception ex)
             {
+                Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(ex, true);
                 // Get the top stack frame
                 var frame = st.GetFrame(st.FrameCount - 1);
@@ -323,6 +325,7 @@ namespace ProjectPDSWPF
             }
             catch (SocketException e)
             {
+                Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame
                 var frame = st.GetFrame(st.FrameCount - 1);
@@ -333,6 +336,7 @@ namespace ProjectPDSWPF
             }
             catch (Exception e)
             {
+                Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame
                 var frame = st.GetFrame(st.FrameCount - 1);
@@ -401,6 +405,7 @@ namespace ProjectPDSWPF
             }
             catch (Exception e)
             {
+                Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame
                 var frame = st.GetFrame(st.FrameCount - 1);
@@ -432,6 +437,7 @@ namespace ProjectPDSWPF
             }
             catch
             {
+                Console.WriteLine("NeighborProtocol");
                 return BitConverter.GetBytes(-1);
             }
             finally

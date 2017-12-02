@@ -7,7 +7,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
-using MahApps.Metro.Controls.Dialogs;
 
 namespace ProjectPDSWPF
 {
@@ -71,13 +70,15 @@ namespace ProjectPDSWPF
             int temp = 0;
             long zipFileSize = 0;
             FileStream fs = null;
+            string user = String.Empty;
             try
             {
                 SocketError sockError;
                 int received = 0;
                 ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
-
-
+                user = NeighborProtocol.getInstance.getUserFromIp(ipSender);
+                if (String.IsNullOrEmpty(user))
+                    user = Constants.UTENTE_ANONIMO;
                 byte[] command = new byte[Constants.FILE_COMMAND.Length];
                 received = handler.Receive(command, 0, command.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
@@ -101,7 +102,7 @@ namespace ProjectPDSWPF
                     throw new SocketException();
                 }
 
-                fileNameString = Encoding.ASCII.GetString(fileNameAndFileLength).Substring(0, fileNameDimension);
+                fileNameString = Encoding.UTF8.GetString(fileNameAndFileLength, 0, fileNameDimension);
                 long fileSize = BitConverter.ToInt64(fileNameAndFileLength, fileNameDimension);
                 id = Guid.NewGuid().ToString();
                 if (settings.AutoAccept)
@@ -117,7 +118,7 @@ namespace ProjectPDSWPF
                 {
                     byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
                     string adjustedSize = SizeSuffix(fileSize);
-                    acceptance(NeighborProtocol.getInstance.getUserFromIp(ipSender), fileNameString, adjustedSize, id);
+                    acceptance(user, fileNameString, adjustedSize, id);
 
                     while (mre.WaitOne())
                         if (String.Compare(Receiver.idFileToAccept, id) == 0)
@@ -173,13 +174,20 @@ namespace ProjectPDSWPF
                 string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
                 zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
 
-                string senderID = NeighborProtocol.getInstance.getUserFromIp(ipSender) + "@" + ipSender;
+                string senderID = user + "@" + ipSender;
                 byte[] image;
-                NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne);
                 JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                if (ne.NeighborImage == null)
-                    ne.setImage(File.ReadAllBytes(App.defaultResourcesFolder + "/guest.png"));
-                encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
+                if (NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne))
+                {
+                    if (ne.NeighborImage == null)
+                        ne.setImage(File.ReadAllBytes(App.defaultResourcesFolder + "/guest.png"));
+                    encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
+                }
+                else
+                {
+                    BitmapImage bitmap = Neighbor.ToImage(File.ReadAllBytes(App.defaultResourcesFolder + "/uu.png"));
+                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
+                }
                 using (MemoryStream ms = new MemoryStream())
                 {
                     encoder.Save(ms);
@@ -235,8 +243,6 @@ namespace ProjectPDSWPF
                 }
                 fs.Close();
 
-                NeighborProtocol n = NeighborProtocol.getInstance;
-                string user = n.getUserFromIp(ipSender);
                 string str = String.Empty;
 
                 if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)

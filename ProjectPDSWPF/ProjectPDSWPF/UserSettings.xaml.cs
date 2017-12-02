@@ -15,9 +15,9 @@ namespace ProjectPDSWPF
             Left = SystemParameters.WorkArea.Right - Width;
             Top = SystemParameters.WorkArea.Bottom - Height;
             if (settings.Online)
-                bottoneOnline.Content = "Online";
+                bottoneOnline.Content = "Pubblico";
             else
-                bottoneOnline.Content = "Offline";
+                bottoneOnline.Content = "Privato";
         }
 
 
@@ -31,14 +31,14 @@ namespace ProjectPDSWPF
             if (settings.Online)
             {
                 settings.Online = false;
-                bottoneOnline.Content = "Offline";
+                bottoneOnline.Content = "Privato";
                 NeighborProtocol.getInstance.quitMe();
                 NeighborProtocol.senderEvent.Reset();
             }
             else
             {
                 settings.Online = true;
-                bottoneOnline.Content = "Online";
+                bottoneOnline.Content = "Pubblico";
                 NeighborProtocol.senderEvent.Set();
             }
             Settings.writeSettings(settings);

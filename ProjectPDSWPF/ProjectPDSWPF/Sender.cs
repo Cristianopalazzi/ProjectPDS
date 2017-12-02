@@ -12,13 +12,13 @@ namespace ProjectPDSWPF
 {
     class Sender
     {
-        public Sender() { }
         public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
             sender.SendTimeout = 2500;
             sender.ReceiveTimeout = 0;
             string fileName = Path.GetFileName(pathFile);
-            byte[] fileNameLength = BitConverter.GetBytes(fileName.Length);
+            byte[] fileNameByte = Encoding.UTF8.GetBytes(fileName);
+            byte[] fileNameLength = BitConverter.GetBytes(fileNameByte.Length);
             long fileLength = 0;
 
             //TODO togliamo ping?
@@ -28,7 +28,7 @@ namespace ProjectPDSWPF
             if (rep.Status != IPStatus.Success)
             {
                 updateFileState(sender, Constants.FILE_STATE.ERROR);
-                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.NET_ERROR); // 4
+                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.NET_ERROR);
                 return;
             }
 
@@ -66,7 +66,7 @@ namespace ProjectPDSWPF
                 SocketError sockError;
                 int sent = 0;
 
-                byte[] fileLine = Combine(command, fileNameLength, Encoding.ASCII.GetBytes(fileName), BitConverter.GetBytes(fileLength));
+                byte[] fileLine = Combine(command, fileNameLength, fileNameByte, BitConverter.GetBytes(fileLength));
                 sent = sender.Send(fileLine, 0, fileLine.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
                 {
@@ -83,8 +83,8 @@ namespace ProjectPDSWPF
                 string response = Encoding.ASCII.GetString(responseFromServer);
                 if (String.Compare(response, Constants.DECLINE_FILE) == 0)
                 {
-                    fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED); //3
-                    updateFileState(sender, Constants.FILE_STATE.CANCELED);
+                    fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
+                    updateFileState(sender, Constants.FILE_STATE.REJECTED);
                     if (File.Exists(zipLocation))
                         File.Delete(zipLocation);
                     releaseResources(sender);

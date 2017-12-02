@@ -9,7 +9,6 @@ namespace ProjectPDSWPF
     /// Logica di interazione per App.xaml
     /// </summary>
     /// 
-    //TODO cambiare le stringhe per compatibilità UTF8
     public partial class App : Application
     {
         private NeighborSelection ns;
