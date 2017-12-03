@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Windows;
+using MahApps.Metro.Controls;
 
 namespace ProjectPDSWPF
 {
     /// <summary>
     /// Interaction logic for UserSettings.xaml
     /// </summary>
-    public partial class UserSettings : Window
+    public partial class UserSettings : MetroWindow
     {
         public UserSettings()
         {
@@ -18,8 +19,22 @@ namespace ProjectPDSWPF
                 bottoneOnline.Content = "Pubblico";
             else
                 bottoneOnline.Content = "Privato";
+            Closing += UserSettings_Closing;
+            Deactivated += UserSettings_Deactivated;
         }
 
+        private void UserSettings_Deactivated(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void UserSettings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Settings.writeSettings(settings);
+            e.Cancel = true;
+            WindowState = WindowState.Minimized;
+            Hide();
+        }
 
         public void openSettings(object sender, EventArgs e)
         {

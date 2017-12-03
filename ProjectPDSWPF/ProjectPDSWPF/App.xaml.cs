@@ -2,6 +2,8 @@
 using System.Windows;
 using System.IO;
 using Microsoft.Win32;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace ProjectPDSWPF
 {
@@ -9,8 +11,8 @@ namespace ProjectPDSWPF
     /// Logica di interazione per App.xaml
     /// </summary>
     /// 
+    //TODO timeout socket acceptance, 0 o valore alto
 
-        //TODO cambiare tempo di attesa per la accetazione lato sender: lasciamo infinito o mettiamo tempo altissimo?
     public partial class App : Application
     {
         private NeighborSelection ns;
@@ -23,8 +25,6 @@ namespace ProjectPDSWPF
         private UserSettings us;
         public static string defaultFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.projectName;
         public static string defaultResourcesFolder = defaultFolder + "\\Resources";
-
-        //TODO file < 260 directory <248
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -48,16 +48,27 @@ namespace ProjectPDSWPF
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
             Receiver.receivingFailure += createBalloons;
             NeighborSelection.closingSelection += NeighborSelection_closingSelection;
-            us.Deactivated += Us_Deactivated;
+            Receiver.changeReceivingFileName += Receiver_changeReceivingFileName;
 
             initializeNotifyIcon();
         }
 
-        private void Us_Deactivated(object sender, EventArgs e)
+        //TODO rifare
+        private string Receiver_changeReceivingFileName(string filename, string hint, string currentDirectory, string type, int motivation)
         {
-            Settings.writeSettings(Settings.getInstance);
-            us.WindowState = WindowState.Minimized;
-            us.Hide();
+            string result = String.Empty;
+            Current.Dispatcher.Invoke(new Action(() =>
+            {
+                MetroWindow window = mw as MetroWindow;
+                window.Show();
+                string motiv = String.Empty;
+                if (motivation == 0)
+                    motiv = "il file esiste già";
+                else motiv = "file troppo lungo";
+                result = window.ShowModalInputExternal("Ops", motiv,
+               new LoginDialogSettings { NegativeButtonVisibility = Visibility.Hidden, AffirmativeButtonText = "OKcancro", InitialUsername = hint });
+            }));
+            return result;
         }
 
         private void NeighborSelection_closingSelection()
@@ -164,7 +175,6 @@ namespace ProjectPDSWPF
 
         private void initializeNotifyIcon()
         {
-            //TODO provare time estimation con lo stesso evento e non 2 separati
             nIcon.Icon = new System.Drawing.Icon(defaultResourcesFolder + "/check.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
@@ -247,4 +257,6 @@ namespace ProjectPDSWPF
             }));
         }
     }
+
+
 }

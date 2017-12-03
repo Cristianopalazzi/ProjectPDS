@@ -29,7 +29,6 @@ namespace ProjectPDSWPF
 
             NeighborProtocol.neighborsEvent += modify_neighbors;
             Sender.updateProgress += updateProgressBar;
-            Sender.updateRemainingTime += updateRemainingTime;
             Sender.updateFileState += Sender_updateFileState;
             Receiver.updateProgress += updateReceivingProgressBar;
             Receiver.updateReceivingFiles += updateReceivingFiles;
@@ -153,20 +152,6 @@ namespace ProjectPDSWPF
             }));
         }
 
-        //aggiorno il tempo rimanente ad un file in invio
-        private void updateRemainingTime(Socket sock, string remainingTime)
-        {
-            sendingFiles.Dispatcher.Invoke(new Action(() =>
-            {
-                foreach (SendingFile sf in FilesToSend)
-                    if (sf.Sock == sock)
-                    {
-                        sf.RemainingTime = remainingTime;
-                        break;
-                    }
-            }));
-        }
-
         //aggiorno la progress bar del file in invio
         private void updateProgressBar(string filename, Socket sock, int percentage, string remainingTime)
         {
@@ -212,8 +197,6 @@ namespace ProjectPDSWPF
             }
             catch
             {
-                //TODO questo messagebox
-                MessageBox.Show("ROTTO");
             }
             finally
             {

@@ -23,7 +23,7 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock MaxWidth="200" ToolTip="{Binding}" TextTrimming="CharacterEllipsis" FontSize="16" Grid.Column="0"
+                                <TextBlock MaxWidth="250" ToolTip="{Binding}" TextTrimming="CharacterEllipsis" FontSize="16" Grid.Column="0"
                                            Text="{ Binding Converter={StaticResource myConverter}, ConverterParameter = Binding}"
                                            HorizontalAlignment="Left" />
                                 <Button Grid.Column="2" Content="Annulla"  BorderThickness="1" BorderBrush="LightGray" Click="Button_Click" HorizontalAlignment="Right"/>

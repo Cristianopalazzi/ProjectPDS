@@ -81,7 +81,6 @@ namespace ProjectPDSWPF
                         IsBackground = true
                     };
                     t.Start();
-
                     threads.Add(t);
                 }
             }

@@ -1,21 +1,27 @@
-﻿<Window x:Class="ProjectPDSWPF.UserSettings"
+﻿<Controls:MetroWindow x:Class="ProjectPDSWPF.UserSettings"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ProjectPDSWPF"
+        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
-        WindowStyle="None"
-        Height="250" Width="300" AllowsTransparency="True"  >
-    <Window.Background>
+        WindowTitleBrush="#FF3D3D3D"
+        IsWindowDraggable="False"
+        WindowState="Minimized"
+        BorderThickness="0"
+        NonActiveWindowTitleBrush="#FF3D3D3D"
+        ResizeMode="NoResize"
+        Height="250" Width="300">
+    <Controls:MetroWindow.Background>
         <SolidColorBrush Color="#FF3D3D3D" Opacity="0.90"/>
-    </Window.Background>
+    </Controls:MetroWindow.Background>
     <Grid>
-        <Button x:Name="bottoneOnline" HorizontalAlignment="Left" Margin="24,144,0,0" VerticalAlignment="Top" Width="145" Height="70" Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" FontSize="16" Click="Button_Click" Foreground="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" />
-        <TextBlock HorizontalAlignment="Left" Margin="24,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="20">
+        <Button x:Name="bottoneOnline" HorizontalAlignment="Left" Margin="24,125,0,0" VerticalAlignment="Top" Width="145" Height="70" Background="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" FontSize="16" Click="Button_Click" Foreground="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" />
+        <TextBlock HorizontalAlignment="Left" Margin="24,50,0,0" TextWrapping="Wrap" VerticalAlignment="Top" FontSize="20">
             <Hyperlink NavigateUri="impostazioni" Foreground="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}" Click="openSettings">impostazioni</Hyperlink>
         </TextBlock>
     </Grid>
 
 
-</Window>
+</Controls:MetroWindow>

@@ -21,7 +21,6 @@ namespace ProjectPDSWPF
             byte[] fileNameLength = BitConverter.GetBytes(fileNameByte.Length);
             long fileLength = 0;
 
-            //TODO togliamo ping?
             Ping p = new Ping();
             PingReply rep = p.Send(ipAddr, 2000);
 
@@ -223,9 +222,6 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate1 fileRejected;
-
-        public delegate void myDelegate3(Socket sock, string remainingTime);
-        public static event myDelegate3 updateRemainingTime;
 
         public delegate void myDelegate4(Socket sock, Constants.FILE_STATE state);
         public static event myDelegate4 updateFileState;

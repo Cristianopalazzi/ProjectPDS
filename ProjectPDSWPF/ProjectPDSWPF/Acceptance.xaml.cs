@@ -5,13 +5,13 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace ProjectPDSWPF
 {
     /// <summary>
     /// Logica di interazione per Acceptance.xaml
     /// </summary>
-    /// //TODO modificare layout
     /// //TODO creare installer
     public partial class Acceptance : MetroWindow
     {

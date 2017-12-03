@@ -253,15 +253,17 @@ namespace ProjectPDSWPF
                         str = currentDirectory + "\\" + entry.Name;
                         if (File.Exists(str))
                         {
-                            string extension = Path.GetExtension(str);
+                            //string extension = Path.GetExtension(str);
                             string onlyName = Path.GetFileNameWithoutExtension(str);
-                            str = currentDirectory + "\\" + onlyName + user + extension;
+                            //str = currentDirectory + "\\" + onlyName + user + extension;
 
-                            if (File.Exists(str))
-                            {
-                                string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                                str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
-                            }
+                            str = changeReceivingFileName(entry.Name, onlyName + user, currentDirectory, "file", 0);
+
+                            //if (File.Exists(str))
+                            //{
+                            //    string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                            //    str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
+                            //}
                         }
                         entry.ExtractToFile(str, true);
                     }
@@ -271,12 +273,15 @@ namespace ProjectPDSWPF
                     str = currentDirectory + "\\" + fileNameString;
                     if (Directory.Exists(str))
                     {
-                        str += user;
-                        if (Directory.Exists(str))
-                        {
-                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            str += timeStamp;
-                        }
+
+                        str = changeReceivingFileName(fileNameString, fileNameString + user, currentDirectory, "directory",0);
+
+                        //str += user;
+                        //if (Directory.Exists(str))
+                        //{
+                        //    string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                        //    str += timeStamp;
+                        //}
                     }
                     try
                     {
@@ -287,7 +292,7 @@ namespace ProjectPDSWPF
                         //scegli tu il percorso
                     }
                 }
-                //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle
+                //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle file < 260 directory <248
             }
             catch (SocketException e)
             {
@@ -353,6 +358,10 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);
         public static event myDelegate2 fileCancel;
+
+        //motivation = 0 => file already exists, motivation = 1 => fileName too long, type ={file, directory}
+        public delegate string myDelegate3(string filename, string hint, string currentDirectory, string type, int motivation);
+        public static event myDelegate3 changeReceivingFileName;
 
         public delegate void myDelegate4(string fileName, string userName, Constants.NOTIFICATION_STATE state);
         public static event myDelegate4 receivingFailure;

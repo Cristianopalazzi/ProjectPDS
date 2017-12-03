@@ -31,6 +31,7 @@
                     <StackPanel Margin="5,0">
                         <TextBlock FontWeight="Bold" FontSize="16" Text="{Binding FileName}"/>
                         <TextBlock FontSize="14" Text="{Binding UserName, StringFormat= da: \{0\}}" Padding="0,3"/>
+                        <TextBlock FontSize="14" Text="{Binding FileSize, StringFormat= di: \{0\}}" Padding="0,3"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
