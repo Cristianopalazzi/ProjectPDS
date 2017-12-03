@@ -9,6 +9,8 @@ namespace ProjectPDSWPF
     /// Logica di interazione per App.xaml
     /// </summary>
     /// 
+
+        //TODO cambiare tempo di attesa per la accetazione lato sender: lasciamo infinito o mettiamo tempo altissimo?
     public partial class App : Application
     {
         private NeighborSelection ns;
@@ -21,6 +23,8 @@ namespace ProjectPDSWPF
         private UserSettings us;
         public static string defaultFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.projectName;
         public static string defaultResourcesFolder = defaultFolder + "\\Resources";
+
+        //TODO file < 260 directory <248
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
@@ -44,8 +48,16 @@ namespace ProjectPDSWPF
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
             Receiver.receivingFailure += createBalloons;
             NeighborSelection.closingSelection += NeighborSelection_closingSelection;
+            us.Deactivated += Us_Deactivated;
 
             initializeNotifyIcon();
+        }
+
+        private void Us_Deactivated(object sender, EventArgs e)
+        {
+            Settings.writeSettings(Settings.getInstance);
+            us.WindowState = WindowState.Minimized;
+            us.Hide();
         }
 
         private void NeighborSelection_closingSelection()
@@ -198,13 +210,14 @@ namespace ProjectPDSWPF
             {
                 if (us.WindowState == WindowState.Normal)
                 {
-                    us.Hide();
                     us.WindowState = WindowState.Minimized;
+                    us.Hide();
                 }
                 else
                 {
                     us.Show();
                     us.WindowState = WindowState.Normal;
+                    us.Activate();
                 }
             }
         }

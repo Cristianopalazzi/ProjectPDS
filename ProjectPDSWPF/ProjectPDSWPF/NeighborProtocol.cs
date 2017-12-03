@@ -200,7 +200,7 @@ namespace ProjectPDSWPF
 
             socketImg.Bind(ipImg);
             socketImg.ReceiveTimeout = 2000;
-            byte[] toBytes = Encoding.ASCII.GetBytes(Constants.HELL + Environment.UserName);
+            byte[] toBytes = Encoding.UTF8.GetBytes(Constants.HELL + Environment.UserName);
 
             while (senderEvent.WaitOne())
             {

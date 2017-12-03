@@ -122,27 +122,29 @@ namespace ProjectPDSWPF
                         int tempPercentage = (int)(temporary / (ulong)zipLength);
                         if (tempPercentage > percentage)
                         {
-                            updateProgress(fileName, sender, tempPercentage);
+                            string remainingTimeString = null;
+                            var elapsedSeconds = (DateTime.Now - now).TotalSeconds;
+                            if (elapsedSeconds >= 1)
+                            {
+                                var transferRate = inviati / elapsedSeconds;
+                                transferRatesList.Add(transferRate);
+                                if (transferRatesList.Count == 6)
+                                    transferRatesList.RemoveAt(0);
+                                double avg = transferRatesList.Average();
+
+                                var remainingTime = (zipLength - temp) / avg;
+                                inviati = 0;
+                                now = DateTime.Now;
+                                TimeSpan t = TimeSpan.FromSeconds(remainingTime);
+                                remainingTimeString = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
+                            }
+                            //updateRemainingTime(sender, remainingTimeString);
+                            updateProgress(fileName, sender, tempPercentage, remainingTimeString);
                             percentage = tempPercentage;
                         }
-                        var elapsedSeconds = (DateTime.Now - now).TotalSeconds;
-                        if (elapsedSeconds >= 1)
-                        {
-                            var transferRate = inviati / elapsedSeconds;
-                            transferRatesList.Add(transferRate);
-                            if (transferRatesList.Count == 6)
-                                transferRatesList.RemoveAt(0);
-                            double avg = transferRatesList.Average();
 
-                            var remainingTime = (zipLength - temp) / avg;
-                            inviati = 0;
-                            now = DateTime.Now;
-                            TimeSpan t = TimeSpan.FromSeconds(remainingTime);
-                            string remainingTimeString = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
-
-                            updateRemainingTime(sender, remainingTimeString);
-                        }
                     }
+
                     else if (sockError == SocketError.Shutdown)
                         return;
                     else
@@ -216,7 +218,7 @@ namespace ProjectPDSWPF
         }
 
 
-        public delegate void myDelegate(string filename, Socket sock, int percentage);
+        public delegate void myDelegate(string filename, Socket sock, int percentage,string remainingTime);
         public static event myDelegate updateProgress;
 
         public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);

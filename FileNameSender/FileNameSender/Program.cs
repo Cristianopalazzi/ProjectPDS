@@ -3,12 +3,16 @@ using System.IO.Pipes;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using System;
+
 namespace FileNameSender
 {
     class Program
     {
         static void Main(string[] args)
         {
+            if (args.Length == 0)
+                return;
             NamedPipeClientStream pipeClient = null;
             StreamWriter sw = null;
             try
@@ -17,7 +21,7 @@ namespace FileNameSender
                 Process[] p = Process.GetProcessesByName("ProjectPDSWPF");
                 if (p.Length == 0)
                 {
-                    Process.Start(@"C:\Users\Gianmaria\source\ReposGit\ProjectPDS\ProjectPDSWPF\ProjectPDSWPF\bin\Debug\ProjectPDSWPF.exe");
+                    Process.Start(Environment.CurrentDirectory + "\\ProjectPDSWPF.exe");
                     Thread.Sleep(250);
                 }
                 pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);

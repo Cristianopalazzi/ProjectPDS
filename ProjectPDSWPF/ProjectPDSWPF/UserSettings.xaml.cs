@@ -43,14 +43,6 @@ namespace ProjectPDSWPF
             }
             Settings.writeSettings(settings);
         }
-
-        private void deactivated_settings(object sender, EventArgs e)
-        {
-            Settings.writeSettings(settings);
-            WindowState = WindowState.Minimized;
-            Hide();
-        }
-
         private Settings settings;
         public delegate void myDelegate();
         public static event myDelegate openTabSettings;

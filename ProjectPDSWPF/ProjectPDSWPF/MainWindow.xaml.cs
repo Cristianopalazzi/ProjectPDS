@@ -168,13 +168,16 @@ namespace ProjectPDSWPF
         }
 
         //aggiorno la progress bar del file in invio
-        private void updateProgressBar(string filename, Socket sock, int percentage)
+        private void updateProgressBar(string filename, Socket sock, int percentage, string remainingTime)
         {
             sendingFiles.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (SendingFile sf in FilesToSend)
                     if (sf.Sock == sock)
                     {
+                        if (!String.IsNullOrEmpty(remainingTime))
+                            if (String.Compare(sf.RemainingTime, remainingTime) != 0)
+                                sf.RemainingTime = remainingTime;
                         sf.Value = percentage;
                         sf.File_state = Constants.FILE_STATE.PROGRESS;
                         if (sf.Value == 100)
@@ -237,7 +240,7 @@ namespace ProjectPDSWPF
                 return;
             List<ReceivingFile> tmp = new List<ReceivingFile>();
             foreach (ReceivingFile rf in FilesToReceive)
-                if (rf.File_state == Constants.FILE_STATE.ERROR || rf.File_state == Constants.FILE_STATE.PROGRESS || rf.File_state == Constants.FILE_STATE.COMPLETED)
+                if (rf.File_state == Constants.FILE_STATE.ERROR || rf.File_state == Constants.FILE_STATE.PROGRESS || rf.File_state == Constants.FILE_STATE.COMPLETED || rf.File_state == Constants.FILE_STATE.CANCELED)
                     tmp.Add(rf);
             if (tmp.Count == 0)
             {
