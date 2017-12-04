@@ -290,7 +290,8 @@ namespace ProjectPDSWPF
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
-                sets.DefaultDirPath = dialog.SelectedPath;
+                if (result != System.Windows.Forms.DialogResult.Cancel)
+                    sets.DefaultDirPath = dialog.SelectedPath;
             }
         }
 

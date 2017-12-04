@@ -199,9 +199,16 @@ namespace ProjectPDSWPF
 
         private void releaseResources(Socket s)
         {
-            if (s.Connected)
-                s.Shutdown(SocketShutdown.Both);
-            s.Close();
+            try
+            {
+                if (s.Connected)
+                    s.Shutdown(SocketShutdown.Both);
+            }
+            catch { }
+            finally
+            {
+                s.Close();
+            }
         }
 
         private byte[] Combine(params byte[][] arrays)
@@ -217,7 +224,7 @@ namespace ProjectPDSWPF
         }
 
 
-        public delegate void myDelegate(string filename, Socket sock, int percentage,string remainingTime);
+        public delegate void myDelegate(string filename, Socket sock, int percentage, string remainingTime);
         public static event myDelegate updateProgress;
 
         public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);

@@ -243,68 +243,57 @@ namespace ProjectPDSWPF
                 }
                 fs.Close();
 
-                string str = String.Empty;
 
-                if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
+                if (Settings.getInstance.AutoRename)
+                    overwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user);
+                else
                 {
-                    archive = ZipFile.OpenRead(zipLocation);
-                    foreach (ZipArchiveEntry entry in archive.Entries)
+                    string str = String.Empty;
+                    RenamingFile rf = null;
+                    if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                     {
-                        str = currentDirectory + "\\" + entry.Name;
-                        if (File.Exists(str))
+                        archive = ZipFile.OpenRead(zipLocation);
+                        foreach (ZipArchiveEntry entry in archive.Entries)
                         {
-                            //string extension = Path.GetExtension(str);
-                            string onlyName = Path.GetFileNameWithoutExtension(str);
-                            //str = currentDirectory + "\\" + onlyName + user + extension;
-
-                            str = changeReceivingFileName(entry.Name, onlyName + user, currentDirectory, "file", 0);
-
-                            //if (File.Exists(str))
-                            //{
-                            //    string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                            //    str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
-                            //}
+                            str = String.Empty;
+                            if (File.Exists(currentDirectory + "\\" + entry.Name))
+                            {
+                                rf = new RenamingFile(entry.Name, currentDirectory, 0);
+                                rf.ShowDialog();
+                                if (String.IsNullOrEmpty(rf.NewName))
+                                    throw new Exception();
+                                str = currentDirectory + "//" + rf.NewName;
+                            }
+                            else str = currentDirectory + "//" + entry.Name;
+                            entry.ExtractToFile(str, true);
                         }
-                        entry.ExtractToFile(str, true);
                     }
-                }
-                else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
-                {
-                    str = currentDirectory + "\\" + fileNameString;
-                    if (Directory.Exists(str))
+                    else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
                     {
-
-                        str = changeReceivingFileName(fileNameString, fileNameString + user, currentDirectory, "directory",0);
-
-                        //str += user;
-                        //if (Directory.Exists(str))
-                        //{
-                        //    string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
-                        //    str += timeStamp;
-                        //}
-                    }
-                    try
-                    {
+                        if (Directory.Exists(currentDirectory + "\\" + fileNameString))
+                        {
+                            rf = new RenamingFile(fileNameString, currentDirectory, 1);
+                            rf.ShowDialog();
+                            if (String.IsNullOrEmpty(rf.NewName))
+                                throw new Exception();
+                            str = currentDirectory + "//" + rf.NewName;
+                        }
+                        else str = currentDirectory + "//" + fileNameString;
                         ZipFile.ExtractToDirectory(zipLocation, str);
                     }
-                    catch (PathTooLongException e)
-                    {
-                        //scegli tu il percorso
-                    }
                 }
-                //TODO aggiungere controllo sulla dimensione massima dei nomi dei file e cartelle file < 260 directory <248
             }
             catch (SocketException e)
             {
                 Console.WriteLine(e.SocketErrorCode);
                 if (zipFileSize == 0)
-                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR); // era 4
+                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
                 else
                     fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
             }
             catch
             {
-                receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR); // era 6
+                receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR);
             }
             finally
             {
@@ -319,6 +308,50 @@ namespace ProjectPDSWPF
             }
         }
 
+        private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user)
+        {
+            string str = String.Empty;
+            if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
+            {
+                ZipArchive archive = ZipFile.OpenRead(zipLocation);
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                {
+                    str = currentDirectory + "\\" + entry.Name;
+                    if (File.Exists(str))
+                    {
+                        string extension = Path.GetExtension(str);
+                        string onlyName = Path.GetFileNameWithoutExtension(str);
+                        str = currentDirectory + "\\" + onlyName + user + extension;
+                        if (File.Exists(str))
+                        {
+                            string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                            str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
+                        }
+                    }
+                    //TODO rivedere
+                    if (str.Length >= 260)
+                        throw new Exception();
+                    entry.ExtractToFile(str, true);
+                }
+                archive.Dispose();
+            }
+            else if (String.Compare(commandString, Constants.DIR_COMMAND) == 0)
+            {
+                str = currentDirectory + "\\" + fileNameString;
+                if (Directory.Exists(str))
+                {
+                    str += user;
+                    if (Directory.Exists(str))
+                    {
+                        string timeStamp = DateTime.Now.ToString("yy-MM-dd_HH-mm-ss-ffffff");
+                        str += timeStamp;
+                    }
+                }
+                if (str.Length >= 248)
+                    throw new Exception();
+                ZipFile.ExtractToDirectory(zipLocation, str);
+            }
+        }
 
         static string SizeSuffix(Int64 value)
         {
@@ -338,9 +371,16 @@ namespace ProjectPDSWPF
 
         private void releaseResources(Socket sock)
         {
-            if (sock.Connected)
-                sock.Shutdown(SocketShutdown.Both);
-            sock.Close();
+            try
+            {
+                if (sock.Connected)
+                    sock.Shutdown(SocketShutdown.Both);
+            }
+            catch { }
+            finally
+            {
+                sock.Close();
+            }
 
         }
         static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
@@ -358,10 +398,6 @@ namespace ProjectPDSWPF
 
         public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);
         public static event myDelegate2 fileCancel;
-
-        //motivation = 0 => file already exists, motivation = 1 => fileName too long, type ={file, directory}
-        public delegate string myDelegate3(string filename, string hint, string currentDirectory, string type, int motivation);
-        public static event myDelegate3 changeReceivingFileName;
 
         public delegate void myDelegate4(string fileName, string userName, Constants.NOTIFICATION_STATE state);
         public static event myDelegate4 receivingFailure;

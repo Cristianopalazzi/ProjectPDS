@@ -13,7 +13,6 @@ namespace ProjectPDSWPF
     /// <summary>
     /// Logica di interazione per NeighborSelection.xaml
     /// </summary>
-    /// //TODO vedere la dimensione massima del nome dei file nella lista di quelli in invio
     public partial class NeighborSelection : MetroWindow
     {
         public delegate void del(List<SendingFile> sf);

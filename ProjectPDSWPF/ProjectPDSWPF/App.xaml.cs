@@ -2,8 +2,7 @@
 using System.Windows;
 using System.IO;
 using Microsoft.Win32;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
+using System.Threading;
 
 namespace ProjectPDSWPF
 {
@@ -48,27 +47,7 @@ namespace ProjectPDSWPF
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
             Receiver.receivingFailure += createBalloons;
             NeighborSelection.closingSelection += NeighborSelection_closingSelection;
-            Receiver.changeReceivingFileName += Receiver_changeReceivingFileName;
-
             initializeNotifyIcon();
-        }
-
-        //TODO rifare
-        private string Receiver_changeReceivingFileName(string filename, string hint, string currentDirectory, string type, int motivation)
-        {
-            string result = String.Empty;
-            Current.Dispatcher.Invoke(new Action(() =>
-            {
-                MetroWindow window = mw as MetroWindow;
-                window.Show();
-                string motiv = String.Empty;
-                if (motivation == 0)
-                    motiv = "il file esiste già";
-                else motiv = "file troppo lungo";
-                result = window.ShowModalInputExternal("Ops", motiv,
-               new LoginDialogSettings { NegativeButtonVisibility = Visibility.Hidden, AffirmativeButtonText = "OKcancro", InitialUsername = hint });
-            }));
-            return result;
         }
 
         private void NeighborSelection_closingSelection()
@@ -78,6 +57,7 @@ namespace ProjectPDSWPF
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
         {
+            NeighborProtocol.ShutDown = true;
             Settings.writeSettings(Settings.getInstance);
             n.quitMe();
             nIcon.Dispose();
@@ -85,6 +65,7 @@ namespace ProjectPDSWPF
 
         private void createBalloons(string fileName, string userName, Constants.NOTIFICATION_STATE state)
         {
+            if (!Settings.getInstance.EnableNotification) return;
             switch (state)
             {
                 case Constants.NOTIFICATION_STATE.RECEIVED:
@@ -209,7 +190,14 @@ namespace ProjectPDSWPF
                     us.WindowState = WindowState.Normal;
                 }
             };
-            item5.Click += delegate { n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance); App.Current.Shutdown(); };
+            item5.Click += delegate
+            {
+                n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
+                NeighborProtocol.ShutDown = true;
+                NeighborProtocol.senderEvent.Set();
+                Thread.Sleep(350);
+                App.Current.Shutdown();
+            };
             nIcon.Visible = true;
             nIcon.MouseClick += NIcon_MouseClick;
         }

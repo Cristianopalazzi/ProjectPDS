@@ -178,10 +178,10 @@
                                                                 <Setter Property="Text" Value="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}" />
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Text" Value="In attesa di conferma" />
+                                                                <MultiDataTrigger.Conditions>
+                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                                </MultiDataTrigger.Conditions>
+                                                                <Setter Property="Text" Value="In attesa di conferma" />
                                                             </MultiDataTrigger>
                                                             <MultiDataTrigger>
                                                                 <MultiDataTrigger.Conditions>
@@ -489,24 +489,33 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="AutoAccept"  FontSize="20" Margin="5,5,5,10" />
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Default Directory"  FontSize="20" Margin="5,5,5,10"/>
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Default Directory Path"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
+                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Accetta automaticamente"  FontSize="20" Margin="5,5,5,10" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Usa directory di default"  FontSize="20" Margin="5,5,5,10"/>
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Rinomina automaticamente" FontSize="20" Margin="5,5,5,10" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Abilita notifiche" FontSize="20" Margin="5,5,5,10" />
+
+                    <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoRename}"  Grid.Row ="2" Grid.Column="2" Name="checkAutoRename" VerticalAlignment="Center"/>
+                    <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = EnableNotification}" Grid.Row ="3" Grid.Column="2" Name="CheckEnableNotification" VerticalAlignment="Center"/>
+                    
+                    
+
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Directory di default"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
-                    <Button Grid.Row="2" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog"  >
+                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog"  >
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" />
                         </Button.Style>
                     </Button>
-                    <TextBox Margin ="10,0,0,0" Text ="{Binding Path= DefaultDirPath}" Grid.Row="2" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" />
-
+                    <TextBox Margin ="10,0,0,0" Text ="{Binding Path= DefaultDirPath}" Grid.Row="4" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" />
                 </Grid>
 
             </TabItem>

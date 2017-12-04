@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 namespace ProjectPDSWPF
 {
     [Serializable]
-    public class Settings :INotifyPropertyChanged
+    public class Settings : INotifyPropertyChanged
     {
         public Boolean DefaultDir
         {
@@ -20,10 +20,22 @@ namespace ProjectPDSWPF
             set { _autoAccept = value; NotifyPropertyChanged("AutoAccept"); }
         }
 
+        public bool AutoRename
+        {
+            get { return _autoRename; }
+            set { _autoRename = value; NotifyPropertyChanged("AutoRename"); }
+        }
+
         public string DefaultDirPath
         {
             get { return _defaultDirPath; }
             set { _defaultDirPath = value; NotifyPropertyChanged("DefaultDirPath"); }
+        }
+
+        public bool EnableNotification
+        {
+            get => _enableNotification;
+            set { _enableNotification = value; NotifyPropertyChanged("EnableNotification"); }
         }
 
         public Boolean Online
@@ -42,6 +54,8 @@ namespace ProjectPDSWPF
             AutoAccept = false;
             DefaultDirPath = String.Empty;
             Online = true;
+            AutoRename = false;
+            EnableNotification = true;
         }
 
         public static Settings getInstance
@@ -58,11 +72,12 @@ namespace ProjectPDSWPF
         }
 
 
+
         private static void readSettings()
         {
             if (File.Exists(App.defaultResourcesFolder + "\\" + Constants.SETTINGS))
             {
-                using (FileStream s = new FileStream(App.defaultResourcesFolder+"\\"+ Constants.SETTINGS, FileMode.Open))
+                using (FileStream s = new FileStream(App.defaultResourcesFolder + "\\" + Constants.SETTINGS, FileMode.Open))
                 {
                     XmlSerializer xSer = new XmlSerializer(typeof(Settings));
                     instance = (Settings)xSer.Deserialize(s);
@@ -91,9 +106,7 @@ namespace ProjectPDSWPF
         }
 
         private static Settings instance = null;
-        private Boolean _online;
-        private Boolean _defaultDir;
-        private Boolean _autoAccept;
+        private Boolean _online, _defaultDir, _autoAccept, _autoRename, _enableNotification;
         private string _defaultDirPath;
 
         public event PropertyChangedEventHandler PropertyChanged;

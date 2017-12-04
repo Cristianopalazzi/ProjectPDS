@@ -61,7 +61,7 @@ namespace ProjectPDSWPF
             socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, false);
 
             socket.Bind(localEndPoint);
-            while (true)
+            while (!ShutDown)
             {
                 try
                 {
@@ -110,7 +110,7 @@ namespace ProjectPDSWPF
                         socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(ex, true);
@@ -122,11 +122,8 @@ namespace ProjectPDSWPF
                     continue;
                 }
             }
-
-            //TODO capire come chiuderle
             socket.Close();
             socketImg.Close();
-
         }
 
         public string getUserFromIp(string ipSender)
@@ -139,7 +136,7 @@ namespace ProjectPDSWPF
 
         void cleanMap()
         {
-            while (true)
+            while (!ShutDown)
             {
                 List<string> toRemove = new List<string>();
 
@@ -204,6 +201,7 @@ namespace ProjectPDSWPF
 
             while (senderEvent.WaitOne())
             {
+                if (ShutDown) break;
                 byte[] requestImg = new byte[Constants.NEED_IMG.Length];
                 try
                 {
@@ -249,7 +247,7 @@ namespace ProjectPDSWPF
             {
                 socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipep);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(ex, true);
@@ -262,8 +260,6 @@ namespace ProjectPDSWPF
             }
             finally
             {
-                if (socket.Connected)
-                    socket.Shutdown(SocketShutdown.Both);
                 socket.Close();
             }
 
@@ -281,7 +277,6 @@ namespace ProjectPDSWPF
 
             listener.Listen(1);
 
-            Console.WriteLine("Waiting for img...");
             try
             {
                 SocketError sockError;
@@ -504,5 +499,6 @@ namespace ProjectPDSWPF
         public static ManualResetEvent senderEvent;
         public delegate void modifyNeighbors(string neighborID, byte[] image, bool addOrRemove);
         public static event modifyNeighbors neighborsEvent;
+        public static bool ShutDown = false;
     }
 }

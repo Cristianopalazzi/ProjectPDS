@@ -13,6 +13,7 @@ namespace ProjectPDSWPF
     /// Logica di interazione per Acceptance.xaml
     /// </summary>
     /// //TODO creare installer
+    /// //TODO scegliere icona
     public partial class Acceptance : MetroWindow
     {
 

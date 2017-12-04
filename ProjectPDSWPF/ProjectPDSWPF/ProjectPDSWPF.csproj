@@ -80,6 +80,9 @@
     </Compile>
     <Compile Include="Receiver.cs" />
     <Compile Include="ReceivingFile.cs" />
+    <Compile Include="RenamingFile.xaml.cs">
+      <DependentUpon>RenamingFile.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Sender.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SendingFile.cs" />
@@ -104,6 +107,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="NeighborSelection.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="RenamingFile.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
