@@ -1,17 +1,34 @@
 ﻿
 using Microsoft.Win32;
 using System;
-using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace Setup
 {
     class Program
     {
-
+        public delegate void myDelegate(bool fine);
+        public static event myDelegate FineInstallazione;
+        [STAThread]
         static void Main(string[] args)
         {
+            SetupForm.installation += installation;
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new SetupForm());
+        }
+
+        private static void installation(string installationPath)
+        {
+            if (String.IsNullOrEmpty(installationPath))
+            {
+                Console.WriteLine("Non c'è una directory selezionata");
+                return;
+            }
+
+            Console.WriteLine("PATH DI INSTALLAZIONE " + installationPath);
             try
             {
                 string dirPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\NonnaPapera";
@@ -24,6 +41,8 @@ namespace Setup
                     creaRisorse("Setup.share.ico", dirPath);
                     creaRisorse("Setup.warning.ico", dirPath);
                     creaRisorse("Setup.guest.png", dirPath);
+                    //creaRisorse("Setup.FileNameSender.exe", installationPath);
+                    //creaRisorse("Setup.MyZip.zip", installationPath);
                     Console.WriteLine("Icons created succesfully");
                 }
                 Console.WriteLine("no need to create icons");
@@ -44,7 +63,8 @@ namespace Setup
                     else
                     {
                         skCommand = sk.CreateSubKey("\\command");
-                        skCommand.SetValue("@", "C:\\Users\\Gianmaria\\source\\repos\\ProjectPDS\\FileNameSender\\FileNameSender\\bin\\Debug\\FileNameSender.exe\"%1\"");
+                        //skCommand.SetValue("@", "C:\\Users\\Gianmaria\\source\\repos\\ProjectPDS\\FileNameSender\\FileNameSender\\bin\\Debug\\FileNameSender.exe\"%1\"");
+                        skCommand.SetValue("@", installationPath + "\\FileNameSender.exe\"%1\"");
                     }
                 }
 
@@ -63,11 +83,14 @@ namespace Setup
                     else
                     {
                         skDirCommand = skDir.CreateSubKey("\\command");
-                        skDirCommand.SetValue("@", "C:\\Users\\Gianmaria\\source\\repos\\ProjectPDS\\FileNameSender\\FileNameSender\\bin\\Debug\\FileNameSender.exe\"%1\"");
+                        //skDirCommand.SetValue("@", "C:\\Users\\Gianmaria\\source\\repos\\ProjectPDS\\FileNameSender\\FileNameSender\\bin\\Debug\\FileNameSender.exe\"%1\"");
+                        skDirCommand.SetValue("@", installationPath + "\\FileNameSender.exe\"%1\"");
 
                     }
 
                 }
+                FineInstallazione(true);
+
             }
             catch
             {

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:ProjectPDSWPF"
         xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
-        Title="PDSProject" Height="350" Width="650"
+        Title="EasyShare" Height="350" Width="650"
         GlowBrush="Black"
         BorderThickness="0"
         Name="myMainWindow">

@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:ProjectPDSWPF"
         mc:Ignorable="d"
         Name="windowNeighborSelection"
-        Title="NeighborSelection" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
+        Title="Scegli con chi condividere il file" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
     <Controls:MetroWindow.Resources>
         <local:PathConverter x:Key="myConverter"/>
     </Controls:MetroWindow.Resources>
