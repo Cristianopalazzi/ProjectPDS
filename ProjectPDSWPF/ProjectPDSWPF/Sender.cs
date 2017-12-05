@@ -5,7 +5,6 @@ using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
-using System.Net.NetworkInformation;
 using System.Collections.Generic;
 
 namespace ProjectPDSWPF
@@ -20,17 +19,6 @@ namespace ProjectPDSWPF
             byte[] fileNameByte = Encoding.UTF8.GetBytes(fileName);
             byte[] fileNameLength = BitConverter.GetBytes(fileNameByte.Length);
             long fileLength = 0;
-
-            Ping p = new Ping();
-            PingReply rep = p.Send(ipAddr, 2000);
-
-            if (rep.Status != IPStatus.Success)
-            {
-                updateFileState(sender, Constants.FILE_STATE.ERROR);
-                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.NET_ERROR);
-                return;
-            }
-
 
             byte[] command = new byte[Constants.FILE_COMMAND.Length];
 
@@ -156,7 +144,7 @@ namespace ProjectPDSWPF
             {
                 //TODO eseguire sempre in debug perchè qualcosa va storto
                 updateFileState(sender, Constants.FILE_STATE.ERROR);
-                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR); //5
+                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
             }
 
             catch

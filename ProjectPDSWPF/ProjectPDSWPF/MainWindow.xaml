@@ -504,18 +504,18 @@
 
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoRename}"  Grid.Row ="2" Grid.Column="2" Name="checkAutoRename" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = EnableNotification}" Grid.Row ="3" Grid.Column="2" Name="CheckEnableNotification" VerticalAlignment="Center"/>
-                    
-                    
+
+                    <Image Grid.Column="1" Grid.Row="2" Name="infoImage" Height="24" Width="24" Stretch="Fill" ToolTip="L'applicazione farà cose"/>
 
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Directory di default"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
-                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog"  >
+                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog" Width="30" Height="30"  >
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" />
                         </Button.Style>
                     </Button>
-                    <TextBox Margin ="10,0,0,0" Text ="{Binding Path= DefaultDirPath}" Grid.Row="4" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" />
+                    <TextBox Margin ="10,10,0,0" MaxWidth="280" Width="280" Text ="{Binding Path= DefaultDirPath}" Grid.Row="4" Grid.Column="2" Name="defaultDirPath" IsReadOnly="true" FontSize="20" VerticalContentAlignment="Center" Height="50" />
                 </Grid>
 
             </TabItem>

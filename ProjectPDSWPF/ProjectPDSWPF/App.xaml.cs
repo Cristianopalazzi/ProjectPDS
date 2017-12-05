@@ -156,7 +156,7 @@ namespace ProjectPDSWPF
 
         private void initializeNotifyIcon()
         {
-            nIcon.Icon = new System.Drawing.Icon(defaultResourcesFolder + "/check.ico");
+            nIcon.Icon = new System.Drawing.Icon(defaultResourcesFolder + "/share.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item2 = new System.Windows.Forms.MenuItem();
             System.Windows.Forms.MenuItem item3 = new System.Windows.Forms.MenuItem();

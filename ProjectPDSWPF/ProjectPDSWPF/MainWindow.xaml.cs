@@ -47,6 +47,8 @@ namespace ProjectPDSWPF
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("FileName");
             view.GroupDescriptions.Add(groupDescription);
+            infoImage.Source = new BitmapImage(new Uri(App.defaultResourcesFolder + "/info.ico"));
+
         }
 
         //lista dei file in attesa di essere accettati o meno

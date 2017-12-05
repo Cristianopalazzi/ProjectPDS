@@ -9,7 +9,7 @@
         ShowCloseButton="False"
         ResizeMode="NoResize"
         Name="renamingFileWindow"
-        Title="RenamingFile" Height="200" Width="350" BorderThickness="0" GlowBrush="Black">
+        Height="200" Width="350" BorderThickness="0" GlowBrush="Black">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

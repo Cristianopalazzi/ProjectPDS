@@ -18,12 +18,12 @@ namespace FileNameSender
             try
             {
                 //TODO aggiungere apertura processo
-                Process[] p = Process.GetProcessesByName("ProjectPDSWPF");
-                if (p.Length == 0)
-                {
-                    Process.Start(Environment.CurrentDirectory + "\\ProjectPDSWPF.exe");
-                    Thread.Sleep(250);
-                }
+                //Process[] p = Process.GetProcessesByName("ProjectPDSWPF");
+                //if (p.Length == 0)
+                //{
+                //    Process.Start(Environment.CurrentDirectory + "\\ProjectPDSWPF.exe");
+                //    Thread.Sleep(250);
+                //}
                 pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);
                 pipeClient.Connect(3000);
                 sw = new StreamWriter(pipeClient);
