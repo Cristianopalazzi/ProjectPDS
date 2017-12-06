@@ -185,7 +185,7 @@ namespace ProjectPDSWPF
                 }
                 else
                 {
-                    BitmapImage bitmap = Neighbor.ToImage(File.ReadAllBytes(App.defaultResourcesFolder + "/uu.png"));
+                    BitmapImage bitmap = Neighbor.ToImage(File.ReadAllBytes(App.defaultResourcesFolder + "/anonimo.png"));
                     encoder.Frames.Add(BitmapFrame.Create(bitmap));
                 }
                 using (MemoryStream ms = new MemoryStream())

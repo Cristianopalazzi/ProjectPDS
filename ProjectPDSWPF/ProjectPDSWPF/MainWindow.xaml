@@ -9,11 +9,13 @@
         Title="EasyShare" Height="350" Width="650"
         GlowBrush="Black"
         BorderThickness="0"
-        Name="myMainWindow">
-    <Grid>
+        Name="myMainWindow"
+        MinWidth="650"
+        >
+    <Grid >
         <TabControl Name="tabControl"  Width="Auto" >
-            <TabItem Header="File in ricezione" Controls:ControlsHelper.HeaderFontSize="20" >
-                <ListView Name="listReceivingFiles" ItemsSource="{Binding FilesToReceive}">
+            <TabItem Header="File in ricezione" Controls:ControlsHelper.HeaderFontSize="20"  >
+                <ListView Name="listReceivingFiles" ItemsSource="{Binding FilesToReceive}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
 
                     <ListView.ContextMenu>
                         <ContextMenu>
@@ -51,55 +53,33 @@
                         </Style>
                     </ListView.Resources>
 
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MaxWidth="150" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="3*" />
+                                    <ColumnDefinition Width="80" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="5" VerticalAlignment="Center">
+                                    <Ellipse Height="64" Width="64">
+                                        <Ellipse.Fill>
+                                            <ImageBrush ImageSource="{Binding Image}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <TextBlock Text="{Binding Name}" TextAlignment="Center" FontSize="16" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <Grid Grid.Column="2" >
+                                    <ProgressBar  Value="{Binding Value}" Height="20"  VerticalAlignment="Center"/>
+                                    <TextBlock  Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black"  HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Grid>
+                                <Image Grid.Column="3" Source="{Binding Pic}" Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
 
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Margin="5" VerticalAlignment="Center">
-                                            <Ellipse Height="64" Width="64">
-                                                <Ellipse.Fill>
-                                                    <ImageBrush ImageSource="{Binding Image}"/>
-                                                </Ellipse.Fill>
-                                            </Ellipse>
-                                            <TextBlock Text="{Binding Name}" TextAlignment="Center" FontSize="16"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                            <GridViewColumn>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <TextBlock ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center" MaxWidth="100"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-
-                            <GridViewColumn Width="240">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <ProgressBar Value="{Binding Value}" Height="20"/>
-                                            <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black"  HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                            <GridViewColumn Width="100">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                        </GridView>
-
-                    </ListView.View>
                     <ListView.ItemContainerStyle>
                         <Style  TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -110,7 +90,7 @@
                 </ListView>
             </TabItem>
             <TabItem Header="File in invio" Controls:ControlsHelper.HeaderFontSize="20">
-                <ListView Name="sendingFiles" ItemsSource="{Binding FilesToSend}">
+                <ListView Name="sendingFiles" ItemsSource="{Binding FilesToSend}" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListView.Resources>
                         <Style TargetType="GridViewColumnHeader">
                             <Setter Property="Visibility" Value="Collapsed" />
@@ -146,210 +126,189 @@
                         </ContextMenu>
                     </ListView.ContextMenu>
 
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn>
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Margin="5" VerticalAlignment="Center">
-                                            <Ellipse Height="64" Width="64">
-                                                <Ellipse.Fill>
-                                                    <ImageBrush ImageSource="{Binding Immagine}"/>
-                                                </Ellipse.Fill>
-                                            </Ellipse>
-                                            <TextBlock Text="{Binding Name}" TextAlignment="Center" FontSize="16"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                            <GridViewColumn Width="240">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <StackPanel>
-                                            <TextBlock  Foreground="Black" HorizontalAlignment="Center"  Margin="0,0,0,10">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="In attesa di conferma" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="Preparazione del file" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="Inviato con successo" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="Invio Annullato" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="File rifiutato" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="Text" Value="Si è verificato un errore durante l'invio" />
-                                                            </MultiDataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
-                                            <Grid>
-                                                <ProgressBar Value="{Binding Value}" Height="20"  VerticalAlignment="Center" />
-                                                <TextBlock Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Grid>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                            <GridViewColumn Width="140">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Button Content="Cancel" Height="20" Width="100" Click="Cancel_Click" VerticalAlignment="Center">
-
-
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource MetroButton}">
-                                                    <Style.Triggers>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </MultiDataTrigger>
-                                                        <MultiDataTrigger>
-                                                            <MultiDataTrigger.Conditions>
-                                                                <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
-                                                            </MultiDataTrigger.Conditions>
-                                                            <Setter Property="Visibility" Value="Hidden" />
-                                                        </MultiDataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-
-                                        </Button>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-
-                            <GridViewColumn Width="100">
-                                <GridViewColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Grid>
-                                            <Controls:ProgressRing  VerticalAlignment="Center" Foreground="{DynamicResource AccentColorBrush}">
-                                                <Controls:ProgressRing.Style>
-                                                    <Style TargetType="Controls:ProgressRing">
-                                                        <Style.Triggers>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="True" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="False" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="False" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="False" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="False" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="False" />
-                                                            </MultiDataTrigger>
-                                                            <MultiDataTrigger>
-                                                                <MultiDataTrigger.Conditions>
-                                                                    <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
-                                                                </MultiDataTrigger.Conditions>
-                                                                <Setter Property="IsActive" Value="False" />
-                                                            </MultiDataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </Controls:ProgressRing.Style>
-                                            </Controls:ProgressRing>
-                                            <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </DataTemplate>
-                                </GridViewColumn.CellTemplate>
-                            </GridViewColumn>
-
-                        </GridView>
-                    </ListView.View>
-
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MaxWidth="150" />
+                                    <ColumnDefinition Width="3*" />
+                                    <ColumnDefinition Width="140" />
+                                    <ColumnDefinition Width="100" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="5" VerticalAlignment="Center">
+                                    <Ellipse Height="64" Width="64">
+                                        <Ellipse.Fill>
+                                            <ImageBrush ImageSource="{Binding Immagine}"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
+                                    <TextBlock Text="{Binding Name}" TextAlignment="Center" TextTrimming ="CharacterEllipsis" FontSize="16"/>
+                                </StackPanel>
+                                <Grid Grid.Column="1" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <ProgressBar Grid.Row="1" Value="{Binding Value}" Height="20"  VerticalAlignment="Top" />
+                                    <TextBlock  Grid.Row ="1" Text="{Binding Value, StringFormat={}{0:0}%}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                                    <TextBlock Grid.Row="0" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom" Margin="0,0,0,10">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="{Binding RemainingTime, StringFormat= Tempo rimanente \{0\}}" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="In attesa di conferma" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="Preparazione del file" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="Inviato con successo" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="Invio Annullato" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="File rifiutato" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="Text" Value="Si è verificato un errore durante l'invio" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Grid>
+                                <Button Grid.Column="2" Content="Cancel" Height="35" Width="110"  Click="Cancel_Click" VerticalAlignment="Center" HorizontalAlignment="Center" >
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource MetroButton}">
+                                            <Style.Triggers>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </MultiDataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Visibility" Value="Hidden" />
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
+                                <Grid Grid.Column="3">
+                                    <Controls:ProgressRing  VerticalAlignment="Center" Foreground="{DynamicResource AccentColorBrush}">
+                                        <Controls:ProgressRing.Style>
+                                            <Style TargetType="Controls:ProgressRing">
+                                                <Style.Triggers>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PREPARATION }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="True" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.PROGRESS }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="False" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.COMPLETED }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="False" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.CANCELED }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="False" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ERROR }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="False" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.ACCEPTANCE }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="False" />
+                                                    </MultiDataTrigger>
+                                                    <MultiDataTrigger>
+                                                        <MultiDataTrigger.Conditions>
+                                                            <Condition Binding="{Binding Path=File_state}" Value="{x:Static local:Constants+FILE_STATE.REJECTED }" />
+                                                        </MultiDataTrigger.Conditions>
+                                                        <Setter Property="IsActive" Value="False" />
+                                                    </MultiDataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Controls:ProgressRing.Style>
+                                    </Controls:ProgressRing>
+                                    <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
+                            
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    
                     <ListView.ItemContainerStyle>
                         <Style  TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -362,7 +321,7 @@
                         <GroupStyle>
                             <GroupStyle.HeaderTemplate>
                                 <DataTemplate>
-                                    <TextBlock FontWeight="Bold" FontSize="16" HorizontalAlignment="Left" MaxWidth="550" TextTrimming="CharacterEllipsis" Margin="5" ToolTip="{Binding Name}" Text="{Binding Name}"/>
+                                    <TextBlock FontWeight="Bold" FontSize="16" HorizontalAlignment="Left"  TextTrimming="CharacterEllipsis" Margin="5" ToolTip="{Binding Name}" Text="{Binding Name}"/>
                                 </DataTemplate>
                             </GroupStyle.HeaderTemplate>
                         </GroupStyle>
@@ -497,7 +456,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock  Grid.Row="0" Grid.Column="0" Text="Accetta automaticamente"  FontSize="20" Margin="5,5,5,10" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Accetta automaticamente"  FontSize="20" Margin="5,5,5,10"/>
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="Usa directory di default"  FontSize="20" Margin="5,5,5,10"/>
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Rinomina automaticamente" FontSize="20" Margin="5,5,5,10" />
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Abilita notifiche" FontSize="20" Margin="5,5,5,10" />
