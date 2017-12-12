@@ -3,6 +3,8 @@ using System.Threading;
 using System.IO.Pipes;
 using System.IO;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System;
 
 namespace ProjectPDSWPF
 {
@@ -33,31 +35,27 @@ namespace ProjectPDSWPF
             try
             {
                 pipeServer = new NamedPipeServerStream("testpipe", PipeDirection.In);
-
+                sr = new StreamReader(pipeServer);
                 while (true)
                 {
                     pipeServer.WaitForConnection();
-                    sr = new StreamReader(pipeServer);
                     string file = sr.ReadLine();
-                    sr.Close();
+                    if (pipeServer.IsConnected)
+                        pipeServer.Disconnect();
                     openNeighbors(file);
-                    pipeServer.Disconnect();
                 }
             }
             catch
             {
                 if (sr != null)
                     sr.Close();
-                if (pipeServer != null)
-                    pipeServer.Close();
                 listenOnPipe();
+
             }
             finally
             {
                 if (sr != null)
                     sr.Close();
-                if (pipeServer != null)
-                    pipeServer.Close();
             }
         }
 

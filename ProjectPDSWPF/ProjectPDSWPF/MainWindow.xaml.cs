@@ -11,6 +11,7 @@ using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System.Windows.Threading;
 using System.Linq;
+using System.Diagnostics;
 
 namespace ProjectPDSWPF
 {
@@ -159,23 +160,36 @@ namespace ProjectPDSWPF
         {
             sendingFiles.Dispatcher.Invoke(new Action(() =>
             {
-                foreach (SendingFile sf in FilesToSend)
-                    if (sf.Sock == sock)
-                    {
-                        if (!String.IsNullOrEmpty(remainingTime))
-                            if (String.Compare(sf.RemainingTime, remainingTime) != 0)
-                                sf.RemainingTime = remainingTime;
-                        sf.Value = percentage;
-                        sf.File_state = Constants.FILE_STATE.PROGRESS;
-                        if (sf.Value == 100)
+                try
+                {
+                    foreach (SendingFile sf in FilesToSend)
+                        if (sf.Sock == sock)
                         {
-                            sf.File_state = Constants.FILE_STATE.COMPLETED;
-                            sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico"));
-                            if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
-                                triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
+                            if (!String.IsNullOrEmpty(remainingTime))
+                                if (String.Compare(sf.RemainingTime, remainingTime) != 0)
+                                    sf.RemainingTime = remainingTime;
+                            sf.Value = percentage;
+                            sf.File_state = Constants.FILE_STATE.PROGRESS;
+                            if (sf.Value == 100)
+                            {
+                                sf.File_state = Constants.FILE_STATE.COMPLETED;
+                                sf.Pic = new BitmapImage(new Uri(App.defaultResourcesFolder + "/check.ico"));
+                                if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
+                                    triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
+                            }
+                            break;
                         }
-                        break;
-                    }
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine("allalal");
+                    var st = new StackTrace(e, true);
+                    // Get the top stack frame
+                    var frame = st.GetFrame(st.FrameCount - 1);
+                    // Get the line number from the stack frame
+                    var line = frame.GetFileLineNumber();
+                    Console.WriteLine("Error at line {0} ", line);
+                }
             }));
         }
 
@@ -197,8 +211,25 @@ namespace ProjectPDSWPF
                 if (sf.Sock.Connected)
                     sf.Sock.Shutdown(SocketShutdown.Both);
             }
-            catch
+            catch(ObjectDisposedException o)
             {
+                Console.WriteLine("main");
+                var st = new StackTrace(o, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("MainWindwos");
+                var st = new StackTrace(ex, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
             }
             finally
             {

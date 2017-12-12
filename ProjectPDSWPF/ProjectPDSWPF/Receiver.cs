@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using System.Diagnostics;
 
 namespace ProjectPDSWPF
 {
@@ -46,8 +47,15 @@ namespace ProjectPDSWPF
                     myThread.Start();
                 }
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine("Receiver");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 //GUI (Controlla la tua connessione) ?????
             }
             finally
@@ -291,8 +299,15 @@ namespace ProjectPDSWPF
                 else
                     fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine("Receiver");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR);
             }
             finally
@@ -376,7 +391,15 @@ namespace ProjectPDSWPF
                 if (sock.Connected)
                     sock.Shutdown(SocketShutdown.Both);
             }
-            catch { }
+            catch (Exception e) {
+                Console.WriteLine("Receiver");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
+            }
             finally
             {
                 sock.Close();

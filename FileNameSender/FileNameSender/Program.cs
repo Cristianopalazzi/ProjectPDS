@@ -39,8 +39,8 @@ namespace FileNameSender
                
                 if (sw != null)
                     sw.Close();
-                if (pipeClient != null)
-                    pipeClient.Close();
+                //if (pipeClient != null)
+                //    pipeClient.Close();
             }
         }
     }

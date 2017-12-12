@@ -6,6 +6,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.IO.Compression;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ProjectPDSWPF
 {
@@ -147,8 +148,15 @@ namespace ProjectPDSWPF
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
             }
 
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine("Sender");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 updateFileState(sender, Constants.FILE_STATE.ERROR);
                 fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR); //6 
             }
@@ -192,7 +200,15 @@ namespace ProjectPDSWPF
                 if (s.Connected)
                     s.Shutdown(SocketShutdown.Both);
             }
-            catch { }
+            catch (Exception e) {
+                Console.WriteLine("Sender");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
+            }
             finally
             {
                 s.Close();
