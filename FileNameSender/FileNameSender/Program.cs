@@ -1,5 +1,4 @@
-﻿
-using System.IO.Pipes;
+﻿using System.IO.Pipes;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
@@ -17,13 +16,13 @@ namespace FileNameSender
             StreamWriter sw = null;
             try
             {
-                //TODO aggiungere apertura processo
-                //Process[] p = Process.GetProcessesByName("ProjectPDSWPF");
-                //if (p.Length == 0)
-                //{
-                //    Process.Start(Environment.CurrentDirectory + "\\ProjectPDSWPF.exe");
-                //    Thread.Sleep(250);
-                //}
+                String appPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+                Process[] p = Process.GetProcessesByName("EasyShare");
+                if (p.Length == 0)
+                {
+                    Process.Start(appPath + "\\EasyShare.exe");
+                    Thread.Sleep(1000);
+                }
                 pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);
                 pipeClient.Connect(3000);
                 sw = new StreamWriter(pipeClient);
@@ -36,11 +35,9 @@ namespace FileNameSender
             }
             finally
             {
-               
+                Console.ReadLine();
                 if (sw != null)
                     sw.Close();
-                //if (pipeClient != null)
-                //    pipeClient.Close();
             }
         }
     }
