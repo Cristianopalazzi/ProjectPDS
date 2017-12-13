@@ -15,12 +15,6 @@
     {
         "Entry"
         {
-        "MsmKey" = "8:_129031DB527E44AFB3A4B7FF81E2E2C4"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_25F22EA8D0974F9A9D8177F89A84C11D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -39,19 +33,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_599AFDFF62FD483694F4B0CE6982ACC3"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_5EF6BE05D21CDA17709017503F1AB1AB"
         "OwnerKey" = "8:_4A64E2937A8398F8EA028C794C2BE9F6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_78461474E0DD4A31A987383EDD0B1264"
+        "MsmKey" = "8:_7B67659E10364B5FBD5E2EE0330CCCB0"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -63,19 +51,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_877369FB69204B929FC1D7F4937F16ED"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_8A91F0C8078848438FD51BE056177B94"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_9080CD3175E94F43AF3863597FC82041"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -87,7 +63,19 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_BB1BEF4C536143B9A4E5B85709656709"
+        "MsmKey" = "8:_9DC8EF0A67A145F7ABF5626E79C570DE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AA413E8C619546D9A7079AEE4B7C6248"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_BC50EBC62D4B40DDA9C586376FF9C7F7"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -111,13 +99,25 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_E2544914584B43AFA8D017B78E242F27"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_E2BDF9862A4E49E69775153B6BA20041"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_E44E5EE721CF4A628CED7B44409357C7"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_F2321C4BD9B24F938F379F7F4B90D163"
+        "MsmKey" = "8:_EB3FDD496A1441B49D4C997596A53C0B"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -136,7 +136,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_7EFD9A1D225904E05D8134D81AC50AD0"
+        "OwnerKey" = "8:_4A64E2937A8398F8EA028C794C2BE9F6"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_5EF6BE05D21CDA17709017503F1AB1AB"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -148,13 +154,7 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4A64E2937A8398F8EA028C794C2BE9F6"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_5EF6BE05D21CDA17709017503F1AB1AB"
+        "OwnerKey" = "8:_7EFD9A1D225904E05D8134D81AC50AD0"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -252,26 +252,6 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_129031DB527E44AFB3A4B7FF81E2E2C4"
-            {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\menuIcon.ico"
-            "TargetName" = "8:menuIcon.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_25F22EA8D0974F9A9D8177F89A84C11D"
             {
             "SourcePath" = "8:..\\..\\FileNameSender\\FileNameSender\\bin\\Debug\\FileNameSender.pdb"
@@ -343,26 +323,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_599AFDFF62FD483694F4B0CE6982ACC3"
-            {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\info.ico"
-            "TargetName" = "8:info.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5EF6BE05D21CDA17709017503F1AB1AB"
             {
             "AssemblyRegister" = "3:1"
@@ -394,9 +354,9 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_78461474E0DD4A31A987383EDD0B1264"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7B67659E10364B5FBD5E2EE0330CCCB0"
             {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\cross.ico"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\cross.ico"
             "TargetName" = "8:cross.ico"
             "Tag" = "8:"
             "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
@@ -445,52 +405,12 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_877369FB69204B929FC1D7F4937F16ED"
-            {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\check.ico"
-            "TargetName" = "8:check.ico"
-            "Tag" = "8:"
-            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8A91F0C8078848438FD51BE056177B94"
             {
             "SourcePath" = "8:..\\EasyShare\\bin\\Debug\\EasyShare.pdb"
             "TargetName" = "8:EasyShare.pdb"
             "Tag" = "8:"
             "Folder" = "8:_E3C1A675EA2C48CA862726CDB1C1B2DA"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9080CD3175E94F43AF3863597FC82041"
-            {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\guest.png"
-            "TargetName" = "8:guest.png"
-            "Tag" = "8:"
-            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -525,10 +445,50 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BB1BEF4C536143B9A4E5B85709656709"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9DC8EF0A67A145F7ABF5626E79C570DE"
             {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\anonimo.png"
-            "TargetName" = "8:anonimo.png"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\guest.png"
+            "TargetName" = "8:guest.png"
+            "Tag" = "8:"
+            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AA413E8C619546D9A7079AEE4B7C6248"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\menuIcon.ico"
+            "TargetName" = "8:menuIcon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BC50EBC62D4B40DDA9C586376FF9C7F7"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\share.ico"
+            "TargetName" = "8:share.ico"
             "Tag" = "8:"
             "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
             "Condition" = "8:"
@@ -607,6 +567,46 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E2544914584B43AFA8D017B78E242F27"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\info.ico"
+            "TargetName" = "8:info.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_E2BDF9862A4E49E69775153B6BA20041"
+            {
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\anonimo.png"
+            "TargetName" = "8:anonimo.png"
+            "Tag" = "8:"
+            "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_E44E5EE721CF4A628CED7B44409357C7"
             {
             "AssemblyRegister" = "3:1"
@@ -638,10 +638,10 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F2321C4BD9B24F938F379F7F4B90D163"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EB3FDD496A1441B49D4C997596A53C0B"
             {
-            "SourcePath" = "8:C:\\Program Files\\EasyShare.inc\\EasyShare\\Resources\\share.ico"
-            "TargetName" = "8:share.ico"
+            "SourcePath" = "8:..\\..\\..\\..\\..\\Desktop\\Programmazione di sistema\\risorse progetto\\check.ico"
+            "TargetName" = "8:check.ico"
             "Tag" = "8:"
             "Folder" = "8:_51A82C73C0E14A4EB9CABBBBE9452FD2"
             "Condition" = "8:"
@@ -694,6 +694,39 @@
                     "Property" = "8:_4824E7439B1042759A5197889E4DD193"
                         "Folders"
                         {
+                        }
+                    }
+                }
+            }
+            "{1525181F-901A-416C-8A58-119130FE478E}:_E552877C2CD249C99E50E7FDED03B8EB"
+            {
+            "Name" = "8:#1915"
+            "AlwaysCreate" = "11:FALSE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Property" = "8:AppDataFolder"
+                "Folders"
+                {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_36F7AC52964649989209A840A37D1377"
+                    {
+                    "Name" = "8:EasyShare"
+                    "AlwaysCreate" = "11:TRUE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_830FA90BBF73487399C8AF4B3F04B466"
+                        "Folders"
+                        {
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_1E1594499ED44EDCB3B9247FC5FD4CAD"
+                            {
+                            "Name" = "8:Resources"
+                            "AlwaysCreate" = "11:TRUE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_9269D8EBACFD4B17A406222A29112242"
+                                "Folders"
+                                {
+                                }
+                            }
                         }
                     }
                 }

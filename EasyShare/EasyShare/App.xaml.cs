@@ -11,8 +11,7 @@ namespace EasyShare
     /// Logica di interazione per App.xaml
     /// </summary>
     /// 
-    //TODO timeout socket acceptance, 0 o valore alto
-
+    //TODO rivedere fileNameSendere, provare a mettere in loop l'apertura del processo invece dello sleep
     public partial class App : Application
     {
         private NeighborSelection ns;
@@ -57,10 +56,11 @@ namespace EasyShare
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
         {
+            n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
             NeighborProtocol.ShutDown = true;
-            Settings.writeSettings(Settings.getInstance);
-            n.quitMe();
-            nIcon.Dispose();
+            NeighborProtocol.senderEvent.Set();
+            Thread.Sleep(350);
+            App.Current.Shutdown();
         }
 
         private void createBalloons(string fileName, string userName, Constants.NOTIFICATION_STATE state)
@@ -192,6 +192,12 @@ namespace EasyShare
             };
             item5.Click += delegate
             {
+                //TODO TESTARE
+                bool filesInProgress = mw.checkForFilesInProgress();
+                if (filesInProgress)
+                    if (!askForExit())
+                        return;
+
                 n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
@@ -244,6 +250,9 @@ namespace EasyShare
                 ns.Focus();
             }));
         }
+
+        public delegate bool myDelegate();
+        public static event myDelegate askForExit;
     }
 
 

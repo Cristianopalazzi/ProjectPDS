@@ -89,38 +89,35 @@ namespace EasyShare
                     user = Constants.UTENTE_ANONIMO;
                 byte[] command = new byte[Constants.FILE_COMMAND.Length];
                 received = handler.Receive(command, 0, command.Length, SocketFlags.None, out sockError);
+
                 if (sockError != SocketError.Success)
-                {
                     throw new SocketException();
-                }
 
                 string commandString = Encoding.ASCII.GetString(command);
                 byte[] fileNameLength = new byte[sizeof(int)];
                 received = handler.Receive(fileNameLength, 0, sizeof(int), SocketFlags.None, out sockError);
+
                 if (sockError != SocketError.Success)
-                {
                     throw new SocketException();
-                }
 
                 int fileNameDimension = BitConverter.ToInt32(fileNameLength, 0);
                 byte[] fileNameAndFileLength = new byte[fileNameDimension + sizeof(long)];
                 received = handler.Receive(fileNameAndFileLength, 0, fileNameAndFileLength.Length, SocketFlags.None, out sockError);
+
                 if (sockError != SocketError.Success)
-                {
                     throw new SocketException();
-                }
 
                 fileNameString = Encoding.UTF8.GetString(fileNameAndFileLength, 0, fileNameDimension);
                 long fileSize = BitConverter.ToInt64(fileNameAndFileLength, fileNameDimension);
                 id = Guid.NewGuid().ToString();
+
                 if (settings.AutoAccept)
                 {
                     byte[] responseClient = Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE);
                     handler.Send(responseClient, 0, responseClient.Length, SocketFlags.None, out sockError);
+
                     if (sockError != SocketError.Success)
-                    {
                         throw new SocketException();
-                    }
                 }
                 else
                 {
@@ -168,17 +165,16 @@ namespace EasyShare
 
                 byte[] zipCommandZipNameLength = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
                 received = handler.Receive(zipCommandZipNameLength, 0, zipCommandZipNameLength.Length, SocketFlags.None, out sockError);
+
                 if (sockError != SocketError.Success || received == 0)
-                {
                     throw new SocketException();
-                }
+
                 int zipFileNameLength = BitConverter.ToInt32(zipCommandZipNameLength, Constants.ZIP_COMMAND.Length);
                 byte[] zipNameAndZipLength = new byte[zipFileNameLength + sizeof(long)];
                 received = handler.Receive(zipNameAndZipLength, 0, zipNameAndZipLength.Length, SocketFlags.None, out sockError);
+
                 if (sockError != SocketError.Success)
-                {
                     throw new SocketException();
-                }
                 string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
                 zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
 
@@ -196,6 +192,7 @@ namespace EasyShare
                     BitmapImage bitmap = Neighbor.ToImage(File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
                     encoder.Frames.Add(BitmapFrame.Create(bitmap));
                 }
+
                 using (MemoryStream ms = new MemoryStream())
                 {
                     encoder.Save(ms);
@@ -207,14 +204,14 @@ namespace EasyShare
                 int percentage = 0;
                 zipLocation = App.defaultFolder + "\\" + zipFileName;
                 fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
-                byte[] data = new byte[1400];
+                byte[] data = new byte[Constants.PACKET_SIZE];
                 int bytesRec = 0;
 
                 while (temp < zipFileSize)
                 {
-                    if (zipFileSize - temp > 1400)
+                    if (zipFileSize - temp > Constants.PACKET_SIZE)
                     {
-                        bytesRec = handler.Receive(data, 0, 1400, SocketFlags.None, out sockError);
+                        bytesRec = handler.Receive(data, 0, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
                     }
                     else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
 
@@ -391,7 +388,8 @@ namespace EasyShare
                 if (sock.Connected)
                     sock.Shutdown(SocketShutdown.Both);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine("Receiver");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame
@@ -406,6 +404,7 @@ namespace EasyShare
             }
 
         }
+
         static readonly string[] SizeSuffixes = { "bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
         private Thread server;

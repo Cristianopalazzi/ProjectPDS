@@ -15,7 +15,7 @@ namespace EasyShare
         public void sendFile(string ipAddr, string pathFile, Socket sender)
         {
             sender.SendTimeout = 2500;
-            sender.ReceiveTimeout = 0;
+            sender.ReceiveTimeout = 1000 * 5 * 60;
             string fileName = Path.GetFileName(pathFile);
             byte[] fileNameByte = Encoding.UTF8.GetBytes(fileName);
             byte[] fileNameLength = BitConverter.GetBytes(fileNameByte.Length);
@@ -50,7 +50,6 @@ namespace EasyShare
             try
             {
                 sender.Connect(remoteEP);
-
                 SocketError sockError;
                 int sent = 0;
 
@@ -87,7 +86,7 @@ namespace EasyShare
                 int temp = 0, percentage = 0;
                 fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
 
-                byte[] data = new byte[1400];
+                byte[] data = new byte[Constants.PACKET_SIZE];
                 int readBytes = 0;
                 DateTime now = DateTime.Now;
                 int inviati = 0;
@@ -95,8 +94,8 @@ namespace EasyShare
 
                 while (temp < zipLength)
                 {
-                    if (zipLength - temp > 1400)
-                        readBytes = fs.Read(data, 0, 1400);
+                    if (zipLength - temp > Constants.PACKET_SIZE)
+                        readBytes = fs.Read(data, 0, Constants.PACKET_SIZE);
                     else
                         readBytes = fs.Read(data, 0, (int)zipLength - temp);
 
@@ -126,7 +125,6 @@ namespace EasyShare
                                 TimeSpan t = TimeSpan.FromSeconds(remainingTime);
                                 remainingTimeString = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
                             }
-                            //updateRemainingTime(sender, remainingTimeString);
                             updateProgress(fileName, sender, tempPercentage, remainingTimeString);
                             percentage = tempPercentage;
                         }
@@ -200,7 +198,8 @@ namespace EasyShare
                 if (s.Connected)
                     s.Shutdown(SocketShutdown.Both);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 Console.WriteLine("Sender");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame
@@ -234,8 +233,8 @@ namespace EasyShare
         public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate1 fileRejected;
 
-        public delegate void myDelegate4(Socket sock, Constants.FILE_STATE state);
-        public static event myDelegate4 updateFileState;
+        public delegate void myDelegate2(Socket sock, Constants.FILE_STATE state);
+        public static event myDelegate2 updateFileState;
     }
 
 }

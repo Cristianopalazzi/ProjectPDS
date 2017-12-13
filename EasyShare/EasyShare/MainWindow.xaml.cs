@@ -37,6 +37,7 @@ namespace EasyShare
             Receiver.acceptance += file_to_accept;
             UserSettings.openTabSettings += tabChange;
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
+            App.askForExit += App_askForExit;
 
             NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
@@ -347,6 +348,16 @@ namespace EasyShare
             return false;
         }
 
+        private bool App_askForExit()
+        {
+            MessageDialogResult result = MessageDialogResult.Negative;
+            MessageDialogStyle style = MessageDialogStyle.AffirmativeAndNegative;
+            Show();
+            result = this.ShowModalMessageExternal("Il trasferimento di alcuni file non è completato", "Vuoi davvero uscire?", style);
+            if (result == MessageDialogResult.Affirmative)
+                return true;
+            return false;
+        }
 
         private ObservableCollection<Neighbor> neighborsValues;
         private ObservableCollection<SendingFile> filesToSend;
@@ -359,5 +370,8 @@ namespace EasyShare
 
         public delegate void myDelegate(string filename, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate triggerBalloon;
+
+        public delegate bool myDelegate1();
+        public static event myDelegate1 askForExit;
     }
 }

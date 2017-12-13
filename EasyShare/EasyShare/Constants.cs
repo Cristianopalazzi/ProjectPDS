@@ -28,5 +28,6 @@
         public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR, REC_ERROR };
         public const string projectName = "EasyShare";
         public const string UTENTE_ANONIMO = "Utente anonimo";
+        public const int PACKET_SIZE = 8 * 1024;
     }
 }

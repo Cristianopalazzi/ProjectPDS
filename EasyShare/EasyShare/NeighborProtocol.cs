@@ -47,17 +47,13 @@ namespace EasyShare
 
             string recv, remoteIpAddress, remotePort;
 
-            //EndPoint con le info del client che si collega
             EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
-
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
 
-            //join ad un gruppo multicast
             socket.SetSocketOption(SocketOptionLevel.IP,
                 SocketOptionName.AddMembership,
                 new MulticastOption(IPAddress.Parse(Constants.MULTICAST)));
 
-            //Non ricevo pacchetti da me stesso
             socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, false);
 
             socket.Bind(localEndPoint);
@@ -177,10 +173,8 @@ namespace EasyShare
 
 
             foreach (string tmp in toRemove)
-            {
                 if (Neighbors.TryRemove(tmp, out Neighbor value))
                     neighborsEvent(tmp, null, false);
-            }
         }
 
 
