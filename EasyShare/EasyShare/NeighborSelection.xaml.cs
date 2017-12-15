@@ -59,10 +59,10 @@ namespace EasyShare
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
+                selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
                 foreach (String file in FileList)
                 {
                     sendingFiles = new List<SendingFile>();
-                    selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
                     foreach (Neighbor n in selected)
                     {
                         SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);

@@ -19,7 +19,7 @@ namespace EasyShare
         private Receiver r;
         private NeighborProtocol n;
         private Settings s;
-        private System.Windows.Forms.NotifyIcon nIcon = new System.Windows.Forms.NotifyIcon();
+        private System.Windows.Forms.NotifyIcon nIcon;
         private MainWindow mw;
         private UserSettings us;
         public static string defaultFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\" + Constants.projectName;
@@ -46,6 +46,7 @@ namespace EasyShare
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
             Receiver.receivingFailure += createBalloons;
             NeighborSelection.closingSelection += NeighborSelection_closingSelection;
+            nIcon = new System.Windows.Forms.NotifyIcon();
             initializeNotifyIcon();
         }
 

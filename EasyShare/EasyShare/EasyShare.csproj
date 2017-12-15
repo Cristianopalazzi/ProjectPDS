@@ -89,6 +89,7 @@
     <Compile Include="UserSettings.xaml.cs">
       <DependentUpon>UserSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ZipInfo.cs" />
     <Page Include="Acceptance.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -120,7 +121,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="myQueue.cs" />
+    <Compile Include="Queue.cs" />
     <Compile Include="NeighborProtocol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

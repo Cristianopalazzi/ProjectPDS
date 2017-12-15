@@ -370,8 +370,5 @@ namespace EasyShare
 
         public delegate void myDelegate(string filename, string username, Constants.NOTIFICATION_STATE state);
         public static event myDelegate triggerBalloon;
-
-        public delegate bool myDelegate1();
-        public static event myDelegate1 askForExit;
     }
 }

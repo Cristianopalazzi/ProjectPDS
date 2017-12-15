@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Net.Sockets;
-using System.IO.Compression;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -12,39 +11,23 @@ namespace EasyShare
 {
     class Sender
     {
-        public void sendFile(string ipAddr, string pathFile, Socket sender)
+        public void sendFile(string ipAddr, string pathFile, Socket sender, ZipInfo zipInfo)
         {
             sender.SendTimeout = 2500;
             sender.ReceiveTimeout = 1000 * 5 * 60;
             string fileName = Path.GetFileName(pathFile);
             byte[] fileNameByte = Encoding.UTF8.GetBytes(fileName);
             byte[] fileNameLength = BitConverter.GetBytes(fileNameByte.Length);
-            long fileLength = 0;
+            long fileLength = zipInfo.IsFile ? new FileInfo(pathFile).Length : DirSize(new DirectoryInfo(pathFile));
 
             byte[] command = new byte[Constants.FILE_COMMAND.Length];
 
-            string zipToSend = RandomStr() + Constants.ZIP_EXTENSION;
-            FileAttributes attr = File.GetAttributes(pathFile);
-            string zipLocation = App.defaultFolder + "\\" + zipToSend;
+            string zipToSend = zipInfo.ZipToSend;
+            string zipLocation = zipInfo.ZipLocation;
+            command = zipInfo.IsFile ? Encoding.ASCII.GetBytes(Constants.FILE_COMMAND) : Encoding.ASCII.GetBytes(Constants.DIR_COMMAND);
+            long zipLength = zipInfo.ZipLength;
 
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                command = Encoding.ASCII.GetBytes(Constants.DIR_COMMAND);
-                DirectoryInfo dInfo = new DirectoryInfo(pathFile);
-                fileLength = DirSize(dInfo);
-                ZipFile.CreateFromDirectory(pathFile, zipLocation, CompressionLevel.NoCompression, false);
-            }
-            else
-            {
-                command = Encoding.ASCII.GetBytes(Constants.FILE_COMMAND);
 
-                fileLength = new FileInfo(pathFile).Length;
-                ZipArchive newFile = ZipFile.Open(zipLocation, ZipArchiveMode.Create);
-                newFile.CreateEntryFromFile(pathFile, fileName, CompressionLevel.NoCompression);
-                newFile.Dispose();
-            }
-
-            long zipLength = new FileInfo(zipLocation).Length;
             IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddr), Constants.PORT_TCP);
             FileStream fs = null;
             try
@@ -72,8 +55,8 @@ namespace EasyShare
                 {
                     fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
                     updateFileState(sender, Constants.FILE_STATE.REJECTED);
-                    if (File.Exists(zipLocation))
-                        File.Delete(zipLocation);
+                    //if (File.Exists(zipLocation))
+                    //    File.Delete(zipLocation);
                     releaseResources(sender);
                     return;
                 }
@@ -84,7 +67,9 @@ namespace EasyShare
 
 
                 int temp = 0, percentage = 0;
-                fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
+                //fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
+                //TODO
+                fs = File.Open(zipLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 byte[] data = new byte[Constants.PACKET_SIZE];
                 int readBytes = 0;
@@ -134,9 +119,7 @@ namespace EasyShare
                     else if (sockError == SocketError.Shutdown)
                         return;
                     else
-                    {
                         throw new SocketException();
-                    }
                 }
             }
             catch (SocketException e)
@@ -163,33 +146,11 @@ namespace EasyShare
             {
                 if (fs != null)
                     fs.Close();
-                if (File.Exists(zipLocation))
-                    File.Delete(zipLocation);
+                //if (File.Exists(zipLocation))
+                //    File.Delete(zipLocation);
                 releaseResources(sender);
             }
         }
-
-        public static string RandomStr()
-        {
-            string rStr = Path.GetRandomFileName();
-            rStr = rStr.Replace(".", "");
-            return rStr;
-        }
-
-
-        public static long DirSize(DirectoryInfo d)
-        {
-            long size = 0;
-            FileInfo[] fis = d.GetFiles();
-            foreach (FileInfo fi in fis)
-                size += fi.Length;
-
-            DirectoryInfo[] dis = d.GetDirectories();
-            foreach (DirectoryInfo di in dis)
-                size += DirSize(di);
-            return size;
-        }
-
 
         private void releaseResources(Socket s)
         {
@@ -224,6 +185,19 @@ namespace EasyShare
                 offset += array.Length;
             }
             return rv;
+        }
+
+        private long DirSize(DirectoryInfo d)
+        {
+            long size = 0;
+            FileInfo[] fis = d.GetFiles();
+            foreach (FileInfo fi in fis)
+                size += fi.Length;
+
+            DirectoryInfo[] dis = d.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+                size += DirSize(di);
+            return size;
         }
 
 
