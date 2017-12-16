@@ -230,32 +230,35 @@ namespace EasyShare
                         if (error != SocketError.Success)
                             throw new SocketException();
                     }
-
-                    var accountImage = images
-                 .OrderByDescending(f => f.LastWriteTime)
-                 .First();
-
-                    string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
-                    byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
-
-                    int sent = handler.Send(imgLength, 0, sizeof(int), SocketFlags.None, out error);
-
-                    if (error != SocketError.Success)
-                        throw new SocketException();
-
-                    byte[] img = GetImage(imgPath);
-
-                    sent = 0;
-
-                    while (sent < img.Length)
+                    else
                     {
-                        if (accountImage.Length - sent >= Constants.PACKET_SIZE)
-                            sent += handler.Send(img, sent, Constants.PACKET_SIZE, SocketFlags.None, out error);
-                        else
-                            sent += handler.Send(img, sent, img.Length - sent, SocketFlags.None, out error);
+
+                        var accountImage = images
+                     .OrderByDescending(f => f.LastWriteTime)
+                     .First();
+
+                        string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
+                        byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
+
+                        int sent = handler.Send(imgLength, 0, sizeof(int), SocketFlags.None, out error);
 
                         if (error != SocketError.Success)
                             throw new SocketException();
+
+                        byte[] img = GetImage(imgPath);
+
+                        sent = 0;
+
+                        while (sent < img.Length)
+                        {
+                            if (accountImage.Length - sent >= Constants.PACKET_SIZE)
+                                sent += handler.Send(img, sent, Constants.PACKET_SIZE, SocketFlags.None, out error);
+                            else
+                                sent += handler.Send(img, sent, img.Length - sent, SocketFlags.None, out error);
+
+                            if (error != SocketError.Success)
+                                throw new SocketException();
+                        }
                     }
 
                 }

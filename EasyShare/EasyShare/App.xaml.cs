@@ -15,7 +15,7 @@ namespace EasyShare
     public partial class App : Application
     {
         private NeighborSelection ns;
-        private MyQueue queue;
+        private Queue queue;
         private Receiver r;
         private NeighborProtocol n;
         private Settings s;
@@ -28,6 +28,12 @@ namespace EasyShare
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            Queue.openNeighbors += neighbor_selection;
+            Sender.fileRejected += createBalloons;
+            EasyShare.MainWindow.triggerBalloon += createBalloons;
+            SystemEvents.SessionEnded += SystemEvents_SessionEnded;
+            Receiver.receivingFailure += createBalloons;
+            NeighborSelection.closingSelection += NeighborSelection_closingSelection;
 
             if (Directory.Exists(defaultFolder))
                 foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
@@ -36,18 +42,13 @@ namespace EasyShare
 
 
             s = Settings.getInstance;
-            queue = new MyQueue();
+            queue = new Queue();
             n = NeighborProtocol.getInstance;
             r = new Receiver();
             mw = new MainWindow();
             ns = new NeighborSelection();
             us = new UserSettings();
-            MyQueue.openNeighbors += neighbor_selection;
-            Sender.fileRejected += createBalloons;
-            EasyShare.MainWindow.triggerBalloon += createBalloons;
-            SystemEvents.SessionEnded += SystemEvents_SessionEnded;
-            Receiver.receivingFailure += createBalloons;
-            NeighborSelection.closingSelection += NeighborSelection_closingSelection;
+
             nIcon = new System.Windows.Forms.NotifyIcon();
             initializeNotifyIcon();
         }
@@ -230,6 +231,7 @@ namespace EasyShare
 
         private void neighbor_selection(string file)
         {
+
             Dispatcher.Invoke(new Action(() =>
             {
                 if (ns.Acceso)

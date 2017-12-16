@@ -8,9 +8,9 @@ using System;
 
 namespace EasyShare
 {
-    class MyQueue
+    class Queue
     {
-        public MyQueue()
+        public Queue()
         {
             NeighborSelection.sendSelectedNeighbors += receive_selected_neighbors;
             filesToSend = new BlockingCollection<List<SendingFile>>();
@@ -59,7 +59,7 @@ namespace EasyShare
             }
         }
 
-        ~MyQueue() { threadPipe.Join(); waitOnTake.Join(); }
+        ~Queue() { threadPipe.Join(); waitOnTake.Join(); }
 
         public void listenOnQueue()
         {
