@@ -28,15 +28,17 @@ namespace EasyShare
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            s = Settings.getInstance;
-            queue = new MyQueue();
-            n = NeighborProtocol.getInstance;
-            r = new Receiver();
 
             if (Directory.Exists(defaultFolder))
                 foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
                     f.Delete();
             else Directory.CreateDirectory(defaultFolder);
+
+
+            s = Settings.getInstance;
+            queue = new MyQueue();
+            n = NeighborProtocol.getInstance;
+            r = new Receiver();
             mw = new MainWindow();
             ns = new NeighborSelection();
             us = new UserSettings();

@@ -49,9 +49,7 @@ namespace EasyShare
         private void listen()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            Socket socketImg = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            string recv, remoteIpAddress, remotePort;
+            string recv, remoteIpAddress;
 
             EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
@@ -73,64 +71,33 @@ namespace EasyShare
                     Array.Resize(ref buffer, i);
                     recv = Encoding.UTF8.GetString(buffer);
                     remoteIpAddress = ((IPEndPoint)senderRemote).Address.ToString();
-                    remotePort = ((IPEndPoint)senderRemote).Port.ToString();
                     string command = recv.Substring(0, 4);
                     string senderName = recv.Substring(4);
 
                     string senderID = String.Concat(senderName, String.Concat("@", remoteIpAddress));
                     Console.WriteLine("HELLO FROM {0} ", senderID);
-                    if (String.Compare(command, Constants.HELL, false) == 0)
+                    if (String.Compare(command, Constants.HELL) == 0)
                     {
                         if (!Neighbors.ContainsKey(senderID))
-                        {
-                            Neighbors.TryAdd(senderID, new Neighbor(senderID, null));
-                            Thread t = new Thread(requestImg);
-                            t.Start(senderID);
+                            requestImg(senderID);
 
-                        }
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                     }
-                    else if (String.Compare(command, Constants.QUIT, false) == 0)
+                    else if (String.Compare(command, Constants.QUIT) == 0)
                         if (Neighbors.TryRemove(senderID, out Neighbor n))
                             neighborsEvent(senderID, null, false);
-
-
-                    //byte[] requestImage;
-                    //IPEndPoint ipImg = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
-                    //if (Neighbors.TryGetValue(senderID, out Neighbor n1))
-                    //{
-                    //    if (n1.NeighborImage == null)
-                    //    {
-                    //        requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
-                    //        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                    //        receiveImg(senderID);
-                    //    }
-                    //    else
-                    //    {
-                    //        requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
-                    //        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
-                    //    socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                    //}
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(ex, true);
-                    // Get the top stack frame
                     var frame = st.GetFrame(st.FrameCount - 1);
-                    // Get the line number from the stack frame
                     var line = frame.GetFileLineNumber();
                     Console.WriteLine("Error at line {0} ", line);
                     continue;
                 }
             }
             socket.Close();
-            socketImg.Close();
         }
 
 
@@ -162,10 +129,8 @@ namespace EasyShare
 
 
                 foreach (string tmp in toRemove)
-                {
                     if (Neighbors.TryRemove(tmp, out Neighbor value))
                         neighborsEvent(tmp, null, false);
-                }
 
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
@@ -183,7 +148,6 @@ namespace EasyShare
                     toRemove.Add(pair.Key);
                 }
             }
-
 
             foreach (string tmp in toRemove)
                 if (Neighbors.TryRemove(tmp, out Neighbor value))
@@ -211,9 +175,7 @@ namespace EasyShare
                 {
                     Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(ex, true);
-                    // Get the top stack frame
                     var frame = st.GetFrame(st.FrameCount - 1);
-                    // Get the line number from the stack frame
                     var line = frame.GetFileLineNumber();
                     Console.WriteLine("Error at line {0} ", line);
                     continue;
@@ -235,16 +197,8 @@ namespace EasyShare
             {
                 socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipep);
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine("NeighborProtocol");
-                var st = new StackTrace(ex, true);
-                // Get the top stack frame
-                var frame = st.GetFrame(st.FrameCount - 1);
-                // Get the line number from the stack frame
-                var line = frame.GetFileLineNumber();
-                Console.WriteLine("Error at line {0} ", line);
-                //something
             }
             finally
             {
@@ -290,6 +244,7 @@ namespace EasyShare
                         throw new SocketException();
 
                     byte[] img = GetImage(imgPath);
+
                     sent = 0;
 
                     while (sent < img.Length)
@@ -306,15 +261,11 @@ namespace EasyShare
                 }
                 catch (SocketException e)
                 {
-
                     Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(e, true);
-                    // Get the top stack frame
                     var frame = st.GetFrame(st.FrameCount - 1);
-                    // Get the line number from the stack frame
                     var line = frame.GetFileLineNumber();
                     Console.WriteLine("Error at line {0} ", line);
-                    //something
                 }
                 finally
                 {
@@ -325,83 +276,68 @@ namespace EasyShare
             }
         }
 
-        private void requestImg(object data)
+        private void requestImg(string neighbor)
         {
-            string neighbor = (String)data;
-            String address = neighbor.Substring(0, neighbor.IndexOf("@"));
+            String address = neighbor.Substring(neighbor.IndexOf("@") + 1);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(address), Constants.PORT_TCP_IMG);
             Socket receiver = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
             int received = 0;
+
             try
             {
-                SocketError sockError;
+                byte[] img;
                 receiver.Connect(iPEndPoint);
 
                 byte[] buffer = new byte[sizeof(int)];
-                received = receiver.Receive(buffer, 0, buffer.Length, SocketFlags.None, out sockError);
+                received = receiver.Receive(buffer, 0, buffer.Length, SocketFlags.None, out SocketError sockError);
 
                 if (sockError != SocketError.Success)
                     throw new SocketException();
 
                 int sizeImg = BitConverter.ToInt32(buffer, 0);
-
                 if (sizeImg == -1)
                 {
                     string placeholderPath = App.currentDirectoryResources + "/guest.png";
-                    int placeholderLength = (int)new FileInfo(placeholderPath).Length;
-                    byte[] placeholderByte = new byte[placeholderLength];
-                    placeholderByte = File.ReadAllBytes(placeholderPath);
-                    if (Neighbors.TryGetValue(neighbor, out Neighbor n))
+                    if (String.IsNullOrEmpty(placeholderPath)) return;
+                    img = File.ReadAllBytes(placeholderPath);
+                }
+                else
+                {
+                    img = new byte[sizeImg];
+                    received = 0;
+                    while (received < img.Length)
                     {
-                        n.setImage(placeholderByte);
-                        neighborsEvent(neighbor, placeholderByte, true);
+                        if (img.Length - received > Constants.PACKET_SIZE)
+                            received += receiver.Receive(img, received, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
+
+                        else received += receiver.Receive(img, received, img.Length - received, SocketFlags.None, out sockError);
+
+                        if (sockError != SocketError.Success)
+                            throw new SocketException();
                     }
-                    return;
                 }
 
-                byte[] img = new byte[sizeImg];
-                received = 0;
-
-                while (received < img.Length)
-                {
-                    if (img.Length - received > Constants.PACKET_SIZE)
-                        received += receiver.Receive(img, received, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
-
-                    else received += receiver.Receive(img, received, img.Length - received, SocketFlags.None, out sockError);
-
-                    if (sockError != SocketError.Success)
-                        throw new SocketException();
-                }
-
-                if (Neighbors.TryGetValue(neighbor, out Neighbor n1))
-                {
-                    n1.setImage(img);
+                //TODO TESTARE
+                Neighbor n = new Neighbor(neighbor, img);
+                if (Neighbors.TryAdd(neighbor, n))
                     neighborsEvent(neighbor, img, true);
-                }
-
             }
             catch (SocketException e)
             {
                 Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
-                // Get the top stack frame
                 var frame = st.GetFrame(st.FrameCount - 1);
-                // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                //something
             }
             catch (Exception e)
             {
                 Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
-                // Get the top stack frame
                 var frame = st.GetFrame(st.FrameCount - 1);
-                // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                //something
             }
             finally
             {
@@ -411,74 +347,9 @@ namespace EasyShare
                         receiver.Shutdown(SocketShutdown.Both);
                     receiver.Close();
                 }
-                receiver.Close();
             }
         }
 
-        //private void sendImg(string ipAddress)
-        //{
-        //    IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddress), Constants.PORT_TCP_IMG);
-        //    Socket sender = new Socket(AddressFamily.InterNetwork,
-        //        SocketType.Stream, ProtocolType.Tcp);
-        //    try
-        //    {
-        //        SocketError sockError;
-        //        sender.Connect(remoteEP);
-        //        DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
-
-        //        FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
-        //        if (images.Length == 0)
-        //        {
-        //            sender.Send(BitConverter.GetBytes(-1), 0, sizeof(int), SocketFlags.None, out sockError);
-        //            if (sockError != SocketError.Success)
-        //                throw new SocketException();
-        //            return;
-        //        }
-
-        //        var accountImage = images
-        //         .OrderByDescending(f => f.LastWriteTime)
-        //         .First();
-
-        //        string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
-        //        byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
-
-        //        int sent = sender.Send(imgLength, 0, sizeof(int), SocketFlags.None, out sockError);
-        //        if (sockError != SocketError.Success)
-        //            throw new SocketException();
-
-        //        byte[] img = GetImage(imgPath);
-        //        int temp = 0;
-        //        while (true)
-        //        {
-        //            if (accountImage.Length - temp >= Constants.PACKET_SIZE)
-        //                sent = sender.Send(img, temp, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
-        //            else
-        //                sent = sender.Send(img, temp, img.Length - temp, SocketFlags.None, out sockError);
-        //            if (sockError != SocketError.Success)
-        //                throw new SocketException();
-        //            temp += sent;
-        //            if (temp == accountImage.Length) break;
-        //        }
-
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("NeighborProtocol");
-        //        var st = new StackTrace(e, true);
-        //        // Get the top stack frame
-        //        var frame = st.GetFrame(st.FrameCount - 1);
-        //        // Get the line number from the stack frame
-        //        var line = frame.GetFileLineNumber();
-        //        Console.WriteLine("Error at line {0} ", line);
-        //        //something
-        //    }
-        //    finally
-        //    {
-        //        if (sender.Connected)
-        //            sender.Shutdown(SocketShutdown.Both);
-        //        sender.Close();
-        //    }
-        //}
 
         private byte[] GetImage(string path)
         {
@@ -555,6 +426,7 @@ namespace EasyShare
         }
 
         public ConcurrentDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
+
         private ConcurrentDictionary<string, Neighbor> neighbors;
         private Thread listener, cleanT, sender, waitForImage;
         private static NeighborProtocol instance = null;
