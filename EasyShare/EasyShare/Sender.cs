@@ -55,8 +55,6 @@ namespace EasyShare
                 {
                     fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
                     updateFileState(sender, Constants.FILE_STATE.REJECTED);
-                    //if (File.Exists(zipLocation))
-                    //    File.Delete(zipLocation);
                     releaseResources(sender);
                     return;
                 }
@@ -67,8 +65,6 @@ namespace EasyShare
 
 
                 int temp = 0, percentage = 0;
-                //fs = new FileStream(zipLocation, FileMode.Open, FileAccess.Read);
-                //TODO
                 fs = File.Open(zipLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 byte[] data = new byte[Constants.PACKET_SIZE];
@@ -146,8 +142,6 @@ namespace EasyShare
             {
                 if (fs != null)
                     fs.Close();
-                //if (File.Exists(zipLocation))
-                //    File.Delete(zipLocation);
                 releaseResources(sender);
             }
         }

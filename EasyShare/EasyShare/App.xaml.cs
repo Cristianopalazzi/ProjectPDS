@@ -193,7 +193,6 @@ namespace EasyShare
             };
             item5.Click += delegate
             {
-                //TODO TESTARE
                 bool filesInProgress = mw.checkForFilesInProgress();
                 if (filesInProgress)
                     if (!askForExit())

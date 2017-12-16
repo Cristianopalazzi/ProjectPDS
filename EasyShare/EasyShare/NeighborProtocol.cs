@@ -37,6 +37,12 @@ namespace EasyShare
                 IsBackground = true
             };
             cleanT.Start();
+            waitForImage = new Thread(waitForImageRequest)
+            {
+                Name = "waitImage",
+                IsBackground = true
+            };
+            waitForImage.Start();
         }
         ~NeighborProtocol() { listener.Join(); sender.Join(); cleanT.Join(); }
 
@@ -76,7 +82,12 @@ namespace EasyShare
                     if (String.Compare(command, Constants.HELL, false) == 0)
                     {
                         if (!Neighbors.ContainsKey(senderID))
+                        {
                             Neighbors.TryAdd(senderID, new Neighbor(senderID, null));
+                            Thread t = new Thread(requestImg);
+                            t.Start(senderID);
+
+                        }
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                     }
                     else if (String.Compare(command, Constants.QUIT, false) == 0)
@@ -84,27 +95,27 @@ namespace EasyShare
                             neighborsEvent(senderID, null, false);
 
 
-                    byte[] requestImage;
-                    IPEndPoint ipImg = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
-                    if (Neighbors.TryGetValue(senderID, out Neighbor n1))
-                    {
-                        if (n1.NeighborImage == null)
-                        {
-                            requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
-                            socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                            receiveImg(senderID);
-                        }
-                        else
-                        {
-                            requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
-                            socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                        }
-                    }
-                    else
-                    {
-                        requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
-                        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
-                    }
+                    //byte[] requestImage;
+                    //IPEndPoint ipImg = new IPEndPoint(((IPEndPoint)senderRemote).Address, Constants.PORT_UDP_IMG);
+                    //if (Neighbors.TryGetValue(senderID, out Neighbor n1))
+                    //{
+                    //    if (n1.NeighborImage == null)
+                    //    {
+                    //        requestImage = Encoding.ASCII.GetBytes(Constants.NEED_IMG);
+                    //        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
+                    //        receiveImg(senderID);
+                    //    }
+                    //    else
+                    //    {
+                    //        requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
+                    //        socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    requestImage = Encoding.ASCII.GetBytes(Constants.DONT_NEED_IMG);
+                    //    socketImg.SendTo(requestImage, requestImage.Length, SocketFlags.None, ipImg);
+                    //}
                 }
                 catch (Exception ex)
                 {
@@ -121,6 +132,8 @@ namespace EasyShare
             socket.Close();
             socketImg.Close();
         }
+
+
 
         public string getUserFromIp(string ipSender)
         {
@@ -183,34 +196,16 @@ namespace EasyShare
         {
             IPEndPoint ipMulticast = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            Socket socketImg = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPEndPoint ipImg = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP_IMG);
 
             EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
-            string remoteIpAddress, remotePort;
-
-            socketImg.Bind(ipImg);
-            socketImg.ReceiveTimeout = 2000;
             byte[] toBytes = Encoding.UTF8.GetBytes(Constants.HELL + Environment.UserName);
 
             while (senderEvent.WaitOne())
             {
                 if (ShutDown) break;
-                byte[] requestImg = new byte[Constants.NEED_IMG.Length];
                 try
                 {
                     socket.SendTo(toBytes, toBytes.Length, SocketFlags.None, ipMulticast);
-                    if (socketImg.Available > 0)
-                    {
-                        socketImg.ReceiveFrom(requestImg, requestImg.Length, SocketFlags.None, ref senderRemote);
-                        if (String.Compare(Encoding.UTF8.GetString(requestImg), Constants.NEED_IMG) == 0)
-                        {
-                            remoteIpAddress = ((IPEndPoint)senderRemote).Address.ToString();
-                            remotePort = ((IPEndPoint)senderRemote).Port.ToString();
-                            sendImg(remoteIpAddress);
-                        }
-                    }
-
                 }
                 catch (Exception ex)
                 {
@@ -229,7 +224,6 @@ namespace EasyShare
                 }
             }
             socket.Close();
-            socketImg.Close();
         }
 
         public void quitMe()
@@ -259,28 +253,99 @@ namespace EasyShare
 
         }
 
-        private void receiveImg(string neighbor)
+        private void waitForImageRequest()
         {
-
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
-            Socket listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-
+            Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
             listener.Bind(localEndPoint);
+            listener.Listen(10);
+            SocketError error;
+            while (true)
+            {
+                try
+                {
+                    handler = listener.Accept();
+                    DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
 
-            listener.Listen(1);
+                    FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
+                    if (images.Length == 0)
+                    {
+                        handler.Send(BitConverter.GetBytes(-1), 0, sizeof(int), SocketFlags.None, out error);
 
+                        if (error != SocketError.Success)
+                            throw new SocketException();
+                    }
+
+                    var accountImage = images
+                 .OrderByDescending(f => f.LastWriteTime)
+                 .First();
+
+                    string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
+                    byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
+
+                    int sent = handler.Send(imgLength, 0, sizeof(int), SocketFlags.None, out error);
+
+                    if (error != SocketError.Success)
+                        throw new SocketException();
+
+                    byte[] img = GetImage(imgPath);
+                    sent = 0;
+
+                    while (sent < img.Length)
+                    {
+                        if (accountImage.Length - sent >= Constants.PACKET_SIZE)
+                            sent += handler.Send(img, sent, Constants.PACKET_SIZE, SocketFlags.None, out error);
+                        else
+                            sent += handler.Send(img, sent, img.Length - sent, SocketFlags.None, out error);
+
+                        if (error != SocketError.Success)
+                            throw new SocketException();
+                    }
+
+                }
+                catch (SocketException e)
+                {
+
+                    Console.WriteLine("NeighborProtocol");
+                    var st = new StackTrace(e, true);
+                    // Get the top stack frame
+                    var frame = st.GetFrame(st.FrameCount - 1);
+                    // Get the line number from the stack frame
+                    var line = frame.GetFileLineNumber();
+                    Console.WriteLine("Error at line {0} ", line);
+                    //something
+                }
+                finally
+                {
+                    if (handler.Connected)
+                        handler.Shutdown(SocketShutdown.Both);
+                    handler.Close();
+                }
+            }
+        }
+
+        private void requestImg(object data)
+        {
+            string neighbor = (String)data;
+            String address = neighbor.Substring(0, neighbor.IndexOf("@"));
+            IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(address), Constants.PORT_TCP_IMG);
+            Socket receiver = new Socket(AddressFamily.InterNetwork,
+                SocketType.Stream, ProtocolType.Tcp);
+            int received = 0;
             try
             {
                 SocketError sockError;
-                handler = listener.Accept();
+                receiver.Connect(iPEndPoint);
+
                 byte[] buffer = new byte[sizeof(int)];
-                handler.Receive(buffer, 0, buffer.Length, SocketFlags.None, out sockError);
+                received = receiver.Receive(buffer, 0, buffer.Length, SocketFlags.None, out sockError);
+
                 if (sockError != SocketError.Success)
                     throw new SocketException();
+
                 int sizeImg = BitConverter.ToInt32(buffer, 0);
-                //Non ha la foto profilo
+
                 if (sizeImg == -1)
                 {
                     string placeholderPath = App.currentDirectoryResources + "/guest.png";
@@ -296,15 +361,19 @@ namespace EasyShare
                 }
 
                 byte[] img = new byte[sizeImg];
-                int temp = 0;
-                while (true)
+                received = 0;
+
+                while (received < img.Length)
                 {
-                    int bytesRec = handler.Receive(img, temp, sizeImg - temp, SocketFlags.None, out sockError);
+                    if (img.Length - received > Constants.PACKET_SIZE)
+                        received += receiver.Receive(img, received, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
+
+                    else received += receiver.Receive(img, received, img.Length - received, SocketFlags.None, out sockError);
+
                     if (sockError != SocketError.Success)
                         throw new SocketException();
-                    temp += bytesRec;
-                    if (temp == sizeImg) break;
                 }
+
                 if (Neighbors.TryGetValue(neighbor, out Neighbor n1))
                 {
                     n1.setImage(img);
@@ -336,80 +405,80 @@ namespace EasyShare
             }
             finally
             {
-                if (handler != null)
+                if (receiver != null)
                 {
-                    if (handler.Connected)
-                        handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
+                    if (receiver.Connected)
+                        receiver.Shutdown(SocketShutdown.Both);
+                    receiver.Close();
                 }
-                listener.Close();
+                receiver.Close();
             }
         }
 
-        private void sendImg(string ipAddress)
-        {
-            IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddress), Constants.PORT_TCP_IMG);
-            Socket sender = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                SocketError sockError;
-                sender.Connect(remoteEP);
-                DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
+        //private void sendImg(string ipAddress)
+        //{
+        //    IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse(ipAddress), Constants.PORT_TCP_IMG);
+        //    Socket sender = new Socket(AddressFamily.InterNetwork,
+        //        SocketType.Stream, ProtocolType.Tcp);
+        //    try
+        //    {
+        //        SocketError sockError;
+        //        sender.Connect(remoteEP);
+        //        DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
 
-                FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
-                if (images.Length == 0)
-                {
-                    sender.Send(BitConverter.GetBytes(-1), 0, sizeof(int), SocketFlags.None, out sockError);
-                    if (sockError != SocketError.Success)
-                        throw new SocketException();
-                    return;
-                }
+        //        FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
+        //        if (images.Length == 0)
+        //        {
+        //            sender.Send(BitConverter.GetBytes(-1), 0, sizeof(int), SocketFlags.None, out sockError);
+        //            if (sockError != SocketError.Success)
+        //                throw new SocketException();
+        //            return;
+        //        }
 
-                var accountImage = images
-                 .OrderByDescending(f => f.LastWriteTime)
-                 .First();
+        //        var accountImage = images
+        //         .OrderByDescending(f => f.LastWriteTime)
+        //         .First();
 
-                string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
-                byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
+        //        string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
+        //        byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
 
-                int sent = sender.Send(imgLength, 0, sizeof(int), SocketFlags.None, out sockError);
-                if (sockError != SocketError.Success)
-                    throw new SocketException();
+        //        int sent = sender.Send(imgLength, 0, sizeof(int), SocketFlags.None, out sockError);
+        //        if (sockError != SocketError.Success)
+        //            throw new SocketException();
 
-                byte[] img = GetImage(imgPath);
-                int temp = 0;
-                while (true)
-                {
-                    if (accountImage.Length - temp >= 1400)
-                        sent = sender.Send(img, temp, 1400, SocketFlags.None, out sockError);
-                    else
-                        sent = sender.Send(img, temp, img.Length - temp, SocketFlags.None, out sockError);
-                    if (sockError != SocketError.Success)
-                        throw new SocketException();
-                    temp += sent;
-                    if (temp == accountImage.Length) break;
-                }
+        //        byte[] img = GetImage(imgPath);
+        //        int temp = 0;
+        //        while (true)
+        //        {
+        //            if (accountImage.Length - temp >= Constants.PACKET_SIZE)
+        //                sent = sender.Send(img, temp, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
+        //            else
+        //                sent = sender.Send(img, temp, img.Length - temp, SocketFlags.None, out sockError);
+        //            if (sockError != SocketError.Success)
+        //                throw new SocketException();
+        //            temp += sent;
+        //            if (temp == accountImage.Length) break;
+        //        }
 
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("NeighborProtocol");
-                var st = new StackTrace(e, true);
-                // Get the top stack frame
-                var frame = st.GetFrame(st.FrameCount - 1);
-                // Get the line number from the stack frame
-                var line = frame.GetFileLineNumber();
-                Console.WriteLine("Error at line {0} ", line);
-                //something
-            }
-            finally
-            {
-                if (sender.Connected)
-                    sender.Shutdown(SocketShutdown.Both);
-                sender.Close();
-            }
-        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine("NeighborProtocol");
+        //        var st = new StackTrace(e, true);
+        //        // Get the top stack frame
+        //        var frame = st.GetFrame(st.FrameCount - 1);
+        //        // Get the line number from the stack frame
+        //        var line = frame.GetFileLineNumber();
+        //        Console.WriteLine("Error at line {0} ", line);
+        //        //something
+        //    }
+        //    finally
+        //    {
+        //        if (sender.Connected)
+        //            sender.Shutdown(SocketShutdown.Both);
+        //        sender.Close();
+        //    }
+        //}
 
         private byte[] GetImage(string path)
         {
@@ -487,7 +556,7 @@ namespace EasyShare
 
         public ConcurrentDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
         private ConcurrentDictionary<string, Neighbor> neighbors;
-        private Thread listener, cleanT, sender;
+        private Thread listener, cleanT, sender, waitForImage;
         private static NeighborProtocol instance = null;
         private Settings settings;
         public static ManualResetEvent senderEvent;

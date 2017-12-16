@@ -136,7 +136,6 @@ namespace EasyShare
             return zipInfo;
         }
 
-        //TODO togliere la cancellazione degli zip
         private bool fileChanged(string pathFile)
         {
             FileAttributes attr = File.GetAttributes(pathFile);

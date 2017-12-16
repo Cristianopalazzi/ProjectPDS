@@ -335,8 +335,6 @@ namespace EasyShare
             Settings.writeSettings(sets);
         }
 
-
-        //TODO testare
         public bool checkForFilesInProgress()
         {
             foreach (SendingFile sf in FilesToSend)
