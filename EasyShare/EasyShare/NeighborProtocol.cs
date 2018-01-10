@@ -209,6 +209,7 @@ namespace EasyShare
 
         private void waitForImageRequest()
         {
+            //TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
