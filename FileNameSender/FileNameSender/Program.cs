@@ -15,12 +15,19 @@ namespace FileNameSender
             NamedPipeClientStream pipeClient = null;
             StreamWriter sw = null;
             bool connected = false;
+            Mutex m = new Mutex(true, "myMutex", out bool created);
             try
             {
                 String appPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
                 Process[] p = Process.GetProcessesByName("EasyShare");
-                if (p.Length == 0)
-                    Process.Start(appPath + "\\EasyShare.exe");
+
+                if (created)
+                {
+                    if (p.Length == 0)
+                        Process.Start(appPath + "\\EasyShare.exe");
+                }
+                else
+                    m.WaitOne();
                 while (!connected)
                 {
                     try
@@ -45,6 +52,7 @@ namespace FileNameSender
             }
             finally
             {
+                m.ReleaseMutex();
                 if (sw != null)
                     sw.Close();
             }

@@ -63,6 +63,7 @@ namespace EasyShare
             n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
+            //TODO vedere se toglierlo
             Thread.Sleep(350);
             App.Current.Shutdown();
         }
