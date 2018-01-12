@@ -28,18 +28,19 @@ namespace FileNameSender
                 }
                 else
                     m.WaitOne();
+
                 while (!connected)
                 {
                     try
                     {
                         pipeClient = new NamedPipeClientStream(".", "testpipe", PipeDirection.Out);
-                        pipeClient.Connect(500);
+                        pipeClient.Connect(100);
                         connected = true;
                         sw = new StreamWriter(pipeClient);
                         sw.WriteLine(args[0]);
                         sw.Flush();
                     }
-                    catch (TimeoutException te)
+                    catch (Exception)
                     {
                         if (sw != null)
                             sw.Close();
@@ -47,16 +48,15 @@ namespace FileNameSender
                     }
                 }
             }
-            catch
+            catch (Exception)
             {
             }
             finally
             {
-                m.ReleaseMutex();
                 if (sw != null)
                     sw.Close();
+                m.ReleaseMutex();
             }
-
         }
     }
 }
