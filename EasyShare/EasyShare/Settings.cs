@@ -64,8 +64,14 @@ namespace EasyShare
             {
                 if (instance == null)
                 {
-                    instance = new Settings();
-                    readSettings();
+                    lock (syncLock)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Settings();
+                            readSettings();
+                        }
+                    }
                 }
                 return instance;
             }
@@ -108,6 +114,7 @@ namespace EasyShare
         private static Settings instance = null;
         private Boolean _online, _defaultDir, _autoAccept, _autoRename, _enableNotification;
         private string _defaultDirPath;
+        private static object syncLock = new object();
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

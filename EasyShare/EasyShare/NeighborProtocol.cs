@@ -44,7 +44,6 @@ namespace EasyShare
             };
             waitForImage.Start();
         }
-        ~NeighborProtocol() { listener.Join(); sender.Join(); cleanT.Join(); }
 
         private void listen()
         {
@@ -424,7 +423,13 @@ namespace EasyShare
             get
             {
                 if (instance == null)
-                    instance = new NeighborProtocol();
+                {
+                    lock (syncLock)
+                    {
+                        if (instance == null)
+                            instance = new NeighborProtocol();
+                    }
+                }
                 return instance;
             }
         }
@@ -439,5 +444,6 @@ namespace EasyShare
         public delegate void modifyNeighbors(string neighborID, byte[] image, bool addOrRemove);
         public static event modifyNeighbors neighborsEvent;
         public static bool ShutDown = false;
+        private static object syncLock = new object();
     }
 }

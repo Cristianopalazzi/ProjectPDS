@@ -23,7 +23,6 @@ namespace EasyShare
             };
             server.Start();
         }
-        ~Receiver() { server.Join(); }
 
         private void startServer()
         {

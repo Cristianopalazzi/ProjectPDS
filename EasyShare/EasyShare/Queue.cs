@@ -59,8 +59,6 @@ namespace EasyShare
             }
         }
 
-        ~Queue() { threadPipe.Join(); waitOnTake.Join(); }
-
         public void listenOnQueue()
         {
             while (true)
@@ -83,7 +81,6 @@ namespace EasyShare
                 }
 
                 Sender sender = new Sender();
-                List<Thread> threads = new List<Thread>();
                 foreach (SendingFile s in sf)
                 {
                     Thread t = new Thread(() =>
@@ -95,7 +92,6 @@ namespace EasyShare
                         IsBackground = true
                     };
                     t.Start();
-                    threads.Add(t);
                 }
             }
         }

@@ -11,7 +11,6 @@ namespace EasyShare
     /// Logica di interazione per App.xaml
     /// </summary>
     /// 
-    //TODO rivedere fileNameSendere, provare a mettere in loop l'apertura del processo invece dello sleep
     public partial class App : Application
     {
         private NeighborSelection ns;
@@ -64,6 +63,7 @@ namespace EasyShare
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
             //TODO vedere se toglierlo
+            //TODO aggiungere join dei thread
             Thread.Sleep(350);
             App.Current.Shutdown();
         }
@@ -205,6 +205,7 @@ namespace EasyShare
                 n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
+                //TODO join threads
                 Thread.Sleep(350);
                 App.Current.Shutdown();
             };
@@ -232,7 +233,6 @@ namespace EasyShare
 
         private void neighbor_selection(string file)
         {
-
             Dispatcher.Invoke(new Action(() =>
             {
                 if (ns.Acceso)
@@ -259,6 +259,4 @@ namespace EasyShare
         public delegate bool myDelegate();
         public static event myDelegate askForExit;
     }
-
-
 }
