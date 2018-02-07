@@ -248,6 +248,7 @@ namespace EasyShare
                     ns.FileList.Clear();
                     ns.Acceso = true;
                     ns.FileList.Add(file);
+                    ns.WindowState = WindowState.Normal;
                 }
                 ns.Show();
                 ns.Activate();
