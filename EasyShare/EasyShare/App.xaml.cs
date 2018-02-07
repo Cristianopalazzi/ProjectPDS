@@ -199,8 +199,9 @@ namespace EasyShare
             {
                 bool filesInProgress = mw.checkForFilesInProgress();
                 if (filesInProgress)
-                    if (!askForExit())
-                        return;
+                    if (askForExit != null)
+                        if (!askForExit())
+                            return;
 
                 n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
                 NeighborProtocol.ShutDown = true;

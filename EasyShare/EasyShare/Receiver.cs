@@ -122,7 +122,8 @@ namespace EasyShare
                 {
                     byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
                     string adjustedSize = SizeSuffix(fileSize);
-                    acceptance(user, fileNameString, adjustedSize, id);
+                    if (acceptance != null)
+                        acceptance(user, fileNameString, adjustedSize, id);
 
                     while (mre.WaitOne())
                         if (String.Compare(Receiver.idFileToAccept, id) == 0)
@@ -198,8 +199,8 @@ namespace EasyShare
                     image = ms.ToArray();
                     ms.Close();
                 }
-
-                updateReceivingFiles(senderID, image, fileNameString, id);
+                if (updateReceivingFiles != null)
+                    updateReceivingFiles(senderID, image, fileNameString, id);
                 int percentage = 0;
                 zipLocation = App.defaultFolder + "\\" + zipFileName;
                 fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
@@ -223,7 +224,9 @@ namespace EasyShare
                         int tempPercentage = (int)(temporary / (ulong)zipFileSize);
                         if (tempPercentage > percentage)
                         {
-                            updateProgress(id, tempPercentage);
+                            if (updateProgress != null)
+
+                                updateProgress(id, tempPercentage);
                             percentage = tempPercentage;
                         }
                     }
@@ -240,7 +243,8 @@ namespace EasyShare
 
                 if (temp != zipFileSize)
                 {
-                    fileCancel(id, Constants.NOTIFICATION_STATE.CANCELED);
+                    if (fileCancel != null)
+                        fileCancel(id, Constants.NOTIFICATION_STATE.CANCELED);
                     fs.Close();
                     releaseResources(handler);
                     return;
@@ -291,9 +295,11 @@ namespace EasyShare
             {
                 Console.WriteLine(e.SocketErrorCode);
                 if (zipFileSize == 0)
-                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
-                else
-                    fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
+                    if (receivingFailure != null)
+                        receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
+                    else
+                    if (fileCancel != null)
+                        fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
             }
             catch (Exception e)
             {
@@ -304,7 +310,8 @@ namespace EasyShare
                 // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR);
+                if (receivingFailure != null)
+                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR);
             }
             finally
             {

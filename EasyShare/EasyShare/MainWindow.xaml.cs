@@ -115,9 +115,11 @@ namespace EasyShare
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/cross.ico"));
                         if (state == Constants.NOTIFICATION_STATE.CANCELED)
-                            triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
-                        else if (state == Constants.NOTIFICATION_STATE.REC_ERROR)
-                            triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
+                            if (triggerBalloon != null)
+                                triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
+                            else if (state == Constants.NOTIFICATION_STATE.REC_ERROR)
+                                if (triggerBalloon != null)
+                                    triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
                         break;
                     }
             }));
@@ -137,7 +139,8 @@ namespace EasyShare
                         {
                             r.File_state = Constants.FILE_STATE.COMPLETED;
                             r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
-                            triggerBalloon(r.Filename, r.Name, 0);
+                            if (triggerBalloon != null)
+                                triggerBalloon(r.Filename, r.Name, 0);
                             break;
                         }
                     }
@@ -175,7 +178,8 @@ namespace EasyShare
                                 sf.File_state = Constants.FILE_STATE.COMPLETED;
                                 sf.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
                                 if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
-                                    triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
+                                    if (triggerBalloon != null)
+                                        triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
                             }
                             break;
                         }

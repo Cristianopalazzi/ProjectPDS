@@ -43,7 +43,8 @@ namespace EasyShare
                     string file = sr.ReadLine();
                     if (pipeServer.IsConnected)
                         pipeServer.Disconnect();
-                    openNeighbors(file);
+                    if (openNeighbors != null)
+                        openNeighbors(file);
                 }
             }
             catch

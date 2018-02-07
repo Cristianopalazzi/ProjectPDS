@@ -84,7 +84,8 @@ namespace EasyShare
                     }
                     else if (String.Compare(command, Constants.QUIT) == 0)
                         if (Neighbors.TryRemove(senderID, out Neighbor n))
-                            neighborsEvent(senderID, null, false);
+                            if (neighborsEvent != null)
+                                neighborsEvent(senderID, null, false);
                 }
                 catch (Exception ex)
                 {
@@ -129,7 +130,8 @@ namespace EasyShare
 
                 foreach (string tmp in toRemove)
                     if (Neighbors.TryRemove(tmp, out Neighbor value))
-                        neighborsEvent(tmp, null, false);
+                        if (neighborsEvent != null)
+                            neighborsEvent(tmp, null, false);
 
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
@@ -150,7 +152,8 @@ namespace EasyShare
 
             foreach (string tmp in toRemove)
                 if (Neighbors.TryRemove(tmp, out Neighbor value))
-                    neighborsEvent(tmp, null, false);
+                    if (neighborsEvent != null)
+                        neighborsEvent(tmp, null, false);
         }
 
 
@@ -324,7 +327,8 @@ namespace EasyShare
                 //TODO TESTARE
                 Neighbor n = new Neighbor(neighbor, img);
                 if (Neighbors.TryAdd(neighbor, n))
-                    neighborsEvent(neighbor, img, true);
+                    if (neighborsEvent != null)
+                        neighborsEvent(neighbor, img, true);
             }
             catch (SocketException e)
             {
