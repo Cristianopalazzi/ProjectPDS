@@ -28,6 +28,7 @@ namespace EasyShare
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Queue.openNeighbors += neighbor_selection;
+            Queue.QueueBalloon += createBalloons;
             Sender.fileRejected += createBalloons;
             EasyShare.MainWindow.triggerBalloon += createBalloons;
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;

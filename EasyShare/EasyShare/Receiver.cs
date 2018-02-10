@@ -328,6 +328,7 @@ namespace EasyShare
 
         private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user)
         {
+                    //TODO rifare ( se mando due file assieme e uno dei due ha eccezione, si rompe tutto )
             string str = String.Empty;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
             {
@@ -346,10 +347,20 @@ namespace EasyShare
                             str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
                         }
                     }
-                    //TODO rivedere
                     if (str.Length >= 260)
-                        throw new Exception();
+                    {
+                        //questo non va bene, bisogna cancellare la entry dall'archivio e gestire, senza lanciare eccezione
+                        archive.Dispose();
+                        throw new Exception(); 
+                    }
+                    try
+                    {
                     entry.ExtractToFile(str, true);
+                    }
+                    catch (PathTooLongException p )
+                    {
+                        entry.Delete();
+                    }
                 }
                 archive.Dispose();
             }

@@ -24,7 +24,7 @@
         public const string ACCEPT_FILE = "OK";
         public const string DECLINE_FILE = "NO";
         public const string SETTINGS = "Settings.xml";
-        public enum FILE_STATE { PREPARATION, ACCEPTANCE, PROGRESS, COMPLETED, CANCELED, ERROR, REJECTED };
+        public enum FILE_STATE { PREPARATION = 0 , ACCEPTANCE = 1, PROGRESS = 2, COMPLETED=3, CANCELED=4, ERROR=5, REJECTED=6 };
         public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR, REC_ERROR };
         public const string projectName = "EasyShare";
         public const string UTENTE_ANONIMO = "Utente anonimo";

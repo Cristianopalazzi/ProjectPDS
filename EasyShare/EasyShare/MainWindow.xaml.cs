@@ -37,6 +37,7 @@ namespace EasyShare
             Receiver.acceptance += file_to_accept;
             UserSettings.openTabSettings += tabChange;
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
+            Queue.QueueUpdateState += Sender_updateFileState;
             App.askForExit += App_askForExit;
 
             NeighborsValues = new ObservableCollection<Neighbor>();

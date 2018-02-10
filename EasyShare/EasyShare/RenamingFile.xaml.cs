@@ -23,7 +23,8 @@ namespace EasyShare
             NewName = String.Empty;
             Extension = Path.GetExtension(fileName);
             CurrentDirectory = directory;
-            motivationTextBlock.Text = "\"" + fileName + "\"" + " esiste già";
+            motivationTextBlock.Text = fileName;
+            motivationTextBlock.ToolTip = fileName;
             actionTextBlock.Text = "Scegli un altro nome";
             Tipo = type;
         }
