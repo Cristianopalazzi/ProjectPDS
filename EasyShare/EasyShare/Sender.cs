@@ -143,7 +143,7 @@ namespace EasyShare
                 if (updateFileState != null)
                     updateFileState(sender, Constants.FILE_STATE.ERROR);
                 if (fileRejected != null)
-                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR); //6 
+                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
             }
 
             finally

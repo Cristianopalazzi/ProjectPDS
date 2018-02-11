@@ -85,7 +85,7 @@ namespace EasyShare
                 if(zipInfo == null)
                 {
                     QueueUpdateState(sf[0].Sock, Constants.FILE_STATE.ERROR);
-                    QueueBalloon(Path.GetFileName(pathFile), null, Constants.NOTIFICATION_STATE.FILE_ERROR); 
+                    QueueBalloon(Path.GetFileName(pathFile), null, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
                     continue;
                 }
 
@@ -98,7 +98,7 @@ namespace EasyShare
                     })
                     {
                         Name = "thread che manda " + s.FileName + " a  " + s.Name,
-                        IsBackground = true
+                        IsBackground = true //TODO cambiare questo thread con foreground, cancellare questa riga di codice
                     };
                     t.Start();
                 }

@@ -137,16 +137,6 @@ namespace EasyShare
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case Constants.NOTIFICATION_STATE.FILE_ERROR:
-                    {
-                        nIcon.BalloonTipTitle = fileName;
-                        string text = "Errore durante la preparazione del file";
-                        nIcon.BalloonTipText = text;
-                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
-                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
-                        break;
-                    }
                 case Constants.NOTIFICATION_STATE.REC_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
@@ -154,6 +144,26 @@ namespace EasyShare
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case Constants.NOTIFICATION_STATE.FILE_ERROR_REC:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = "Errore durante la preparazione del file in ricezione";
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case Constants.NOTIFICATION_STATE.FILE_ERROR_SEND:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = "Errore durante la preparazione del file in invio";
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
@@ -208,7 +218,7 @@ namespace EasyShare
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
                 //TODO join threads
-                Thread.Sleep(350);
+                //Thread.Sleep(350);
                 App.Current.Shutdown();
             };
             nIcon.Visible = true;
