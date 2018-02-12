@@ -78,7 +78,16 @@ namespace EasyShare
                     if (String.Compare(command, Constants.HELL) == 0)
                     {
                         if (!Neighbors.ContainsKey(senderID))
-                            requestImg(senderID);
+                        {
+                            byte[] img = requestImg(senderID);
+                            //TODO TESTARE
+                            if (img == null)
+                                continue;
+                            Neighbor n = new Neighbor(senderID, img);
+                            if (Neighbors.TryAdd(senderID, n))
+                                if (neighborsEvent != null)
+                                    neighborsEvent(senderID, img, true);
+                        }
 
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                     }
@@ -211,7 +220,7 @@ namespace EasyShare
 
         private void waitForImageRequest()
         {
-            //TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
+            // TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
@@ -223,6 +232,7 @@ namespace EasyShare
                 try
                 {
                     handler = listener.Accept();
+                    handler.SendTimeout = 1500;
                     DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
 
                     FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
@@ -250,22 +260,16 @@ namespace EasyShare
 
                         byte[] img = GetImage(imgPath);
 
-                        sent = 0;
+                        sent = handler.Send(img, 0, img.Length, SocketFlags.None, out error); //rimosso ciclo while per controllare
 
-                        while (sent < img.Length)
-                        {
-                            if (accountImage.Length - sent >= Constants.PACKET_SIZE)
-                                sent += handler.Send(img, sent, Constants.PACKET_SIZE, SocketFlags.None, out error);
-                            else
-                                sent += handler.Send(img, sent, img.Length - sent, SocketFlags.None, out error);
+                        if (error != SocketError.Success)
+                            throw new SocketException();
 
-                            if (error != SocketError.Success)
-                                throw new SocketException();
-                        }
                     }
 
                 }
-                catch (SocketException e)
+
+                catch (Exception e)
                 {
                     Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(e, true);
@@ -282,22 +286,19 @@ namespace EasyShare
             }
         }
 
-        private void requestImg(string neighbor)
+        private byte[] requestImg(string neighbor)
         {
             String address = neighbor.Substring(neighbor.IndexOf("@") + 1);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(address), Constants.PORT_TCP_IMG);
-            Socket receiver = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
+            Socket receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             int received = 0;
+            byte[] img = null;
             try
             {
-                byte[] img;
                 receiver.Connect(iPEndPoint);
-
                 byte[] buffer = new byte[sizeof(int)];
                 received = receiver.Receive(buffer, 0, buffer.Length, SocketFlags.None, out SocketError sockError);
-
-                if (sockError != SocketError.Success)
+                if (received == 0 || sockError != SocketError.Success)
                     throw new SocketException();
 
                 int sizeImg = BitConverter.ToInt32(buffer, 0);
@@ -310,26 +311,19 @@ namespace EasyShare
                 {
                     img = new byte[sizeImg];
                     received = 0;
-                    while (received < img.Length)
-                    {
-                        if (img.Length - received > Constants.PACKET_SIZE)
-                            received += receiver.Receive(img, received, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
 
-                        else received += receiver.Receive(img, received, img.Length - received, SocketFlags.None, out sockError);
+                    received = receiver.Receive(img, 0, sizeImg, SocketFlags.None, out sockError);
 
-                        if (sockError != SocketError.Success)
-                            throw new SocketException();
-                    }
+                    if (sockError != SocketError.Success)
+                        throw new SocketException();
                 }
 
-                //TODO TESTARE
-                Neighbor n = new Neighbor(neighbor, img);
-                if (Neighbors.TryAdd(neighbor, n))
-                    if (neighborsEvent != null)
-                        neighborsEvent(neighbor, img, true);
             }
             catch (SocketException e)
             {
+                string placeholderPath = App.currentDirectoryResources + "/guest.png";
+                img = File.ReadAllBytes(placeholderPath);
+
                 Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
                 var frame = st.GetFrame(st.FrameCount - 1);
@@ -354,6 +348,7 @@ namespace EasyShare
                 }
             }
 
+            return img;
         }
 
 
