@@ -142,12 +142,11 @@ namespace EasyShare
 
 
         // aggiungo un nuovo file in ricezione alla lista
-        private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
+        private void updateReceivingFiles(ReceivingFile file)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
-                ReceivingFile rf = new ReceivingFile(new Neighbor(senderID, image), fileName, id);
-                FilesToReceive.Add(rf);
+                FilesToReceive.Add(file);
             }));
         }
 
@@ -325,25 +324,24 @@ namespace EasyShare
         }
 
         //aggiorno la lista dei vicini online
-        public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
+        public void modify_neighbors(Neighbor neighbor, bool addOrRemove)
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare
             foreach (Neighbor n in NeighborsValues)
             {
-                if (String.Compare(id, n.NeighborName + "@" + n.NeighborIp) == 0)
+                if(String.Compare(neighbor.NeighborIp,n.NeighborIp) == 0 && String.Compare(neighbor.NeighborName,n.NeighborName) == 0)
                 {
                     isPresent = true;
                     if (!addOrRemove)
-                        Application.Current.Dispatcher.Invoke(new Action(() => { neighborsValues.Remove(n); }));
+                        Application.Current.Dispatcher.Invoke(new Action(() => { NeighborsValues.Remove(n); }));
                     break;
                 }
             }
             if (addOrRemove && !isPresent)
                 Dispatcher.Invoke(new Action(() =>
                 {
-                    Neighbor n1 = new Neighbor(id, bytes);
-                    neighborsValues.Add(n1);
+                    NeighborsValues.Add(neighbor);
                 }));
         }
 

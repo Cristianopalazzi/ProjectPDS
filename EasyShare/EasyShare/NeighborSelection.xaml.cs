@@ -66,7 +66,7 @@ namespace EasyShare
                     sendingFiles = new List<SendingFile>();
                     foreach (Neighbor n in selected)
                     {
-                        SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);
+                        SendingFile sf = new SendingFile(n, file);
                         sendingFiles.Add(sf);
                     }
                     sendSelectedNeighbors(sendingFiles);
@@ -78,28 +78,24 @@ namespace EasyShare
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
         }
 
-        public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
+        public void modify_neighbors(Neighbor neighbor, bool addOrRemove)
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare
             foreach (Neighbor n in Neighbors)
             {
-                if (String.Compare(id, n.NeighborName + "@" + n.NeighborIp) == 0)
+                if (String.Compare(neighbor.NeighborIp, n.NeighborIp) == 0 && String.Compare(neighbor.NeighborName, n.NeighborName) == 0)
                 {
                     isPresent = true;
                     if (!addOrRemove)
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            Neighbors.Remove(n);
-                        }));
+                        Application.Current.Dispatcher.Invoke(new Action(() => { Neighbors.Remove(n); }));
                     break;
                 }
             }
             if (addOrRemove && !isPresent)
-                Application.Current.Dispatcher.Invoke(new Action(() =>
+                Dispatcher.Invoke(new Action(() =>
                 {
-                    Neighbor n1 = new Neighbor(id, bytes);
-                    Neighbors.Add(n1);
+                    Neighbors.Add(neighbor);
                 }));
         }
 

@@ -23,6 +23,7 @@ namespace EasyShare
             image.BeginInit();
             image.StreamSource = new System.IO.MemoryStream(array);
             image.EndInit();
+            image.Freeze();
             return image;
         }
 

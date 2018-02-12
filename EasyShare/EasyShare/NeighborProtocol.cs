@@ -86,7 +86,7 @@ namespace EasyShare
                             Neighbor n = new Neighbor(senderID, img);
                             if (Neighbors.TryAdd(senderID, n))
                                 if (neighborsEvent != null)
-                                    neighborsEvent(senderID, img, true);
+                                    neighborsEvent(n, true);
                         }
 
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
@@ -94,7 +94,7 @@ namespace EasyShare
                     else if (String.Compare(command, Constants.QUIT) == 0)
                         if (Neighbors.TryRemove(senderID, out Neighbor n))
                             if (neighborsEvent != null)
-                                neighborsEvent(senderID, null, false);
+                                neighborsEvent(new Neighbor(senderID,null), false);
                 }
                 catch (Exception ex)
                 {
@@ -140,7 +140,7 @@ namespace EasyShare
                 foreach (string tmp in toRemove)
                     if (Neighbors.TryRemove(tmp, out Neighbor value))
                         if (neighborsEvent != null)
-                            neighborsEvent(tmp, null, false);
+                            neighborsEvent(new Neighbor(tmp,null), false);
 
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
@@ -162,7 +162,7 @@ namespace EasyShare
             foreach (string tmp in toRemove)
                 if (Neighbors.TryRemove(tmp, out Neighbor value))
                     if (neighborsEvent != null)
-                        neighborsEvent(tmp, null, false);
+                        neighborsEvent(new Neighbor(tmp, null), false);
         }
 
 
@@ -452,7 +452,7 @@ namespace EasyShare
         private static NeighborProtocol instance = null;
         private Settings settings;
         public static ManualResetEvent senderEvent;
-        public delegate void modifyNeighbors(string neighborID, byte[] image, bool addOrRemove);
+        public delegate void modifyNeighbors(Neighbor n, bool addOrRemove);
         public static event modifyNeighbors neighborsEvent;
         public static bool ShutDown = false;
         private static object syncLock = new object();

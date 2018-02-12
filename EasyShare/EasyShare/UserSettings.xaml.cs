@@ -20,14 +20,7 @@ namespace EasyShare
             else
                 bottoneOnline.Content = "Privato";
             Closing += UserSettings_Closing;
-            Deactivated += UserSettings_Deactivated;
         }
-
-        private void UserSettings_Deactivated(object sender, EventArgs e)
-        {
-
-        }
-
         private void UserSettings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Settings.writeSettings(settings);

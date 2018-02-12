@@ -16,10 +16,14 @@ namespace EasyShare
         public int Tipo { get => tipo; set => tipo = value; }
         public string Extension { get => extension; set => extension = value; }
 
-        //type 0=> file, 1=> directory
-        public RenamingFile(string fileName, string directory, int type)
+        public RenamingFile()
         {
             InitializeComponent();
+        }
+
+        //type 0=> file, 1=> directory
+        public void setFields(string fileName,string directory, int type)
+        {
             NewName = String.Empty;
             Extension = Path.GetExtension(fileName);
             CurrentDirectory = directory;

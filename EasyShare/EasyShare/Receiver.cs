@@ -19,7 +19,7 @@ namespace EasyShare
             server = new Thread(startServer)
             {
                 Name = "server",
-                IsBackground = true 
+                IsBackground = true
             };
             server.Start();
         }
@@ -42,7 +42,7 @@ namespace EasyShare
                     Socket handler = listener.Accept();
                     Thread myThread = new Thread(() => receiveFromSocket(handler));
                     myThread.SetApartmentState(ApartmentState.STA);
-                    myThread.IsBackground = true; 
+                    myThread.IsBackground = true;
                     myThread.Start();
                 }
             }
@@ -78,6 +78,7 @@ namespace EasyShare
             long zipFileSize = 0;
             FileStream fs = null;
             string user = String.Empty;
+            bool zipToDelete = true;
             try
             {
                 SocketError sockError;
@@ -178,32 +179,29 @@ namespace EasyShare
                 string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
                 zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
 
-                string senderID = user + "@" + ipSender;
-                byte[] image;
-                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                if (NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne))
+                if (File.Exists(zipLocation))
                 {
-                    if (ne.NeighborImage == null)
-                        ne.setImage(File.ReadAllBytes(App.currentDirectoryResources + "/guest.png"));
-                    encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
+                    //send NOINVIO
+                    handler.Send(Encoding.ASCII.GetBytes(Constants.DECLINE_FILE), 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
+                    zipToDelete = false;
+                    return;
                 }
-                else
-                {
-                    BitmapImage bitmap = Neighbor.ToImage(File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
-                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                }
+                //send OKINVIO
+                handler.Send(Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE), 0, Constants.ACCEPT_FILE.Length, SocketFlags.None, out sockError);
+                fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
 
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    encoder.Save(ms);
-                    image = ms.ToArray();
-                    ms.Close();
-                }
+
+                string senderID = user + "@" + ipSender;
+                if (!NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor neighbor))
+                    neighbor = new Neighbor(senderID, File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
                 if (updateReceivingFiles != null)
-                    updateReceivingFiles(senderID, image, fileNameString, id);
+                {
+                    ReceivingFile rf = new ReceivingFile(neighbor, fileNameString, id);
+                    updateReceivingFiles(rf);
+                }
                 int percentage = 0;
                 zipLocation = App.defaultFolder + "\\" + zipFileName;
-                fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
+               
                 byte[] data = new byte[Constants.PACKET_SIZE];
                 int bytesRec = 0;
 
@@ -256,7 +254,7 @@ namespace EasyShare
                 else
                 {
                     string str = String.Empty;
-                    RenamingFile rf = null;
+                    RenamingFile rf = new RenamingFile();
                     if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                     {
                         archive = ZipFile.OpenRead(zipLocation);
@@ -265,7 +263,7 @@ namespace EasyShare
                             str = String.Empty;
                             if (File.Exists(currentDirectory + "\\" + entry.Name))
                             {
-                                rf = new RenamingFile(entry.Name, currentDirectory, 0);
+                                rf.setFields(entry.Name, currentDirectory, 0);
                                 rf.ShowDialog();
                                 if (String.IsNullOrEmpty(rf.NewName))
                                     throw new Exception();
@@ -279,7 +277,7 @@ namespace EasyShare
                     {
                         if (Directory.Exists(currentDirectory + "\\" + fileNameString))
                         {
-                            rf = new RenamingFile(fileNameString, currentDirectory, 1);
+                            rf.setFields(fileNameString, currentDirectory, 1);
                             rf.ShowDialog();
                             if (String.IsNullOrEmpty(rf.NewName))
                                 throw new Exception();
@@ -319,13 +317,13 @@ namespace EasyShare
                 if (archive != null)
                     archive.Dispose();
                 if (!String.IsNullOrEmpty(zipLocation))
-                    if (File.Exists(zipLocation))
+                    if (File.Exists(zipLocation) && zipToDelete)
                         File.Delete(zipLocation);
                 releaseResources(handler);
             }
         }
 
-        private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user,string id)
+        private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user, string id)
         {
             string str = String.Empty;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
@@ -345,7 +343,7 @@ namespace EasyShare
                             str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
                         }
                     }
-                  
+
                     try
                     {
                         entry.ExtractToFile(str, true);
@@ -372,10 +370,10 @@ namespace EasyShare
                         str += timeStamp;
                     }
                 }
-               
+
                 try
                 {
-                    ZipFile.ExtractToDirectory(zipLocation, str); 
+                    ZipFile.ExtractToDirectory(zipLocation, str);
                 }
                 catch (PathTooLongException)
                 {
@@ -437,7 +435,7 @@ namespace EasyShare
         public delegate void myDelegate(string id, int percentage);
         public static event myDelegate updateProgress;
 
-        public delegate void myDelegate1(string senderID, byte[] image, string fileName, string id);
+        public delegate void myDelegate1(ReceivingFile rf);
         public static event myDelegate1 updateReceivingFiles;
 
         public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);

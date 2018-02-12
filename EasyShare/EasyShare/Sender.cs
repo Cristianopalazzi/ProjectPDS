@@ -65,12 +65,22 @@ namespace EasyShare
                 byte[] zipLine = Combine(Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND), BitConverter.GetBytes(zipToSend.Length),
                     Encoding.ASCII.GetBytes(zipToSend), BitConverter.GetBytes(zipLength));
                 sent = sender.Send(zipLine, 0, zipLine.Length, SocketFlags.None, out sockError);
-
+                int received = 0;
+                byte[] data = new byte[Constants.DECLINE_FILE.Length];
+                received = sender.Receive(data, 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
+                if (received != 0)
+                {
+                    if (string.Compare(Encoding.ASCII.GetString(data), Constants.DECLINE_FILE) == 0)
+                    {
+                        updateFileState(sender, Constants.FILE_STATE.ERROR);
+                        return;
+                    }
+                }
 
                 int temp = 0, percentage = 0;
                 fs = File.Open(zipLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-                byte[] data = new byte[Constants.PACKET_SIZE];
+                data = new byte[Constants.PACKET_SIZE];
                 int readBytes = 0;
                 DateTime now = DateTime.Now;
                 int inviati = 0;

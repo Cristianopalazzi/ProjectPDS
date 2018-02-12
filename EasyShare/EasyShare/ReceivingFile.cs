@@ -13,6 +13,7 @@ namespace EasyShare
             Ipaddr = neighbor.NeighborIp;
             Image = new BitmapImage();
             Image = neighbor.NeighborImage;
+            Image.Freeze();
             Guid = guid;
             File_state = Constants.FILE_STATE.PROGRESS;
         }
