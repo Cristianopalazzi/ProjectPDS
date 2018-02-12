@@ -179,15 +179,20 @@ namespace EasyShare
                 string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
                 zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
 
+                zipLocation = App.defaultFolder + "\\" + zipFileName;
                 if (File.Exists(zipLocation))
                 {
-                    //send NOINVIO
-                    handler.Send(Encoding.ASCII.GetBytes(Constants.DECLINE_FILE), 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
                     zipToDelete = false;
+                    handler.Send(Encoding.ASCII.GetBytes(Constants.DECLINE_FILE), 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
+                    if (sockError != SocketError.Success)
+                        throw new SocketException();
                     return;
                 }
-                //send OKINVIO
+
                 handler.Send(Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE), 0, Constants.ACCEPT_FILE.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                    throw new SocketException();
+
                 fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
 
 
@@ -200,8 +205,7 @@ namespace EasyShare
                     updateReceivingFiles(rf);
                 }
                 int percentage = 0;
-                zipLocation = App.defaultFolder + "\\" + zipFileName;
-               
+
                 byte[] data = new byte[Constants.PACKET_SIZE];
                 int bytesRec = 0;
 

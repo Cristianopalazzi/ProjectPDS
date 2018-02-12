@@ -171,6 +171,16 @@ namespace EasyShare
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
+                case Constants.NOTIFICATION_STATE.EXISTS:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = userName + " sta ancora elaborando questa versione del file";
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
             }
         }
 

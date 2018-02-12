@@ -68,13 +68,16 @@ namespace EasyShare
                 int received = 0;
                 byte[] data = new byte[Constants.DECLINE_FILE.Length];
                 received = sender.Receive(data, 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
-                if (received != 0)
+                if (received == 0 || sockError != SocketError.Success)
+                    throw new SocketException();
+
+                if (string.Compare(Encoding.ASCII.GetString(data), Constants.DECLINE_FILE) == 0)
                 {
-                    if (string.Compare(Encoding.ASCII.GetString(data), Constants.DECLINE_FILE) == 0)
-                    {
+                    if (updateFileState != null)
                         updateFileState(sender, Constants.FILE_STATE.ERROR);
-                        return;
-                    }
+                    if (fileRejected != null)
+                        fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.EXISTS);
+                    return;
                 }
 
                 int temp = 0, percentage = 0;
@@ -153,7 +156,7 @@ namespace EasyShare
                 if (updateFileState != null)
                     updateFileState(sender, Constants.FILE_STATE.ERROR);
                 if (fileRejected != null)
-                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
+                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND);
             }
 
             finally

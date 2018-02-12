@@ -23,7 +23,7 @@
         public const string DECLINE_FILE = "NO";
         public const string SETTINGS = "Settings.xml";
         public enum FILE_STATE { PREPARATION = 0 , ACCEPTANCE = 1, PROGRESS = 2, COMPLETED=3, CANCELED=4, ERROR=5, REJECTED=6 };
-        public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR_SEND,FILE_ERROR_REC, REC_ERROR };
+        public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR_SEND,FILE_ERROR_REC, REC_ERROR, EXISTS };
         public const string projectName = "EasyShare";
         public const string UTENTE_ANONIMO = "Utente anonimo";
         public const int PACKET_SIZE = 8 * 1024;
