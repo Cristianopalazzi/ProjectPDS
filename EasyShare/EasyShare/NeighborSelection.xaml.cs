@@ -45,9 +45,10 @@ namespace EasyShare
 
         private void NeighborSelection_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            closingSelection();
+            if (closingSelection != null)
+                closingSelection();
             e.Cancel = true;
-            WindowState = WindowState.Minimized;
+            //WindowState = WindowState.Minimized;
             Hide();
         }
 

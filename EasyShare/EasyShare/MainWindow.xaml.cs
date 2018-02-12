@@ -37,6 +37,7 @@ namespace EasyShare
             Receiver.acceptance += file_to_accept;
             UserSettings.openTabSettings += tabChange;
             NeighborSelection.sendSelectedNeighbors += addSendingFiles;
+            Queue.QueueUpdateState += Sender_updateFileState;
             App.askForExit += App_askForExit;
 
             NeighborsValues = new ObservableCollection<Neighbor>();
@@ -115,35 +116,30 @@ namespace EasyShare
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/cross.ico"));
                         if (state == Constants.NOTIFICATION_STATE.CANCELED)
-                            triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
+                        {
+                            if (triggerBalloon != null)
+                                triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
+                        }
                         else if (state == Constants.NOTIFICATION_STATE.REC_ERROR)
-                            triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
+                        {
+                            if (triggerBalloon != null)
+                                triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
+                        }
+                        else if (state == Constants.NOTIFICATION_STATE.FILE_ERROR_SEND)
+                        {
+                            if (triggerBalloon != null)
+                                triggerBalloon(r.Filename, null, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND);
+                        }
+                        else if (state == Constants.NOTIFICATION_STATE.FILE_ERROR_REC)
+                        {
+                            if (triggerBalloon != null)
+                                triggerBalloon(r.Filename, null, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                        }
                         break;
                     }
             }));
         }
 
-        //aggiorno la progress bar del file in ricezione
-        private void updateReceivingProgressBar(string id, int percentage)
-        {
-            listReceivingFiles.Dispatcher.Invoke(new Action(() =>
-            {
-                foreach (ReceivingFile r in FilesToReceive)
-                {
-                    if (String.Compare(r.Guid, id) == 0)
-                    {
-                        r.Value = percentage;
-                        if (r.Value == 100)
-                        {
-                            r.File_state = Constants.FILE_STATE.COMPLETED;
-                            r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
-                            triggerBalloon(r.Filename, r.Name, 0);
-                            break;
-                        }
-                    }
-                }
-            }));
-        }
 
         // aggiungo un nuovo file in ricezione alla lista
         private void updateReceivingFiles(string senderID, byte[] image, string fileName, string id)
@@ -158,9 +154,9 @@ namespace EasyShare
         //aggiorno la progress bar del file in invio
         private void updateProgressBar(string filename, Socket sock, int percentage, string remainingTime)
         {
-            sendingFiles.Dispatcher.Invoke(new Action(() =>
+            try
             {
-                try
+                sendingFiles.Dispatcher.Invoke(new Action(() =>
                 {
                     foreach (SendingFile sf in FilesToSend)
                         if (sf.Sock == sock)
@@ -175,24 +171,62 @@ namespace EasyShare
                                 sf.File_state = Constants.FILE_STATE.COMPLETED;
                                 sf.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
                                 if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
-                                    triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
+                                    if (triggerBalloon != null)
+                                        triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
                             }
                             break;
                         }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("allalal");
-                    var st = new StackTrace(e, true);
-                    // Get the top stack frame
-                    var frame = st.GetFrame(st.FrameCount - 1);
-                    // Get the line number from the stack frame
-                    var line = frame.GetFileLineNumber();
-                    Console.WriteLine("Error at line {0} ", line);
-                }
-            }));
+
+                }));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Update Progress Bar SENDER");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
+            }
+
         }
 
+        //aggiorno la progress bar del file in ricezione
+        private void updateReceivingProgressBar(string id, int percentage)
+        {
+            try
+            {
+                Dispatcher.Invoke(new Action(() =>
+                {
+                    foreach (ReceivingFile r in FilesToReceive)
+                    {
+                        if (String.Compare(r.Guid, id) == 0)
+                        {
+                            r.Value = percentage;
+                            if (r.Value == 100)
+                            {
+                                r.File_state = Constants.FILE_STATE.COMPLETED;
+                                r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
+                                if (triggerBalloon != null)
+                                    triggerBalloon(r.Filename, r.Name, 0);
+                                break;
+                            }
+                        }
+                    }
+                }));
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Update Progress Bar RECEIVER");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
+            }
+        }
         //chiusura della finestra principale
         private void MainWindow_Closing(object sender, CancelEventArgs e)
         {
@@ -252,11 +286,9 @@ namespace EasyShare
         //context menu sui file in ricezione (cancella tutti i file ricevuti correttamente)
         private void receiving_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
-            if (listReceivingFiles.SelectedIndex == -1)
-                return;
             List<ReceivingFile> tmp = new List<ReceivingFile>();
             foreach (ReceivingFile rf in FilesToReceive)
-                if (rf.File_state == Constants.FILE_STATE.ERROR || rf.File_state == Constants.FILE_STATE.PROGRESS || rf.File_state == Constants.FILE_STATE.COMPLETED || rf.File_state == Constants.FILE_STATE.CANCELED)
+                if (rf.File_state == Constants.FILE_STATE.ERROR || rf.File_state == Constants.FILE_STATE.COMPLETED || rf.File_state == Constants.FILE_STATE.CANCELED)
                     tmp.Add(rf);
             if (tmp.Count == 0)
             {
@@ -280,8 +312,6 @@ namespace EasyShare
         //context menu sui file in invio (cancella tutti i file inviati correttamente)
         private void sending_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
-            if (sendingFiles.SelectedIndex == -1)
-                return;
             List<SendingFile> tmp = new List<SendingFile>();
             foreach (SendingFile sf in FilesToSend)
                 if (sf.File_state == Constants.FILE_STATE.CANCELED || sf.File_state == Constants.FILE_STATE.COMPLETED || sf.File_state == Constants.FILE_STATE.ERROR || sf.File_state == Constants.FILE_STATE.REJECTED)

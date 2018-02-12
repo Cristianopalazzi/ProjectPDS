@@ -25,7 +25,7 @@ namespace EasyShare
 
         private void UserSettings_Deactivated(object sender, EventArgs e)
         {
-            
+
         }
 
         private void UserSettings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -38,7 +38,8 @@ namespace EasyShare
 
         public void openSettings(object sender, EventArgs e)
         {
-            openTabSettings();
+            if (openTabSettings != null)
+                openTabSettings();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

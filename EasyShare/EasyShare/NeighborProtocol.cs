@@ -78,13 +78,23 @@ namespace EasyShare
                     if (String.Compare(command, Constants.HELL) == 0)
                     {
                         if (!Neighbors.ContainsKey(senderID))
-                            requestImg(senderID);
+                        {
+                            byte[] img = requestImg(senderID);
+                            //TODO TESTARE
+                            if (img == null)
+                                continue;
+                            Neighbor n = new Neighbor(senderID, img);
+                            if (Neighbors.TryAdd(senderID, n))
+                                if (neighborsEvent != null)
+                                    neighborsEvent(senderID, img, true);
+                        }
 
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                     }
                     else if (String.Compare(command, Constants.QUIT) == 0)
                         if (Neighbors.TryRemove(senderID, out Neighbor n))
-                            neighborsEvent(senderID, null, false);
+                            if (neighborsEvent != null)
+                                neighborsEvent(senderID, null, false);
                 }
                 catch (Exception ex)
                 {
@@ -129,7 +139,8 @@ namespace EasyShare
 
                 foreach (string tmp in toRemove)
                     if (Neighbors.TryRemove(tmp, out Neighbor value))
-                        neighborsEvent(tmp, null, false);
+                        if (neighborsEvent != null)
+                            neighborsEvent(tmp, null, false);
 
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
@@ -150,7 +161,8 @@ namespace EasyShare
 
             foreach (string tmp in toRemove)
                 if (Neighbors.TryRemove(tmp, out Neighbor value))
-                    neighborsEvent(tmp, null, false);
+                    if (neighborsEvent != null)
+                        neighborsEvent(tmp, null, false);
         }
 
 
@@ -208,7 +220,7 @@ namespace EasyShare
 
         private void waitForImageRequest()
         {
-            //TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
+            // TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
@@ -220,6 +232,7 @@ namespace EasyShare
                 try
                 {
                     handler = listener.Accept();
+                    handler.SendTimeout = 1500;
                     DirectoryInfo dir = new DirectoryInfo(Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE);
 
                     FileInfo[] images = dir.GetFiles("*.accountpicture-ms");
@@ -246,7 +259,6 @@ namespace EasyShare
                             throw new SocketException();
 
                         byte[] img = GetImage(imgPath);
-
                         sent = 0;
 
                         while (sent < img.Length)
@@ -255,14 +267,15 @@ namespace EasyShare
                                 sent += handler.Send(img, sent, Constants.PACKET_SIZE, SocketFlags.None, out error);
                             else
                                 sent += handler.Send(img, sent, img.Length - sent, SocketFlags.None, out error);
-
                             if (error != SocketError.Success)
                                 throw new SocketException();
                         }
+
                     }
 
                 }
-                catch (SocketException e)
+
+                catch (Exception e)
                 {
                     Console.WriteLine("NeighborProtocol");
                     var st = new StackTrace(e, true);
@@ -279,36 +292,33 @@ namespace EasyShare
             }
         }
 
-        private void requestImg(string neighbor)
+        private byte[] requestImg(string neighbor)
         {
             String address = neighbor.Substring(neighbor.IndexOf("@") + 1);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(address), Constants.PORT_TCP_IMG);
-            Socket receiver = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
+            Socket receiver = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             int received = 0;
-
+            byte[] img = null;
             try
             {
-                byte[] img;
+                receiver.ReceiveTimeout = 1500;
                 receiver.Connect(iPEndPoint);
-
                 byte[] buffer = new byte[sizeof(int)];
                 received = receiver.Receive(buffer, 0, buffer.Length, SocketFlags.None, out SocketError sockError);
-
-                if (sockError != SocketError.Success)
+                if (received == 0 || sockError != SocketError.Success)
                     throw new SocketException();
 
                 int sizeImg = BitConverter.ToInt32(buffer, 0);
                 if (sizeImg == -1)
                 {
                     string placeholderPath = App.currentDirectoryResources + "/guest.png";
-                    if (String.IsNullOrEmpty(placeholderPath)) return;
                     img = File.ReadAllBytes(placeholderPath);
                 }
                 else
                 {
                     img = new byte[sizeImg];
                     received = 0;
+
                     while (received < img.Length)
                     {
                         if (img.Length - received > Constants.PACKET_SIZE)
@@ -321,13 +331,12 @@ namespace EasyShare
                     }
                 }
 
-                //TODO TESTARE
-                Neighbor n = new Neighbor(neighbor, img);
-                if (Neighbors.TryAdd(neighbor, n))
-                    neighborsEvent(neighbor, img, true);
             }
             catch (SocketException e)
             {
+                string placeholderPath = App.currentDirectoryResources + "/guest.png";
+                img = File.ReadAllBytes(placeholderPath);
+
                 Console.WriteLine("NeighborProtocol");
                 var st = new StackTrace(e, true);
                 var frame = st.GetFrame(st.FrameCount - 1);
@@ -351,6 +360,8 @@ namespace EasyShare
                     receiver.Close();
                 }
             }
+
+            return img;
         }
 
 

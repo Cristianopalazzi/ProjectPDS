@@ -18,14 +18,12 @@
         public const string ZIP_COMMAND = "ZIP";
         public const string DIR_COMMAND = "DIR";
         public const string ZIP_EXTENSION = ".zip";
-        public const string NEED_IMG = "YIMG";
-        public const string DONT_NEED_IMG = "NIMG";
         public const string ACCOUNT_IMAGE = @"\Microsoft\Windows\AccountPictures\";
         public const string ACCEPT_FILE = "OK";
         public const string DECLINE_FILE = "NO";
         public const string SETTINGS = "Settings.xml";
-        public enum FILE_STATE { PREPARATION, ACCEPTANCE, PROGRESS, COMPLETED, CANCELED, ERROR, REJECTED };
-        public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR, REC_ERROR };
+        public enum FILE_STATE { PREPARATION = 0 , ACCEPTANCE = 1, PROGRESS = 2, COMPLETED=3, CANCELED=4, ERROR=5, REJECTED=6 };
+        public enum NOTIFICATION_STATE { RECEIVED, SENT, CANCELED, REFUSED, NET_ERROR, SEND_ERROR, FILE_ERROR_SEND,FILE_ERROR_REC, REC_ERROR };
         public const string projectName = "EasyShare";
         public const string UTENTE_ANONIMO = "Utente anonimo";
         public const int PACKET_SIZE = 8 * 1024;

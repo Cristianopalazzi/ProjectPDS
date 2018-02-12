@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.IO.Compression;
 using System;
+using System.Net.Sockets;
 
 namespace EasyShare
 {
@@ -43,7 +44,8 @@ namespace EasyShare
                     string file = sr.ReadLine();
                     if (pipeServer.IsConnected)
                         pipeServer.Disconnect();
-                    openNeighbors(file);
+                    if (openNeighbors != null)
+                        openNeighbors(file);
                 }
             }
             catch
@@ -80,6 +82,13 @@ namespace EasyShare
                     else zipInfo = cachingFiles[pathFile];
                 }
 
+                if(zipInfo == null)
+                {
+                    QueueUpdateState(sf[0].Sock, Constants.FILE_STATE.ERROR);
+                    QueueBalloon(Path.GetFileName(pathFile), null, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
+                    continue;
+                }
+
                 Sender sender = new Sender();
                 foreach (SendingFile s in sf)
                 {
@@ -89,7 +98,7 @@ namespace EasyShare
                     })
                     {
                         Name = "thread che manda " + s.FileName + " a  " + s.Name,
-                        IsBackground = true
+                        IsBackground = true 
                     };
                     t.Start();
                 }
@@ -104,32 +113,45 @@ namespace EasyShare
 
         private ZipInfo createZip(string pathFile)
         {
-            string zipToSend = RandomStr() + Constants.ZIP_EXTENSION;
-            FileAttributes attr = File.GetAttributes(pathFile);
-            string zipLocation = App.defaultFolder + "\\" + zipToSend;
-            bool isFile;
-            DateTime lastWrite;
+            string zipLocation = String.Empty;
+            try
+            {
 
-            if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
-            {
-                ZipFile.CreateFromDirectory(pathFile, zipLocation, CompressionLevel.NoCompression, false);
-                isFile = false;
-                DirectoryInfo dInfo = new DirectoryInfo(pathFile);
-                lastWrite = LastestModified(dInfo, dInfo.LastWriteTime);
+
+                string zipToSend = RandomStr() + Constants.ZIP_EXTENSION;
+                FileAttributes attr = File.GetAttributes(pathFile);
+                zipLocation = App.defaultFolder + "\\" + zipToSend;
+                bool isFile;
+                DateTime lastWrite;
+
+                if ((attr & FileAttributes.Directory) == FileAttributes.Directory)
+                {
+                    ZipFile.CreateFromDirectory(pathFile, zipLocation, CompressionLevel.NoCompression, false);
+                    isFile = false;
+                    DirectoryInfo dInfo = new DirectoryInfo(pathFile);
+                    lastWrite = LastestModified(dInfo, dInfo.LastWriteTime);
+                }
+                else
+                {
+                    ZipArchive newFile = ZipFile.Open(zipLocation, ZipArchiveMode.Create);
+                    newFile.CreateEntryFromFile(pathFile, Path.GetFileName(pathFile), CompressionLevel.NoCompression);
+                    newFile.Dispose();
+                    FileInfo fInfo = new FileInfo(pathFile);
+                    isFile = true;
+                    lastWrite = fInfo.LastWriteTime;
+                }
+                long zipLength = new FileInfo(zipLocation).Length;
+                ZipInfo zipInfo = new ZipInfo(zipToSend, zipLocation, zipLength, isFile, lastWrite);
+                cachingFiles.Add(pathFile, zipInfo);
+                return zipInfo;
             }
-            else
+            catch 
             {
-                ZipArchive newFile = ZipFile.Open(zipLocation, ZipArchiveMode.Create);
-                newFile.CreateEntryFromFile(pathFile, Path.GetFileName(pathFile), CompressionLevel.NoCompression);
-                newFile.Dispose();
-                FileInfo fInfo = new FileInfo(pathFile);
-                isFile = true;
-                lastWrite = fInfo.LastWriteTime;
+                if (!String.IsNullOrEmpty(zipLocation))
+                    File.Delete(zipLocation);
+                return null;
             }
-            long zipLength = new FileInfo(zipLocation).Length;
-            ZipInfo zipInfo = new ZipInfo(zipToSend, zipLocation, zipLength, isFile, lastWrite);
-            cachingFiles.Add(pathFile, zipInfo);
-            return zipInfo;
+            
         }
 
         private bool fileChanged(string pathFile)
@@ -184,5 +206,9 @@ namespace EasyShare
         private Thread threadPipe, waitOnTake;
         public delegate void myDel(string file);
         public static event myDel openNeighbors;
+        public delegate void myDel2(string fileName, string userName, Constants.NOTIFICATION_STATE state);
+        public static event myDel2 QueueBalloon;
+        public delegate void myDel3(Socket s, Constants.FILE_STATE state);
+        public static event myDel3 QueueUpdateState;
     }
 }

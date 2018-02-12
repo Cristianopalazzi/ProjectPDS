@@ -27,7 +27,14 @@ namespace EasyShare
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
+            String appPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            Process[] p = Process.GetProcessesByName("EasyShare");
+            if (p.Length > 1)
+            {
+                Environment.Exit(0);
+            }
             Queue.openNeighbors += neighbor_selection;
+            Queue.QueueBalloon += createBalloons;
             Sender.fileRejected += createBalloons;
             EasyShare.MainWindow.triggerBalloon += createBalloons;
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
@@ -62,9 +69,7 @@ namespace EasyShare
             n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
-            //TODO vedere se toglierlo
-            //TODO aggiungere join dei thread
-            Thread.Sleep(350);
+            //Thread.Sleep(350);
             App.Current.Shutdown();
         }
 
@@ -136,16 +141,6 @@ namespace EasyShare
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
-                case Constants.NOTIFICATION_STATE.FILE_ERROR:
-                    {
-                        nIcon.BalloonTipTitle = fileName;
-                        string text = "Errore durante la preparazione del file";
-                        nIcon.BalloonTipText = text;
-                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
-                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
-                        break;
-                    }
                 case Constants.NOTIFICATION_STATE.REC_ERROR:
                     {
                         nIcon.BalloonTipTitle = fileName;
@@ -153,6 +148,26 @@ namespace EasyShare
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case Constants.NOTIFICATION_STATE.FILE_ERROR_REC:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = "Errore durante la preparazione del file in ricezione";
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
+                        nIcon.ShowBalloonTip(3000);
+                        break;
+                    }
+                case Constants.NOTIFICATION_STATE.FILE_ERROR_SEND:
+                    {
+                        nIcon.BalloonTipTitle = fileName;
+                        string text = "Errore durante la preparazione del file in invio";
+                        nIcon.BalloonTipText = text;
+                        nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
+                        nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
                         nIcon.ShowBalloonTip(3000);
                         break;
                     }
@@ -182,31 +197,21 @@ namespace EasyShare
             item1.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 0; };
             item2.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 1; };
             item3.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 2; };
-            item4.Click += delegate
-            {
-                if (us.WindowState == WindowState.Normal)
-                {
-                    us.Hide();
-                    us.WindowState = WindowState.Minimized;
-                }
-                else
-                {
-                    us.Show();
-                    us.WindowState = WindowState.Normal;
-                }
-            };
+            item4.Click += delegate { mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; mw.tabControl.SelectedIndex = 3; };
+
             item5.Click += delegate
             {
                 bool filesInProgress = mw.checkForFilesInProgress();
                 if (filesInProgress)
-                    if (!askForExit())
-                        return;
+                    if (askForExit != null)
+                        if (!askForExit())
+                            return;
 
                 n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
-                //TODO join threads
-                Thread.Sleep(350);
+                //TODO confermare cancellazione e poi chiusura come soluzione
+                //Thread.Sleep(350);
                 App.Current.Shutdown();
             };
             nIcon.Visible = true;
@@ -247,6 +252,7 @@ namespace EasyShare
                     ns.FileList.Clear();
                     ns.Acceso = true;
                     ns.FileList.Add(file);
+                    ns.WindowState = WindowState.Normal;
                 }
                 ns.Show();
                 ns.Activate();

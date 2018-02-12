@@ -42,7 +42,8 @@ namespace EasyShare
                 {
                     throw new SocketException();
                 }
-                updateFileState(sender, Constants.FILE_STATE.ACCEPTANCE);
+                if (updateFileState != null)
+                    updateFileState(sender, Constants.FILE_STATE.ACCEPTANCE);
                 byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
                 sender.Receive(responseFromServer, 0, responseFromServer.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
@@ -53,8 +54,10 @@ namespace EasyShare
                 string response = Encoding.ASCII.GetString(responseFromServer);
                 if (String.Compare(response, Constants.DECLINE_FILE) == 0)
                 {
-                    fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
-                    updateFileState(sender, Constants.FILE_STATE.REJECTED);
+                    if (fileRejected != null)
+                        fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
+                    if (updateFileState != null)
+                        updateFileState(sender, Constants.FILE_STATE.REJECTED);
                     releaseResources(sender);
                     return;
                 }
@@ -106,7 +109,8 @@ namespace EasyShare
                                 TimeSpan t = TimeSpan.FromSeconds(remainingTime);
                                 remainingTimeString = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
                             }
-                            updateProgress(fileName, sender, tempPercentage, remainingTimeString);
+                            if (updateProgress != null)
+                                updateProgress(fileName, sender, tempPercentage, remainingTimeString);
                             percentage = tempPercentage;
                         }
 
@@ -121,8 +125,10 @@ namespace EasyShare
             catch (SocketException e)
             {
                 //TODO eseguire sempre in debug perchè qualcosa va storto
-                updateFileState(sender, Constants.FILE_STATE.ERROR);
-                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
+                if (updateFileState != null)
+                    updateFileState(sender, Constants.FILE_STATE.ERROR);
+                if (fileRejected != null)
+                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
             }
 
             catch (Exception e)
@@ -134,8 +140,10 @@ namespace EasyShare
                 // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                updateFileState(sender, Constants.FILE_STATE.ERROR);
-                fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR); //6 
+                if (updateFileState != null)
+                    updateFileState(sender, Constants.FILE_STATE.ERROR);
+                if (fileRejected != null)
+                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
             }
 
             finally
