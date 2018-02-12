@@ -289,7 +289,6 @@ namespace EasyShare
             Socket receiver = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
             int received = 0;
-
             try
             {
                 byte[] img;
@@ -305,7 +304,6 @@ namespace EasyShare
                 if (sizeImg == -1)
                 {
                     string placeholderPath = App.currentDirectoryResources + "/guest.png";
-                    if (String.IsNullOrEmpty(placeholderPath)) return;
                     img = File.ReadAllBytes(placeholderPath);
                 }
                 else
@@ -355,6 +353,7 @@ namespace EasyShare
                     receiver.Close();
                 }
             }
+
         }
 
 

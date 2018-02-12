@@ -98,7 +98,7 @@ namespace EasyShare
                     })
                     {
                         Name = "thread che manda " + s.FileName + " a  " + s.Name,
-                        IsBackground = true //TODO cambiare questo thread con foreground, cancellare questa riga di codice
+                        IsBackground = true 
                     };
                     t.Start();
                 }

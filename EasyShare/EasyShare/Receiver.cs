@@ -19,7 +19,7 @@ namespace EasyShare
             server = new Thread(startServer)
             {
                 Name = "server",
-                IsBackground = true //TODO cambiare questo che è la radice dei thread receiver
+                IsBackground = true 
             };
             server.Start();
         }
@@ -42,7 +42,7 @@ namespace EasyShare
                     Socket handler = listener.Accept();
                     Thread myThread = new Thread(() => receiveFromSocket(handler));
                     myThread.SetApartmentState(ApartmentState.STA);
-                    myThread.IsBackground = false; //cambiare in foreground , cancellare questa linea di codice
+                    myThread.IsBackground = true; 
                     myThread.Start();
                 }
             }
@@ -327,7 +327,6 @@ namespace EasyShare
 
         private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user,string id)
         {
-            //TODO rifare ( se mando due file assieme e uno dei due ha eccezione, si rompe tutto )
             string str = String.Empty;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
             {
@@ -346,14 +345,7 @@ namespace EasyShare
                             str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
                         }
                     }
-                    //if (str.Length >= 260)
-                    //{
-                    //    //questo non va bene, bisogna cancellare la entry dall'archivio e gestire, senza lanciare eccezione
-                    //    archive.Dispose();
-                    //    throw new Exception(); 
-                    //}
-
-                    //nuovo codice, da testare
+                  
                     try
                     {
                         entry.ExtractToFile(str, true);
@@ -380,12 +372,10 @@ namespace EasyShare
                         str += timeStamp;
                     }
                 }
-                //if (str.Length >= 248)
-                //    throw new Exception();
-                //nuovo codice, da testare
+               
                 try
                 {
-                    ZipFile.ExtractToDirectory(zipLocation, str); //rollback nel caso che dia eccezione
+                    ZipFile.ExtractToDirectory(zipLocation, str); 
                 }
                 catch (PathTooLongException)
                 {

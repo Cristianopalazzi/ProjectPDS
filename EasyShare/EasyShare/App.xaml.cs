@@ -63,9 +63,7 @@ namespace EasyShare
             n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
-            //TODO vedere se toglierlo
-            //TODO aggiungere join dei thread
-            Thread.Sleep(350);
+            //Thread.Sleep(350);
             App.Current.Shutdown();
         }
 
@@ -217,7 +215,7 @@ namespace EasyShare
                 n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
-                //TODO join threads
+                //TODO confermare cancellazione e poi chiusura come soluzione
                 //Thread.Sleep(350);
                 App.Current.Shutdown();
             };

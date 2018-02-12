@@ -218,7 +218,6 @@ namespace EasyShare
             }
             catch (Exception e)
             {
-                //TODO decidere se gestire l'aggiunta di altri file in ricezione / se evitare di fare questo cazzo di loop tutte le volte
                 Console.WriteLine("Update Progress Bar RECEIVER");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame
@@ -368,7 +367,6 @@ namespace EasyShare
 
         public bool checkForFilesInProgress()
         {
-            //TODO cambiare, lasciare finire l'invio e poi chiudere direttamente
             foreach (SendingFile sf in FilesToSend)
                 if (sf.File_state == Constants.FILE_STATE.ACCEPTANCE || sf.File_state == Constants.FILE_STATE.PREPARATION || sf.File_state == Constants.FILE_STATE.PROGRESS)
                     return true;
