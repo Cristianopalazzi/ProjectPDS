@@ -259,11 +259,17 @@ namespace EasyShare
                             throw new SocketException();
 
                         byte[] img = GetImage(imgPath);
+                        sent = 0;
 
-                        sent = handler.Send(img, 0, img.Length, SocketFlags.None, out error); //rimosso ciclo while per controllare
-
-                        if (error != SocketError.Success)
-                            throw new SocketException();
+                        while (sent < img.Length)
+                        {
+                            if (accountImage.Length - sent >= Constants.PACKET_SIZE)
+                                sent += handler.Send(img, sent, Constants.PACKET_SIZE, SocketFlags.None, out error);
+                            else
+                                sent += handler.Send(img, sent, img.Length - sent, SocketFlags.None, out error);
+                            if (error != SocketError.Success)
+                                throw new SocketException();
+                        }
 
                     }
 
@@ -295,6 +301,7 @@ namespace EasyShare
             byte[] img = null;
             try
             {
+                receiver.ReceiveTimeout = 1500;
                 receiver.Connect(iPEndPoint);
                 byte[] buffer = new byte[sizeof(int)];
                 received = receiver.Receive(buffer, 0, buffer.Length, SocketFlags.None, out SocketError sockError);
@@ -312,10 +319,16 @@ namespace EasyShare
                     img = new byte[sizeImg];
                     received = 0;
 
-                    received = receiver.Receive(img, 0, sizeImg, SocketFlags.None, out sockError);
+                    while (received < img.Length)
+                    {
+                        if (img.Length - received > Constants.PACKET_SIZE)
+                            received += receiver.Receive(img, received, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
 
-                    if (sockError != SocketError.Success)
-                        throw new SocketException();
+                        else received += receiver.Receive(img, received, img.Length - received, SocketFlags.None, out sockError);
+
+                        if (sockError != SocketError.Success)
+                            throw new SocketException();
+                    }
                 }
 
             }
