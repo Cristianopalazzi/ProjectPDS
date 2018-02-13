@@ -11,7 +11,7 @@ namespace EasyShare
 {
     class Sender
     {
-        public void sendFile(string ipAddr, string pathFile, Socket sender, ZipInfo zipInfo)
+        public void SendFile(string ipAddr, string pathFile, Socket sender, ZipInfo zipInfo)
         {
             sender.SendTimeout = 2500;
             sender.ReceiveTimeout = 1000 * 5 * 60;
@@ -33,17 +33,15 @@ namespace EasyShare
             try
             {
                 sender.Connect(remoteEP);
-                SocketError sockError;
                 int sent = 0;
 
                 byte[] fileLine = Combine(command, fileNameLength, fileNameByte, BitConverter.GetBytes(fileLength));
-                sent = sender.Send(fileLine, 0, fileLine.Length, SocketFlags.None, out sockError);
+                sent = sender.Send(fileLine, 0, fileLine.Length, SocketFlags.None, out SocketError sockError);
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
                 }
-                if (updateFileState != null)
-                    updateFileState(sender, Constants.FILE_STATE.ACCEPTANCE);
+                UpdateFileState?.Invoke(sender, Constants.FILE_STATE.ACCEPTANCE);
                 byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
                 sender.Receive(responseFromServer, 0, responseFromServer.Length, SocketFlags.None, out sockError);
                 if (sockError != SocketError.Success)
@@ -54,23 +52,32 @@ namespace EasyShare
                 string response = Encoding.ASCII.GetString(responseFromServer);
                 if (String.Compare(response, Constants.DECLINE_FILE) == 0)
                 {
-                    if (fileRejected != null)
-                        fileRejected(fileName, NeighborProtocol.getInstance.getUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
-                    if (updateFileState != null)
-                        updateFileState(sender, Constants.FILE_STATE.REJECTED);
-                    releaseResources(sender);
+                    FileRejected?.Invoke(fileName, NeighborProtocol.GetInstance.GetUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.REFUSED);
+                    UpdateFileState?.Invoke(sender, Constants.FILE_STATE.REJECTED);
+                    ReleaseResources(sender);
                     return;
                 }
 
                 byte[] zipLine = Combine(Encoding.ASCII.GetBytes(Constants.ZIP_COMMAND), BitConverter.GetBytes(zipToSend.Length),
                     Encoding.ASCII.GetBytes(zipToSend), BitConverter.GetBytes(zipLength));
                 sent = sender.Send(zipLine, 0, zipLine.Length, SocketFlags.None, out sockError);
+                int received = 0;
+                byte[] data = new byte[Constants.DECLINE_FILE.Length];
+                received = sender.Receive(data, 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
+                if (received == 0 || sockError != SocketError.Success)
+                    throw new SocketException();
 
+                if (string.Compare(Encoding.ASCII.GetString(data), Constants.DECLINE_FILE) == 0)
+                {
+                    UpdateFileState?.Invoke(sender, Constants.FILE_STATE.ERROR);
+                    FileRejected?.Invoke(fileName, NeighborProtocol.GetInstance.GetUserFromIp(ipAddr), Constants.NOTIFICATION_STATE.EXISTS);
+                    return;
+                }
 
-                int temp = 0, percentage = 0;
+                long temp = 0, percentage = 0;
                 fs = File.Open(zipLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-                byte[] data = new byte[Constants.PACKET_SIZE];
+                data = new byte[Constants.PACKET_SIZE];
                 int readBytes = 0;
                 DateTime now = DateTime.Now;
                 int inviati = 0;
@@ -81,7 +88,7 @@ namespace EasyShare
                     if (zipLength - temp > Constants.PACKET_SIZE)
                         readBytes = fs.Read(data, 0, Constants.PACKET_SIZE);
                     else
-                        readBytes = fs.Read(data, 0, (int)zipLength - temp);
+                        readBytes = fs.Read(data, 0, (int)(zipLength - temp));
 
                     sent = sender.Send(data, 0, readBytes, SocketFlags.None, out sockError);
 
@@ -109,8 +116,7 @@ namespace EasyShare
                                 TimeSpan t = TimeSpan.FromSeconds(remainingTime);
                                 remainingTimeString = string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
                             }
-                            if (updateProgress != null)
-                                updateProgress(fileName, sender, tempPercentage, remainingTimeString);
+                            UpdateProgress?.Invoke(fileName, sender, tempPercentage, remainingTimeString);
                             percentage = tempPercentage;
                         }
 
@@ -124,13 +130,16 @@ namespace EasyShare
             }
             catch (SocketException e)
             {
-                //TODO eseguire sempre in debug perchè qualcosa va storto
-                if (updateFileState != null)
-                    updateFileState(sender, Constants.FILE_STATE.ERROR);
-                if (fileRejected != null)
-                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
+                Console.WriteLine("Sender");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
+                UpdateFileState?.Invoke(sender, Constants.FILE_STATE.ERROR);
+                FileRejected?.Invoke(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
             }
-
             catch (Exception e)
             {
                 Console.WriteLine("Sender");
@@ -140,21 +149,19 @@ namespace EasyShare
                 // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                if (updateFileState != null)
-                    updateFileState(sender, Constants.FILE_STATE.ERROR);
-                if (fileRejected != null)
-                    fileRejected(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
+                UpdateFileState?.Invoke(sender, Constants.FILE_STATE.ERROR);
+                FileRejected?.Invoke(fileName, ipAddr, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND);
             }
 
             finally
             {
                 if (fs != null)
                     fs.Close();
-                releaseResources(sender);
+                ReleaseResources(sender);
             }
         }
 
-        private void releaseResources(Socket s)
+        private void ReleaseResources(Socket s)
         {
             try
             {
@@ -204,13 +211,13 @@ namespace EasyShare
 
 
         public delegate void myDelegate(string filename, Socket sock, int percentage, string remainingTime);
-        public static event myDelegate updateProgress;
+        public static event myDelegate UpdateProgress;
 
         public delegate void myDelegate1(string fileName, string username, Constants.NOTIFICATION_STATE state);
-        public static event myDelegate1 fileRejected;
+        public static event myDelegate1 FileRejected;
 
         public delegate void myDelegate2(Socket sock, Constants.FILE_STATE state);
-        public static event myDelegate2 updateFileState;
+        public static event myDelegate2 UpdateFileState;
     }
 
 }

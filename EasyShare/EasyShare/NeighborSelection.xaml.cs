@@ -16,60 +16,52 @@ namespace EasyShare
     public partial class NeighborSelection : MetroWindow
     {
         public delegate void del(List<SendingFile> sf);
-        public static event del sendSelectedNeighbors;
+        public static event del SendSelectedNeighbors;
 
         public delegate void myDelegate();
-        public static event myDelegate closingSelection;
+        public static event myDelegate ClosingSelection;
 
         private Boolean acceso;
 
-        public ObservableCollection<Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
         public bool Acceso { get => acceso; set => acceso = value; }
         public ObservableCollection<string> FileList { get => fileList; set => fileList = value; }
 
-        private ObservableCollection<Neighbor> neighbors;
         private ObservableCollection<String> fileList;
 
         public NeighborSelection()
         {
             InitializeComponent();
             DataContext = this;
-            NeighborProtocol n = NeighborProtocol.getInstance;
-            NeighborProtocol.neighborsEvent += modify_neighbors;
-            Neighbors = new ObservableCollection<Neighbor>();
+            NeighborProtocol n = NeighborProtocol.GetInstance;
             FileList = new ObservableCollection<String>();
-            listNeighborSelection.ItemsSource = Neighbors;
+            listNeighborSelection.ItemsSource = n.Neighbors;
             Closing += NeighborSelection_Closing;
             Acceso = false;
         }
 
         private void NeighborSelection_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (closingSelection != null)
-                closingSelection();
+            ClosingSelection?.Invoke();
             e.Cancel = true;
-            //WindowState = WindowState.Minimized;
             Hide();
         }
 
-
-
-        private void button_send_files(object sender, RoutedEventArgs e)
+        private void Button_send_files(object sender, RoutedEventArgs e)
         {
-            List<Neighbor> selected = null;
+            List<KeyValuePair<string, Neighbor>> selected = null;
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
-                selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
+                selected = listNeighborSelection.SelectedItems.Cast<KeyValuePair<string, Neighbor>>().ToList();
                 foreach (String file in FileList)
                 {
                     sendingFiles = new List<SendingFile>();
-                    foreach (Neighbor n in selected)
+                    foreach (KeyValuePair<string, Neighbor> n in selected)
                     {
-                        SendingFile sf = new SendingFile(n.NeighborIp, n.NeighborName, file, n.NeighborImage);
+                        SendingFile sf = new SendingFile(n.Value, file);
                         sendingFiles.Add(sf);
                     }
-                    sendSelectedNeighbors(sendingFiles);
+                    SendSelectedNeighbors(sendingFiles);
                 }
                 Acceso = false;
                 Hide();
@@ -77,34 +69,6 @@ namespace EasyShare
             else
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
         }
-
-        public void modify_neighbors(string id, byte[] bytes, bool addOrRemove)
-        {
-            bool isPresent = false;
-            //AddOrRemove = true per neighbor da aggiungere e false da cancellare
-            foreach (Neighbor n in Neighbors)
-            {
-                if (String.Compare(id, n.NeighborName + "@" + n.NeighborIp) == 0)
-                {
-                    isPresent = true;
-                    if (!addOrRemove)
-                        Application.Current.Dispatcher.Invoke(new Action(() =>
-                        {
-                            Neighbors.Remove(n);
-                        }));
-                    break;
-                }
-            }
-            if (addOrRemove && !isPresent)
-                Application.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    Neighbor n1 = new Neighbor(id, bytes);
-                    Neighbors.Add(n1);
-                }));
-        }
-
-
-
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {

@@ -9,7 +9,7 @@
         ShowCloseButton="False"
         ResizeMode="NoResize"
         Name="renamingFileWindow"
-        Height="200" Width="350" BorderThickness="0" GlowBrush="Black">
+        Height="200" Width="350" BorderThickness="0" GlowBrush="Black" MinWidth="350" MinHeight="200">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -23,7 +23,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Name="motivationTextBlock" Grid.Column="0" FontSize="16" TextTrimming="CharacterEllipsis" Margin="5"/>
-        <TextBlock Grid.Row="0" Name="block" Text="esiste già" Grid.Column="1" FontSize="16"  Margin="5"/>
+        <TextBlock Grid.Row="0" Name="block" Text="esiste già" Grid.Column="1" FontSize="16"  Margin="10"/>
         <TextBlock Grid.Column="0"  Grid.Row="1" Name="actionTextBlock" Margin="5" FontSize="16"/>
         <TextBox Grid.Column="0" Grid.Row="2" Height="30" Name="newNameTextBox" Margin="5" MaxLength="100" FontSize="16"
                           AcceptsReturn="False" AcceptsTab="False" Width="220" MaxWidth="220" HorizontalAlignment="Left"/>

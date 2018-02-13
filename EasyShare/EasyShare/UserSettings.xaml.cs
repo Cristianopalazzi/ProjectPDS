@@ -12,7 +12,7 @@ namespace EasyShare
         public UserSettings()
         {
             InitializeComponent();
-            settings = Settings.getInstance;
+            settings = Settings.GetInstance;
             Left = SystemParameters.WorkArea.Right - Width;
             Top = SystemParameters.WorkArea.Bottom - Height;
             if (settings.Online)
@@ -20,26 +20,18 @@ namespace EasyShare
             else
                 bottoneOnline.Content = "Privato";
             Closing += UserSettings_Closing;
-            Deactivated += UserSettings_Deactivated;
         }
-
-        private void UserSettings_Deactivated(object sender, EventArgs e)
-        {
-
-        }
-
         private void UserSettings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Settings.writeSettings(settings);
+            Settings.WriteSettings(settings);
             e.Cancel = true;
             WindowState = WindowState.Minimized;
             Hide();
         }
 
-        public void openSettings(object sender, EventArgs e)
+        public void OpenSettings(object sender, EventArgs e)
         {
-            if (openTabSettings != null)
-                openTabSettings();
+            OpenTabSettings?.Invoke();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -48,7 +40,7 @@ namespace EasyShare
             {
                 settings.Online = false;
                 bottoneOnline.Content = "Privato";
-                NeighborProtocol.getInstance.quitMe();
+                NeighborProtocol.GetInstance.QuitMe();
                 NeighborProtocol.senderEvent.Reset();
             }
             else
@@ -57,10 +49,10 @@ namespace EasyShare
                 bottoneOnline.Content = "Pubblico";
                 NeighborProtocol.senderEvent.Set();
             }
-            Settings.writeSettings(settings);
+            Settings.WriteSettings(settings);
         }
         private Settings settings;
         public delegate void myDelegate();
-        public static event myDelegate openTabSettings;
+        public static event myDelegate OpenTabSettings;
     }
 }

@@ -6,7 +6,6 @@ using System.Net;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
 using System.Diagnostics;
 
 namespace EasyShare
@@ -15,16 +14,16 @@ namespace EasyShare
     {
         public Receiver()
         {
-            settings = Settings.getInstance;
-            server = new Thread(startServer)
+            settings = Settings.GetInstance;
+            server = new Thread(StartServer)
             {
                 Name = "server",
-                IsBackground = true 
+                IsBackground = true
             };
             server.Start();
         }
 
-        private void startServer()
+        private void StartServer()
         {
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
             Socket listener = null;
@@ -38,11 +37,10 @@ namespace EasyShare
 
                 while (true)
                 {
-                    Console.WriteLine("Waiting for a connection...");
                     Socket handler = listener.Accept();
-                    Thread myThread = new Thread(() => receiveFromSocket(handler));
+                    Thread myThread = new Thread(() => ReceiveFromSocket(handler));
                     myThread.SetApartmentState(ApartmentState.STA);
-                    myThread.IsBackground = true; 
+                    myThread.IsBackground = true;
                     myThread.Start();
                 }
             }
@@ -68,26 +66,26 @@ namespace EasyShare
 
         }
 
-        private void receiveFromSocket(Socket handler)
+        private void ReceiveFromSocket(Socket handler)
         {
             handler.ReceiveTimeout = 2500;
             handler.SendTimeout = 2500;
             string zipLocation = String.Empty, fileNameString = String.Empty, ipSender = String.Empty, id = String.Empty;
             ZipArchive archive = null;
-            int temp = 0;
+            long temp = 0;
             long zipFileSize = 0;
             FileStream fs = null;
             string user = String.Empty;
+            bool zipToDelete = true;
             try
             {
-                SocketError sockError;
                 int received = 0;
                 ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
-                user = NeighborProtocol.getInstance.getUserFromIp(ipSender);
+                user = NeighborProtocol.GetInstance.GetUserFromIp(ipSender);
                 if (String.IsNullOrEmpty(user))
                     user = Constants.UTENTE_ANONIMO;
                 byte[] command = new byte[Constants.FILE_COMMAND.Length];
-                received = handler.Receive(command, 0, command.Length, SocketFlags.None, out sockError);
+                received = handler.Receive(command, 0, command.Length, SocketFlags.None, out SocketError sockError);
 
                 if (sockError != SocketError.Success)
                     throw new SocketException();
@@ -122,8 +120,7 @@ namespace EasyShare
                 {
                     byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
                     string adjustedSize = SizeSuffix(fileSize);
-                    if (acceptance != null)
-                        acceptance(user, fileNameString, adjustedSize, id);
+                    Acceptance?.Invoke(user, fileNameString, adjustedSize, id);
 
                     while (mre.WaitOne())
                         if (String.Compare(Receiver.idFileToAccept, id) == 0)
@@ -142,7 +139,7 @@ namespace EasyShare
                         handler.Send(responseToClient, 0, responseToClient.Length, SocketFlags.None, out sockError);
                         if (sockError != SocketError.Success)
                             throw new SocketException();
-                        releaseResources(handler);
+                        ReleaseResources(handler);
                         return;
                     }
                 }
@@ -176,44 +173,41 @@ namespace EasyShare
                 if (sockError != SocketError.Success)
                     throw new SocketException();
                 string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
-                zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
+
+                zipLocation = App.defaultFolder + "\\" + zipFileName;
+                if (File.Exists(zipLocation))
+                {
+                    zipToDelete = false;
+                    handler.Send(Encoding.ASCII.GetBytes(Constants.DECLINE_FILE), 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
+                    if (sockError != SocketError.Success)
+                        throw new SocketException();
+                    return;
+                }
+
+                handler.Send(Encoding.ASCII.GetBytes(Constants.ACCEPT_FILE), 0, Constants.ACCEPT_FILE.Length, SocketFlags.None, out sockError);
+                if (sockError != SocketError.Success)
+                    throw new SocketException();
+
+                fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
 
                 string senderID = user + "@" + ipSender;
-                byte[] image;
-                JpegBitmapEncoder encoder = new JpegBitmapEncoder();
-                if (NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor ne))
-                {
-                    if (ne.NeighborImage == null)
-                        ne.setImage(File.ReadAllBytes(App.currentDirectoryResources + "/guest.png"));
-                    encoder.Frames.Add(BitmapFrame.Create(ne.NeighborImage));
-                }
-                else
-                {
-                    BitmapImage bitmap = Neighbor.ToImage(File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
-                    encoder.Frames.Add(BitmapFrame.Create(bitmap));
-                }
+                if (!NeighborProtocol.GetInstance.Neighbors.TryGetValue(senderID, out Neighbor neighbor))
+                    neighbor = new Neighbor(senderID, File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
 
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    encoder.Save(ms);
-                    image = ms.ToArray();
-                    ms.Close();
-                }
-                if (updateReceivingFiles != null)
-                    updateReceivingFiles(senderID, image, fileNameString, id);
+                ReceivingFile rf1 = new ReceivingFile(neighbor, fileNameString, id);
+                UpdateReceivingFiles?.Invoke(rf1);
+
+                zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
                 int percentage = 0;
-                zipLocation = App.defaultFolder + "\\" + zipFileName;
-                fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
+
                 byte[] data = new byte[Constants.PACKET_SIZE];
                 int bytesRec = 0;
 
                 while (temp < zipFileSize)
                 {
                     if (zipFileSize - temp > Constants.PACKET_SIZE)
-                    {
                         bytesRec = handler.Receive(data, 0, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
-                    }
-                    else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
+                    else bytesRec = handler.Receive(data, 0, (int)(zipFileSize - temp), SocketFlags.None, out sockError);
 
                     if (sockError == SocketError.Success)
                     {
@@ -224,17 +218,12 @@ namespace EasyShare
                         int tempPercentage = (int)(temporary / (ulong)zipFileSize);
                         if (tempPercentage > percentage)
                         {
-                            if (updateProgress != null)
-                                updateProgress(id, tempPercentage);
+                            UpdateProgress?.Invoke(id, tempPercentage);
                             percentage = tempPercentage;
                         }
                     }
                     else
-                    {
-                        if (fs != null)
-                            fs.Close();
                         throw new SocketException();
-                    }
 
                     if (bytesRec == 0)
                         break;
@@ -242,21 +231,19 @@ namespace EasyShare
 
                 if (temp != zipFileSize)
                 {
-                    if (fileCancel != null)
-                        fileCancel(id, Constants.NOTIFICATION_STATE.CANCELED);
+                    FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.CANCELED);
                     fs.Close();
-                    releaseResources(handler);
+                    ReleaseResources(handler);
                     return;
                 }
                 fs.Close();
 
-
-                if (Settings.getInstance.AutoRename)
-                    overwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user, id);
+                if (Settings.GetInstance.AutoRename)
+                    OverwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user, id);
                 else
                 {
                     string str = String.Empty;
-                    RenamingFile rf = null;
+                    RenamingFile rf = new RenamingFile();
                     if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
                     {
                         archive = ZipFile.OpenRead(zipLocation);
@@ -265,7 +252,7 @@ namespace EasyShare
                             str = String.Empty;
                             if (File.Exists(currentDirectory + "\\" + entry.Name))
                             {
-                                rf = new RenamingFile(entry.Name, currentDirectory, 0);
+                                rf.SetFields(entry.Name, currentDirectory, 0);
                                 rf.ShowDialog();
                                 if (String.IsNullOrEmpty(rf.NewName))
                                     throw new Exception();
@@ -279,7 +266,7 @@ namespace EasyShare
                     {
                         if (Directory.Exists(currentDirectory + "\\" + fileNameString))
                         {
-                            rf = new RenamingFile(fileNameString, currentDirectory, 1);
+                            rf.SetFields(fileNameString, currentDirectory, 1);
                             rf.ShowDialog();
                             if (String.IsNullOrEmpty(rf.NewName))
                                 throw new Exception();
@@ -290,15 +277,22 @@ namespace EasyShare
                     }
                 }
             }
+
             catch (SocketException e)
             {
+                Console.WriteLine("Receiver");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 Console.WriteLine(e.SocketErrorCode);
+
                 if (zipFileSize == 0)
-                    if (receivingFailure != null)
-                        receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
-                    else
-                    if (fileCancel != null)
-                        fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
+                    ReceivingFailure?.Invoke(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
+                else
+                    FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.REC_ERROR);
             }
             catch (Exception e)
             {
@@ -309,8 +303,7 @@ namespace EasyShare
                 // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                if (receivingFailure != null)
-                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                ReceivingFailure?.Invoke(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
             }
             finally
             {
@@ -319,13 +312,13 @@ namespace EasyShare
                 if (archive != null)
                     archive.Dispose();
                 if (!String.IsNullOrEmpty(zipLocation))
-                    if (File.Exists(zipLocation))
+                    if (File.Exists(zipLocation) && zipToDelete)
                         File.Delete(zipLocation);
-                releaseResources(handler);
+                ReleaseResources(handler);
             }
         }
 
-        private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user,string id)
+        private void OverwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user, string id)
         {
             string str = String.Empty;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
@@ -345,15 +338,14 @@ namespace EasyShare
                             str = currentDirectory + "\\" + onlyName + user + timeStamp + extension;
                         }
                     }
-                  
+
                     try
                     {
                         entry.ExtractToFile(str, true);
                     }
                     catch (PathTooLongException)
                     {
-                        if (fileCancel != null)
-                            fileCancel(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                        FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
 
 
                     }
@@ -372,16 +364,15 @@ namespace EasyShare
                         str += timeStamp;
                     }
                 }
-               
+
                 try
                 {
-                    ZipFile.ExtractToDirectory(zipLocation, str); 
+                    ZipFile.ExtractToDirectory(zipLocation, str);
                 }
                 catch (PathTooLongException)
                 {
                     Directory.Delete(str, true);
-                    if (fileCancel != null)
-                        fileCancel(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                    FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
 
                 }
             }
@@ -403,7 +394,7 @@ namespace EasyShare
             return string.Format("{0:n" + 2 + "} {1}", adjustedSize, SizeSuffixes[mag]);
         }
 
-        private void releaseResources(Socket sock)
+        private void ReleaseResources(Socket sock)
         {
             try
             {
@@ -435,19 +426,19 @@ namespace EasyShare
         public static ManualResetEvent mre = new ManualResetEvent(false);
 
         public delegate void myDelegate(string id, int percentage);
-        public static event myDelegate updateProgress;
+        public static event myDelegate UpdateProgress;
 
-        public delegate void myDelegate1(string senderID, byte[] image, string fileName, string id);
-        public static event myDelegate1 updateReceivingFiles;
+        public delegate void myDelegate1(ReceivingFile rf);
+        public static event myDelegate1 UpdateReceivingFiles;
 
         public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);
-        public static event myDelegate2 fileCancel;
+        public static event myDelegate2 FileCancel;
 
         public delegate void myDelegate4(string fileName, string userName, Constants.NOTIFICATION_STATE state);
-        public static event myDelegate4 receivingFailure;
+        public static event myDelegate4 ReceivingFailure;
 
         public delegate void myDelegate5(string userName, string fileName, string dimension, string id);
-        public static event myDelegate5 acceptance;
+        public static event myDelegate5 Acceptance;
 
         public static string idFileToAccept = String.Empty;
         public static bool accepted = false;

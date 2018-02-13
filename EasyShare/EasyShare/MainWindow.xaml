@@ -11,6 +11,7 @@
         BorderThickness="0"
         Name="myMainWindow"
         MinWidth="650"
+        MinHeight="350"
         >
     <Grid >
         <TabControl Name="tabControl"  Width="Auto" >
@@ -19,8 +20,8 @@
 
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Rimuovi" Click="receiving_files_menu_delete_click"/>
-                            <MenuItem Header="Rimuovi i completati" Click="receiving_files_menu_all_delete_click"/>
+                            <MenuItem Header="Rimuovi" Click="Receiving_files_menu_delete_click"/>
+                            <MenuItem Header="Rimuovi i completati" Click="Receiving_files_menu_all_delete_click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
 
@@ -121,8 +122,8 @@
 
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Rimuovi" Click="sending_files_menu_delete_click"/>
-                            <MenuItem Header="Rimuovi i completati" Click="sending_files_menu_all_delete_click"/>
+                            <MenuItem Header="Rimuovi" Click="Sending_files_menu_delete_click"/>
+                            <MenuItem Header="Rimuovi i completati" Click="Sending_files_menu_all_delete_click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
 
@@ -305,10 +306,10 @@
                                     <Image Source="{Binding Pic}" Width="32" Height="32" VerticalAlignment="Center"/>
                                 </Grid>
                             </Grid>
-                            
+
                         </DataTemplate>
                     </ListView.ItemTemplate>
-                    
+
                     <ListView.ItemContainerStyle>
                         <Style  TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -333,7 +334,7 @@
             <TabItem Header="Contatti online" Controls:ControlsHelper.HeaderFontSize="20" >
                 <Grid>
                     <DockPanel LastChildFill="True">
-                        <ListView x:Name="Neighbors" ItemsSource="{Binding NeighborsValues}" HorizontalAlignment="Stretch" VerticalAlignment="Top" DockPanel.Dock="Top">
+                        <ListView x:Name="Neighbors" HorizontalAlignment="Stretch" VerticalAlignment="Top" DockPanel.Dock="Top" SelectedValuePath="Key">
                             <ListView.Resources>
                                 <Style TargetType="GridViewColumnHeader">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -409,13 +410,13 @@
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" HorizontalAlignment="Center" Margin="5"
-                                                 ToolTip="{Binding NeighborName}">
+                                                 ToolTip="{Binding Path = Value.NeighborName}">
                                         <Ellipse Height="64" Width="64" HorizontalAlignment="Center">
                                             <Ellipse.Fill>
-                                                <ImageBrush  ImageSource="{Binding NeighborImage}" />
+                                                <ImageBrush  ImageSource="{Binding Path = Value.NeighborImage}" />
                                             </Ellipse.Fill>
                                         </Ellipse>
-                                        <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom"
+                                        <TextBlock Text="{Binding Path = Value.NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom"
                                                    MaxWidth="80" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </DataTemplate>
@@ -441,7 +442,7 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Impostazioni" Selector.Unselected="tabChanged" Controls:ControlsHelper.HeaderFontSize="20">
+            <TabItem Header="Impostazioni" Selector.Unselected="TabChanged" Controls:ControlsHelper.HeaderFontSize="20">
 
                 <Grid Name="gridSettings" Margin="15">
                     <Grid.RowDefinitions>
@@ -469,7 +470,7 @@
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Directory di default"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
-                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog" Width="30" Height="30"  >
+                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="OpenFolderBrowserDialog" Width="30" Height="30"  >
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" />
                         </Button.Style>

@@ -14,7 +14,7 @@ namespace EasyShare
             Counter = 0;
             neighborImage = null;
             if (bytes != null)
-                setImage(bytes);
+                SetImage(bytes);
         }
 
         public static BitmapImage ToImage(byte[] array)
@@ -23,6 +23,7 @@ namespace EasyShare
             image.BeginInit();
             image.StreamSource = new System.IO.MemoryStream(array);
             image.EndInit();
+            image.Freeze();
             return image;
         }
 
@@ -45,7 +46,7 @@ namespace EasyShare
             get => neighborImage;
         }
 
-        public void setImage(byte[] bytes)
+        public void SetImage(byte[] bytes)
         {
             BitmapImage bitmap = ToImage(bytes);
             if (NeighborImage != bitmap)

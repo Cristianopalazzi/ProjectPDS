@@ -6,12 +6,13 @@ namespace EasyShare
 {
     public class SendingFile : INotifyPropertyChanged
     {
-        public SendingFile(string ipAddress, string name, string fileName, BitmapImage immagine)
+        public SendingFile(Neighbor neighbor, string fileName)
         {
-            IpAddr = ipAddress;
-            Name = name;
+            IpAddr = neighbor.NeighborIp;
+            Name = neighbor.NeighborName;
             FileName = fileName;
-            Immagine = immagine;
+            Immagine = neighbor.NeighborImage;
+            Immagine.Freeze();
             Value = 0.0;
             Sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             File_state = Constants.FILE_STATE.PREPARATION;
