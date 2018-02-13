@@ -19,8 +19,8 @@
 
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Rimuovi" Click="receiving_files_menu_delete_click"/>
-                            <MenuItem Header="Rimuovi i completati" Click="receiving_files_menu_all_delete_click"/>
+                            <MenuItem Header="Rimuovi" Click="Receiving_files_menu_delete_click"/>
+                            <MenuItem Header="Rimuovi i completati" Click="Receiving_files_menu_all_delete_click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
 
@@ -121,8 +121,8 @@
 
                     <ListView.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Header="Rimuovi" Click="sending_files_menu_delete_click"/>
-                            <MenuItem Header="Rimuovi i completati" Click="sending_files_menu_all_delete_click"/>
+                            <MenuItem Header="Rimuovi" Click="Sending_files_menu_delete_click"/>
+                            <MenuItem Header="Rimuovi i completati" Click="Sending_files_menu_all_delete_click"/>
                         </ContextMenu>
                     </ListView.ContextMenu>
 
@@ -441,7 +441,7 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Impostazioni" Selector.Unselected="tabChanged" Controls:ControlsHelper.HeaderFontSize="20">
+            <TabItem Header="Impostazioni" Selector.Unselected="TabChanged" Controls:ControlsHelper.HeaderFontSize="20">
 
                 <Grid Name="gridSettings" Margin="15">
                     <Grid.RowDefinitions>
@@ -469,7 +469,7 @@
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Directory di default"  FontSize="20" Margin="5,5,5,10" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = AutoAccept}"  Grid.Row ="0" Grid.Column="2" Name="CheckAutoAccept" VerticalAlignment="Center"/>
                     <CheckBox Margin ="10,0,0,0" IsChecked ="{Binding Path = DefaultDir}" Grid.Row ="1" Grid.Column="2" Name="CheckDefaultDir" VerticalAlignment="Center"/>
-                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="openFolderBrowserDialog" Width="30" Height="30"  >
+                    <Button Grid.Row="4" Grid.Column="1" Content="..." Margin="10" Click="OpenFolderBrowserDialog" Width="30" Height="30"  >
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource MetroButton}" />
                         </Button.Style>

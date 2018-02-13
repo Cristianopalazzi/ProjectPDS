@@ -23,22 +23,22 @@ namespace EasyShare
         public MainWindow()
         {
             InitializeComponent();
-            sets = Settings.getInstance;
+            sets = Settings.GetInstance;
             gridSettings.DataContext = sets;
             Deactivated += MainWindow_Deactivated;
             Closing += MainWindow_Closing;
 
-            NeighborProtocol.neighborsEvent += modify_neighbors;
-            Sender.updateProgress += updateProgressBar;
-            Sender.updateFileState += Sender_updateFileState;
-            Receiver.updateProgress += updateReceivingProgressBar;
-            Receiver.updateReceivingFiles += updateReceivingFiles;
-            Receiver.fileCancel += file_cancel;
-            Receiver.acceptance += file_to_accept;
-            UserSettings.openTabSettings += tabChange;
-            NeighborSelection.sendSelectedNeighbors += addSendingFiles;
+            NeighborProtocol.NeighborsEvent += Modify_neighbors;
+            Sender.UpdateProgress += UpdateProgressBar;
+            Sender.UpdateFileState += Sender_updateFileState;
+            Receiver.UpdateProgress += UpdateReceivingProgressBar;
+            Receiver.UpdateReceivingFiles += UpdateReceivingFiles;
+            Receiver.FileCancel += File_cancel;
+            Receiver.Acceptance += File_to_accept;
+            UserSettings.OpenTabSettings += TabChange;
+            NeighborSelection.SendSelectedNeighbors += AddSendingFiles;
             Queue.QueueUpdateState += Sender_updateFileState;
-            App.askForExit += App_askForExit;
+            App.AskForExit += App_askForExit;
 
             NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
@@ -54,7 +54,7 @@ namespace EasyShare
         }
 
         //lista dei file in attesa di essere accettati o meno
-        private void file_to_accept(string userName, string fileName, string dimension, string id)
+        private void File_to_accept(string userName, string fileName, string dimension, string id)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -65,7 +65,7 @@ namespace EasyShare
                     acceptance = new Acceptance();
                     acceptance.Show();
                 }
-                acceptance.AcceptingFiles.Add(new Acceptance.fileToAccept(fileName, userName, dimension, id));
+                acceptance.AcceptingFiles.Add(new Acceptance.FileToAccept(fileName, userName, dimension, id));
             }));
         }
 
@@ -91,7 +91,7 @@ namespace EasyShare
         }
 
         //mostro la tab delle impostazioni dopo aver cliccato su "impostazioni"
-        private void tabChange()
+        private void TabChange()
         {
             Show();
             WindowState = WindowState.Normal;
@@ -99,14 +99,14 @@ namespace EasyShare
         }
 
         //aggiungo file da inviare alla lista dopo aver cliccato invia nella finestra di selezione dei vicini
-        private void addSendingFiles(List<SendingFile> sf)
+        private void AddSendingFiles(List<SendingFile> sf)
         {
             foreach (SendingFile s in sf)
                 FilesToSend.Add(s);
         }
 
         //file annullato da parte del sender => aggiorno la lista dei file in ricezione
-        private void file_cancel(string id, Constants.NOTIFICATION_STATE state)
+        private void File_cancel(string id, Constants.NOTIFICATION_STATE state)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
@@ -115,26 +115,8 @@ namespace EasyShare
                     {
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/cross.ico"));
-                        if (state == Constants.NOTIFICATION_STATE.CANCELED)
-                        {
-                            if (triggerBalloon != null)
-                                triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.CANCELED); //2
-                        }
-                        else if (state == Constants.NOTIFICATION_STATE.REC_ERROR)
-                        {
-                            if (triggerBalloon != null)
-                                triggerBalloon(r.Filename, r.Name, Constants.NOTIFICATION_STATE.REC_ERROR); //7
-                        }
-                        else if (state == Constants.NOTIFICATION_STATE.FILE_ERROR_SEND)
-                        {
-                            if (triggerBalloon != null)
-                                triggerBalloon(r.Filename, null, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND);
-                        }
-                        else if (state == Constants.NOTIFICATION_STATE.FILE_ERROR_REC)
-                        {
-                            if (triggerBalloon != null)
-                                triggerBalloon(r.Filename, null, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
-                        }
+                        TriggerBalloon?.Invoke(r.Filename, r.Name, state); // TODO testare
+
                         break;
                     }
             }));
@@ -142,7 +124,7 @@ namespace EasyShare
 
 
         // aggiungo un nuovo file in ricezione alla lista
-        private void updateReceivingFiles(ReceivingFile file)
+        private void UpdateReceivingFiles(ReceivingFile file)
         {
             listReceivingFiles.Dispatcher.Invoke(new Action(() =>
             {
@@ -151,7 +133,7 @@ namespace EasyShare
         }
 
         //aggiorno la progress bar del file in invio
-        private void updateProgressBar(string filename, Socket sock, int percentage, string remainingTime)
+        private void UpdateProgressBar(string filename, Socket sock, int percentage, string remainingTime)
         {
             try
             {
@@ -170,8 +152,7 @@ namespace EasyShare
                                 sf.File_state = Constants.FILE_STATE.COMPLETED;
                                 sf.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
                                 if (WindowState != WindowState.Normal || tabControl.SelectedIndex != 1)
-                                    if (triggerBalloon != null)
-                                        triggerBalloon(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
+                                    TriggerBalloon?.Invoke(sf.FileName, sf.Name, Constants.NOTIFICATION_STATE.SENT); //1
                             }
                             break;
                         }
@@ -192,7 +173,7 @@ namespace EasyShare
         }
 
         //aggiorno la progress bar del file in ricezione
-        private void updateReceivingProgressBar(string id, int percentage)
+        private void UpdateReceivingProgressBar(string id, int percentage)
         {
             try
             {
@@ -207,8 +188,7 @@ namespace EasyShare
                             {
                                 r.File_state = Constants.FILE_STATE.COMPLETED;
                                 r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/check.ico"));
-                                if (triggerBalloon != null)
-                                    triggerBalloon(r.Filename, r.Name, 0);
+                                TriggerBalloon?.Invoke(r.Filename, r.Name, 0);
                                 break;
                             }
                         }
@@ -272,7 +252,7 @@ namespace EasyShare
         }
 
         //context menu sui file in ricezione (cancella un file ricevuto correttamente)
-        private void receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
+        private void Receiving_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (listReceivingFiles.SelectedIndex == -1)
                 return;
@@ -283,7 +263,7 @@ namespace EasyShare
         }
 
         //context menu sui file in ricezione (cancella tutti i file ricevuti correttamente)
-        private void receiving_files_menu_all_delete_click(object sender, RoutedEventArgs e)
+        private void Receiving_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
             List<ReceivingFile> tmp = new List<ReceivingFile>();
             foreach (ReceivingFile rf in FilesToReceive)
@@ -298,7 +278,7 @@ namespace EasyShare
         }
 
         //context menu sui file in invio (cancella un file inviato correttamente)
-        private void sending_files_menu_delete_click(object sender, RoutedEventArgs e)
+        private void Sending_files_menu_delete_click(object sender, RoutedEventArgs e)
         {
             if (sendingFiles.SelectedIndex == -1)
                 return;
@@ -309,7 +289,7 @@ namespace EasyShare
         }
 
         //context menu sui file in invio (cancella tutti i file inviati correttamente)
-        private void sending_files_menu_all_delete_click(object sender, RoutedEventArgs e)
+        private void Sending_files_menu_all_delete_click(object sender, RoutedEventArgs e)
         {
             List<SendingFile> tmp = new List<SendingFile>();
             foreach (SendingFile sf in FilesToSend)
@@ -324,13 +304,13 @@ namespace EasyShare
         }
 
         //aggiorno la lista dei vicini online
-        public void modify_neighbors(Neighbor neighbor, bool addOrRemove)
+        public void Modify_neighbors(Neighbor neighbor, bool addOrRemove)
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare
             foreach (Neighbor n in NeighborsValues)
             {
-                if(String.Compare(neighbor.NeighborIp,n.NeighborIp) == 0 && String.Compare(neighbor.NeighborName,n.NeighborName) == 0)
+                if (String.Compare(neighbor.NeighborIp, n.NeighborIp) == 0 && String.Compare(neighbor.NeighborName, n.NeighborName) == 0)
                 {
                     isPresent = true;
                     if (!addOrRemove)
@@ -346,7 +326,7 @@ namespace EasyShare
         }
 
         //mostro il dialog per scegliere la cartella in cui salvare il file in ricezione
-        public void openFolderBrowserDialog(object sender, EventArgs e)
+        public void OpenFolderBrowserDialog(object sender, EventArgs e)
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
@@ -358,12 +338,12 @@ namespace EasyShare
 
 
         //scrivo su file i settings ogni volta che cambio tab (rispetto a quella delle impostazioni)
-        public void tabChanged(object Sender, EventArgs e)
+        public void TabChanged(object Sender, EventArgs e)
         {
-            Settings.writeSettings(sets);
+            Settings.WriteSettings(sets);
         }
 
-        public bool checkForFilesInProgress()
+        public bool CheckForFilesInProgress()
         {
             foreach (SendingFile sf in FilesToSend)
                 if (sf.File_state == Constants.FILE_STATE.ACCEPTANCE || sf.File_state == Constants.FILE_STATE.PREPARATION || sf.File_state == Constants.FILE_STATE.PROGRESS)
@@ -395,6 +375,6 @@ namespace EasyShare
         public ObservableCollection<ReceivingFile> FilesToReceive { get => filesToReceive; set => filesToReceive = value; }
 
         public delegate void myDelegate(string filename, string username, Constants.NOTIFICATION_STATE state);
-        public static event myDelegate triggerBalloon;
+        public static event myDelegate TriggerBalloon;
     }
 }

@@ -15,8 +15,8 @@ namespace EasyShare
     {
         public Receiver()
         {
-            settings = Settings.getInstance;
-            server = new Thread(startServer)
+            settings = Settings.GetInstance;
+            server = new Thread(StartServer)
             {
                 Name = "server",
                 IsBackground = true
@@ -24,7 +24,7 @@ namespace EasyShare
             server.Start();
         }
 
-        private void startServer()
+        private void StartServer()
         {
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
             Socket listener = null;
@@ -40,7 +40,7 @@ namespace EasyShare
                 {
                     Console.WriteLine("Waiting for a connection...");
                     Socket handler = listener.Accept();
-                    Thread myThread = new Thread(() => receiveFromSocket(handler));
+                    Thread myThread = new Thread(() => ReceiveFromSocket(handler));
                     myThread.SetApartmentState(ApartmentState.STA);
                     myThread.IsBackground = true;
                     myThread.Start();
@@ -68,7 +68,7 @@ namespace EasyShare
 
         }
 
-        private void receiveFromSocket(Socket handler)
+        private void ReceiveFromSocket(Socket handler)
         {
             handler.ReceiveTimeout = 2500;
             handler.SendTimeout = 2500;
@@ -81,14 +81,13 @@ namespace EasyShare
             bool zipToDelete = true;
             try
             {
-                SocketError sockError;
                 int received = 0;
                 ipSender = ((IPEndPoint)handler.RemoteEndPoint).Address.ToString();
-                user = NeighborProtocol.getInstance.getUserFromIp(ipSender);
+                user = NeighborProtocol.GetInstance.GetUserFromIp(ipSender);
                 if (String.IsNullOrEmpty(user))
                     user = Constants.UTENTE_ANONIMO;
                 byte[] command = new byte[Constants.FILE_COMMAND.Length];
-                received = handler.Receive(command, 0, command.Length, SocketFlags.None, out sockError);
+                received = handler.Receive(command, 0, command.Length, SocketFlags.None, out SocketError sockError);
 
                 if (sockError != SocketError.Success)
                     throw new SocketException();
@@ -123,8 +122,7 @@ namespace EasyShare
                 {
                     byte[] responseToClient = new byte[Constants.ACCEPT_FILE.Length];
                     string adjustedSize = SizeSuffix(fileSize);
-                    if (acceptance != null)
-                        acceptance(user, fileNameString, adjustedSize, id);
+                    Acceptance?.Invoke(user, fileNameString, adjustedSize, id);
 
                     while (mre.WaitOne())
                         if (String.Compare(Receiver.idFileToAccept, id) == 0)
@@ -143,7 +141,7 @@ namespace EasyShare
                         handler.Send(responseToClient, 0, responseToClient.Length, SocketFlags.None, out sockError);
                         if (sockError != SocketError.Success)
                             throw new SocketException();
-                        releaseResources(handler);
+                        ReleaseResources(handler);
                         return;
                     }
                 }
@@ -197,12 +195,12 @@ namespace EasyShare
 
 
                 string senderID = user + "@" + ipSender;
-                if (!NeighborProtocol.getInstance.Neighbors.TryGetValue(senderID, out Neighbor neighbor))
+                if (!NeighborProtocol.GetInstance.Neighbors.TryGetValue(senderID, out Neighbor neighbor))
                     neighbor = new Neighbor(senderID, File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
-                if (updateReceivingFiles != null)
+                if (UpdateReceivingFiles != null)
                 {
                     ReceivingFile rf = new ReceivingFile(neighbor, fileNameString, id);
-                    updateReceivingFiles(rf);
+                    UpdateReceivingFiles(rf);
                 }
                 int percentage = 0;
 
@@ -226,8 +224,7 @@ namespace EasyShare
                         int tempPercentage = (int)(temporary / (ulong)zipFileSize);
                         if (tempPercentage > percentage)
                         {
-                            if (updateProgress != null)
-                                updateProgress(id, tempPercentage);
+                            UpdateProgress?.Invoke(id, tempPercentage);
                             percentage = tempPercentage;
                         }
                     }
@@ -244,17 +241,16 @@ namespace EasyShare
 
                 if (temp != zipFileSize)
                 {
-                    if (fileCancel != null)
-                        fileCancel(id, Constants.NOTIFICATION_STATE.CANCELED);
+                    FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.CANCELED);
                     fs.Close();
-                    releaseResources(handler);
+                    ReleaseResources(handler);
                     return;
                 }
                 fs.Close();
 
 
-                if (Settings.getInstance.AutoRename)
-                    overwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user, id);
+                if (Settings.GetInstance.AutoRename)
+                    OverwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user, id);
                 else
                 {
                     string str = String.Empty;
@@ -267,7 +263,7 @@ namespace EasyShare
                             str = String.Empty;
                             if (File.Exists(currentDirectory + "\\" + entry.Name))
                             {
-                                rf.setFields(entry.Name, currentDirectory, 0);
+                                rf.SetFields(entry.Name, currentDirectory, 0);
                                 rf.ShowDialog();
                                 if (String.IsNullOrEmpty(rf.NewName))
                                     throw new Exception();
@@ -281,7 +277,7 @@ namespace EasyShare
                     {
                         if (Directory.Exists(currentDirectory + "\\" + fileNameString))
                         {
-                            rf.setFields(fileNameString, currentDirectory, 1);
+                            rf.SetFields(fileNameString, currentDirectory, 1);
                             rf.ShowDialog();
                             if (String.IsNullOrEmpty(rf.NewName))
                                 throw new Exception();
@@ -296,11 +292,10 @@ namespace EasyShare
             {
                 Console.WriteLine(e.SocketErrorCode);
                 if (zipFileSize == 0)
-                    if (receivingFailure != null)
-                        receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
+                    if (ReceivingFailure != null)
+                        ReceivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
                     else
-                    if (fileCancel != null)
-                        fileCancel(id, Constants.NOTIFICATION_STATE.REC_ERROR);
+                        FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.REC_ERROR);
             }
             catch (Exception e)
             {
@@ -311,8 +306,7 @@ namespace EasyShare
                 // Get the line number from the stack frame
                 var line = frame.GetFileLineNumber();
                 Console.WriteLine("Error at line {0} ", line);
-                if (receivingFailure != null)
-                    receivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                ReceivingFailure?.Invoke(fileNameString, ipSender, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
             }
             finally
             {
@@ -323,11 +317,11 @@ namespace EasyShare
                 if (!String.IsNullOrEmpty(zipLocation))
                     if (File.Exists(zipLocation) && zipToDelete)
                         File.Delete(zipLocation);
-                releaseResources(handler);
+                ReleaseResources(handler);
             }
         }
 
-        private void overwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user, string id)
+        private void OverwriteFileName(string commandString, string fileNameString, string zipLocation, string currentDirectory, string user, string id)
         {
             string str = String.Empty;
             if (String.Compare(commandString, Constants.FILE_COMMAND) == 0)
@@ -354,8 +348,7 @@ namespace EasyShare
                     }
                     catch (PathTooLongException)
                     {
-                        if (fileCancel != null)
-                            fileCancel(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                        FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
 
 
                     }
@@ -382,8 +375,7 @@ namespace EasyShare
                 catch (PathTooLongException)
                 {
                     Directory.Delete(str, true);
-                    if (fileCancel != null)
-                        fileCancel(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
+                    FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.FILE_ERROR_REC);
 
                 }
             }
@@ -405,7 +397,7 @@ namespace EasyShare
             return string.Format("{0:n" + 2 + "} {1}", adjustedSize, SizeSuffixes[mag]);
         }
 
-        private void releaseResources(Socket sock)
+        private void ReleaseResources(Socket sock)
         {
             try
             {
@@ -437,19 +429,19 @@ namespace EasyShare
         public static ManualResetEvent mre = new ManualResetEvent(false);
 
         public delegate void myDelegate(string id, int percentage);
-        public static event myDelegate updateProgress;
+        public static event myDelegate UpdateProgress;
 
         public delegate void myDelegate1(ReceivingFile rf);
-        public static event myDelegate1 updateReceivingFiles;
+        public static event myDelegate1 UpdateReceivingFiles;
 
         public delegate void myDelegate2(string id, Constants.NOTIFICATION_STATE state);
-        public static event myDelegate2 fileCancel;
+        public static event myDelegate2 FileCancel;
 
         public delegate void myDelegate4(string fileName, string userName, Constants.NOTIFICATION_STATE state);
-        public static event myDelegate4 receivingFailure;
+        public static event myDelegate4 ReceivingFailure;
 
         public delegate void myDelegate5(string userName, string fileName, string dimension, string id);
-        public static event myDelegate5 acceptance;
+        public static event myDelegate5 Acceptance;
 
         public static string idFileToAccept = String.Empty;
         public static bool accepted = false;

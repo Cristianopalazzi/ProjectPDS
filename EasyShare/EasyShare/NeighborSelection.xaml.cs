@@ -16,10 +16,10 @@ namespace EasyShare
     public partial class NeighborSelection : MetroWindow
     {
         public delegate void del(List<SendingFile> sf);
-        public static event del sendSelectedNeighbors;
+        public static event del SendSelectedNeighbors;
 
         public delegate void myDelegate();
-        public static event myDelegate closingSelection;
+        public static event myDelegate ClosingSelection;
 
         private Boolean acceso;
 
@@ -34,8 +34,8 @@ namespace EasyShare
         {
             InitializeComponent();
             DataContext = this;
-            NeighborProtocol n = NeighborProtocol.getInstance;
-            NeighborProtocol.neighborsEvent += modify_neighbors;
+            NeighborProtocol n = NeighborProtocol.GetInstance;
+            NeighborProtocol.NeighborsEvent += Modify_neighbors;
             Neighbors = new ObservableCollection<Neighbor>();
             FileList = new ObservableCollection<String>();
             listNeighborSelection.ItemsSource = Neighbors;
@@ -45,8 +45,7 @@ namespace EasyShare
 
         private void NeighborSelection_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (closingSelection != null)
-                closingSelection();
+            ClosingSelection?.Invoke();
             e.Cancel = true;
             //WindowState = WindowState.Minimized;
             Hide();
@@ -54,7 +53,7 @@ namespace EasyShare
 
 
 
-        private void button_send_files(object sender, RoutedEventArgs e)
+        private void Button_send_files(object sender, RoutedEventArgs e)
         {
             List<Neighbor> selected = null;
             List<SendingFile> sendingFiles = null;
@@ -69,7 +68,7 @@ namespace EasyShare
                         SendingFile sf = new SendingFile(n, file);
                         sendingFiles.Add(sf);
                     }
-                    sendSelectedNeighbors(sendingFiles);
+                    SendSelectedNeighbors(sendingFiles);
                 }
                 Acceso = false;
                 Hide();
@@ -78,7 +77,7 @@ namespace EasyShare
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
         }
 
-        public void modify_neighbors(Neighbor neighbor, bool addOrRemove)
+        public void Modify_neighbors(Neighbor neighbor, bool addOrRemove)
         {
             bool isPresent = false;
             //AddOrRemove = true per neighbor da aggiungere e false da cancellare

@@ -58,7 +58,7 @@ namespace EasyShare
             EnableNotification = true;
         }
 
-        public static Settings getInstance
+        public static Settings GetInstance
         {
             get
             {
@@ -69,7 +69,7 @@ namespace EasyShare
                         if (instance == null)
                         {
                             instance = new Settings();
-                            readSettings();
+                            ReadSettings();
                         }
                     }
                 }
@@ -79,7 +79,7 @@ namespace EasyShare
 
 
 
-        private static void readSettings()
+        private static void ReadSettings()
         {
             if (File.Exists(App.defaultResourcesFolder + "\\" + Constants.SETTINGS))
             {
@@ -94,7 +94,7 @@ namespace EasyShare
         }
 
 
-        public static void writeSettings(Settings values)
+        public static void WriteSettings(Settings values)
         {
             using (FileStream s = new FileStream(App.defaultResourcesFolder + "\\" + Constants.SETTINGS, FileMode.Create))
             {

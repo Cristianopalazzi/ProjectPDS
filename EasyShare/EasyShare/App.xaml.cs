@@ -33,13 +33,13 @@ namespace EasyShare
             {
                 Environment.Exit(0);
             }
-            Queue.openNeighbors += neighbor_selection;
-            Queue.QueueBalloon += createBalloons;
-            Sender.fileRejected += createBalloons;
-            EasyShare.MainWindow.triggerBalloon += createBalloons;
+            Queue.OpenNeighbors += Neighbor_selection;
+            Queue.QueueBalloon += CreateBalloons;
+            Sender.FileRejected += CreateBalloons;
+            EasyShare.MainWindow.TriggerBalloon += CreateBalloons;
             SystemEvents.SessionEnded += SystemEvents_SessionEnded;
-            Receiver.receivingFailure += createBalloons;
-            NeighborSelection.closingSelection += NeighborSelection_closingSelection;
+            Receiver.ReceivingFailure += CreateBalloons;
+            NeighborSelection.ClosingSelection += NeighborSelection_closingSelection;
 
             if (Directory.Exists(defaultFolder))
                 foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
@@ -47,16 +47,16 @@ namespace EasyShare
             else Directory.CreateDirectory(defaultFolder);
 
 
-            s = Settings.getInstance;
+            s = Settings.GetInstance;
             queue = new Queue();
-            n = NeighborProtocol.getInstance;
+            n = NeighborProtocol.GetInstance;
             r = new Receiver();
             mw = new MainWindow();
             ns = new NeighborSelection();
             us = new UserSettings();
 
             nIcon = new System.Windows.Forms.NotifyIcon();
-            initializeNotifyIcon();
+            InitializeNotifyIcon();
         }
 
         private void NeighborSelection_closingSelection()
@@ -66,16 +66,16 @@ namespace EasyShare
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
         {
-            n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
+            n.QuitMe(); nIcon.Dispose(); Settings.WriteSettings(Settings.GetInstance);
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
             //Thread.Sleep(350);
             App.Current.Shutdown();
         }
 
-        private void createBalloons(string fileName, string userName, Constants.NOTIFICATION_STATE state)
+        private void CreateBalloons(string fileName, string userName, Constants.NOTIFICATION_STATE state)
         {
-            if (!Settings.getInstance.EnableNotification) return;
+            if (!Settings.GetInstance.EnableNotification) return;
             switch (state)
             {
                 case Constants.NOTIFICATION_STATE.RECEIVED:
@@ -120,7 +120,7 @@ namespace EasyShare
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
-                        string user = NeighborProtocol.getInstance.getUserFromIp(userName);
+                        string user = NeighborProtocol.GetInstance.GetUserFromIp(userName);
                         string text = "Errore nella connessione con l'host";
                         if (!String.IsNullOrEmpty(user))
                             text = String.Concat(text, ": " + user);
@@ -132,7 +132,7 @@ namespace EasyShare
                     {
                         nIcon.BalloonTipTitle = fileName;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
-                        string user = NeighborProtocol.getInstance.getUserFromIp(userName);
+                        string user = NeighborProtocol.GetInstance.GetUserFromIp(userName);
                         string text = "Errore durante l'invio ";
                         if (!String.IsNullOrEmpty(user))
                             text = String.Concat(text, "a: " + user);
@@ -184,7 +184,7 @@ namespace EasyShare
             }
         }
 
-        private void initializeNotifyIcon()
+        private void InitializeNotifyIcon()
         {
             nIcon.Icon = new System.Drawing.Icon(currentDirectoryResources + "/share.ico");
             System.Windows.Forms.MenuItem item1 = new System.Windows.Forms.MenuItem();
@@ -211,13 +211,13 @@ namespace EasyShare
 
             item5.Click += delegate
             {
-                bool filesInProgress = mw.checkForFilesInProgress();
+                bool filesInProgress = mw.CheckForFilesInProgress();
                 if (filesInProgress)
-                    if (askForExit != null)
-                        if (!askForExit())
+                    if (AskForExit != null)
+                        if (!AskForExit())
                             return;
 
-                n.quitMe(); nIcon.Dispose(); Settings.writeSettings(Settings.getInstance);
+                n.QuitMe(); nIcon.Dispose(); Settings.WriteSettings(Settings.GetInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
                 //TODO confermare cancellazione e poi chiusura come soluzione
@@ -246,7 +246,7 @@ namespace EasyShare
             }
         }
 
-        private void neighbor_selection(string file)
+        private void Neighbor_selection(string file)
         {
             Dispatcher.Invoke(new Action(() =>
             {
@@ -257,7 +257,7 @@ namespace EasyShare
                 }
                 else
                 {
-                    NeighborProtocol.getInstance.clean();
+                    NeighborProtocol.GetInstance.Clean();
                     ns.listNeighborSelection.UnselectAll();
                     ns.FileList.Clear();
                     ns.Acceso = true;
@@ -273,6 +273,6 @@ namespace EasyShare
         }
 
         public delegate bool myDelegate();
-        public static event myDelegate askForExit;
+        public static event myDelegate AskForExit;
     }
 }

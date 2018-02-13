@@ -13,16 +13,16 @@ namespace EasyShare
     {
         public Queue()
         {
-            NeighborSelection.sendSelectedNeighbors += receive_selected_neighbors;
+            NeighborSelection.SendSelectedNeighbors += Receive_selected_neighbors;
             filesToSend = new BlockingCollection<List<SendingFile>>();
             cachingFiles = new Dictionary<string, ZipInfo>();
-            threadPipe = new Thread(listenOnPipe)
+            threadPipe = new Thread(ListenOnPipe)
             {
                 Name = "ThreadPipe",
                 IsBackground = true
             };
             threadPipe.Start();
-            waitOnTake = new Thread(listenOnQueue)
+            waitOnTake = new Thread(ListenOnQueue)
             {
                 Name = "waitOnTake",
                 IsBackground = true
@@ -30,7 +30,7 @@ namespace EasyShare
             waitOnTake.Start();
         }
 
-        private void listenOnPipe()
+        private void ListenOnPipe()
         {
             NamedPipeServerStream pipeServer = null;
             StreamReader sr = null;
@@ -44,15 +44,14 @@ namespace EasyShare
                     string file = sr.ReadLine();
                     if (pipeServer.IsConnected)
                         pipeServer.Disconnect();
-                    if (openNeighbors != null)
-                        openNeighbors(file);
+                    OpenNeighbors?.Invoke(file);
                 }
             }
             catch
             {
                 if (sr != null)
                     sr.Close();
-                listenOnPipe();
+                ListenOnPipe();
             }
             finally
             {
@@ -61,7 +60,7 @@ namespace EasyShare
             }
         }
 
-        public void listenOnQueue()
+        public void ListenOnQueue()
         {
             while (true)
             {
@@ -70,14 +69,14 @@ namespace EasyShare
                 string pathFile = sf[0].FileName;
 
                 if (!cachingFiles.ContainsKey(pathFile))
-                    zipInfo = createZip(pathFile);
+                    zipInfo = CreateZip(pathFile);
 
                 else
                 {
-                    if (fileChanged(pathFile))
+                    if (FileChanged(pathFile))
                     {
                         cachingFiles.Remove(pathFile);
-                        zipInfo = createZip(pathFile);
+                        zipInfo = CreateZip(pathFile);
                     }
                     else zipInfo = cachingFiles[pathFile];
                 }
@@ -94,7 +93,7 @@ namespace EasyShare
                 {
                     Thread t = new Thread(() =>
                     {
-                        sender.sendFile(s.IpAddr, s.FileName, s.Sock, zipInfo);
+                        sender.SendFile(s.IpAddr, s.FileName, s.Sock, zipInfo);
                     })
                     {
                         Name = "thread che manda " + s.FileName + " a  " + s.Name,
@@ -105,13 +104,13 @@ namespace EasyShare
             }
         }
 
-        private void receive_selected_neighbors(List<SendingFile> sendingFiles)
+        private void Receive_selected_neighbors(List<SendingFile> sendingFiles)
         {
             if (sendingFiles != null)
                 filesToSend.Add(sendingFiles);
         }
 
-        private ZipInfo createZip(string pathFile)
+        private ZipInfo CreateZip(string pathFile)
         {
             string zipLocation = String.Empty;
             try
@@ -154,7 +153,7 @@ namespace EasyShare
             
         }
 
-        private bool fileChanged(string pathFile)
+        private bool FileChanged(string pathFile)
         {
             FileAttributes attr = File.GetAttributes(pathFile);
 
@@ -205,7 +204,7 @@ namespace EasyShare
         private Dictionary<string, ZipInfo> cachingFiles;
         private Thread threadPipe, waitOnTake;
         public delegate void myDel(string file);
-        public static event myDel openNeighbors;
+        public static event myDel OpenNeighbors;
         public delegate void myDel2(string fileName, string userName, Constants.NOTIFICATION_STATE state);
         public static event myDel2 QueueBalloon;
         public delegate void myDel3(Socket s, Constants.FILE_STATE state);

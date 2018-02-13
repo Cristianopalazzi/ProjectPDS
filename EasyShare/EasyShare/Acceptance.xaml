@@ -21,8 +21,8 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1"  Width="Auto" Name="acceptAll" Content="Accetta tutti"  HorizontalAlignment="Left" Margin="0,10" Click="acceptOrRejectAll"/>
-            <Button Grid.Column="3" Width="Auto" Name="rejectAll" Content="Rifiuta tutti"  HorizontalAlignment="Right" Margin="0,10" Click="acceptOrRejectAll"/>
+            <Button Grid.Column="1"  Width="Auto" Name="acceptAll" Content="Accetta tutti"  HorizontalAlignment="Left" Margin="0,10" Click="AcceptOrRejectAll"/>
+            <Button Grid.Column="3" Width="Auto" Name="rejectAll" Content="Rifiuta tutti"  HorizontalAlignment="Right" Margin="0,10" Click="AcceptOrRejectAll"/>
         </Grid>
         <Border BorderBrush="LightGray" Margin="5,0" BorderThickness="0,0,0,1"/>
         <ListView Grid.Row="1"  ItemsSource="{Binding AcceptingFiles}" Name="filesToAccept" BorderThickness="0" VerticalAlignment="Top">
@@ -38,8 +38,8 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button  Grid.Column="1" Width="80" Content="Accetta" Name="accept" HorizontalAlignment="Left" Margin="0,5,10,5" Click="acceptOrReject" />
-                            <Button Grid.Column="2" Width="80" Content="Rifiuta" Name="reject" HorizontalAlignment="Right" Margin="0,5,10,5" Click="acceptOrReject"/>
+                            <Button  Grid.Column="1" Width="80" Content="Accetta" Name="accept" HorizontalAlignment="Left" Margin="0,5,10,5" Click="AcceptOrReject" />
+                            <Button Grid.Column="2" Width="80" Content="Rifiuta" Name="reject" HorizontalAlignment="Right" Margin="0,5,10,5" Click="AcceptOrReject"/>
                         </Grid>
                         <Border BorderBrush="LightGray" BorderThickness="0,0,0,1"/>
                     </StackPanel>

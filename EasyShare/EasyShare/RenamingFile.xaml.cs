@@ -22,7 +22,7 @@ namespace EasyShare
         }
 
         //type 0=> file, 1=> directory
-        public void setFields(string fileName,string directory, int type)
+        public void SetFields(string fileName,string directory, int type)
         {
             NewName = String.Empty;
             Extension = Path.GetExtension(fileName);

@@ -15,8 +15,8 @@ namespace EasyShare
     public partial class Acceptance : MetroWindow
     {
 
-        public ObservableCollection<fileToAccept> AcceptingFiles { get => acceptingFiles; set => acceptingFiles = value; }
-        private ObservableCollection<fileToAccept> acceptingFiles = new ObservableCollection<fileToAccept>();
+        public ObservableCollection<FileToAccept> AcceptingFiles { get => acceptingFiles; set => acceptingFiles = value; }
+        private ObservableCollection<FileToAccept> acceptingFiles = new ObservableCollection<FileToAccept>();
 
         public Acceptance()
         {
@@ -26,10 +26,10 @@ namespace EasyShare
         }
 
 
-        private void acceptOrReject(object sender, RoutedEventArgs e)
+        private void AcceptOrReject(object sender, RoutedEventArgs e)
         {
             Button b = sender as Button;
-            fileToAccept sf = b.DataContext as fileToAccept;
+            FileToAccept sf = b.DataContext as FileToAccept;
             if (String.Compare(b.Name, "accept") == 0)
                 Receiver.accepted = true;
             else if (String.Compare(b.Name, "reject") == 0)
@@ -41,34 +41,34 @@ namespace EasyShare
                 Close();
         }
 
-        private void acceptOrRejectAll(object sender, RoutedEventArgs e)
+        private void AcceptOrRejectAll(object sender, RoutedEventArgs e)
         {
-            List<fileToAccept> toRemove = new List<fileToAccept>();
+            List<FileToAccept> toRemove = new List<FileToAccept>();
             Button b = sender as Button;
             if (String.Compare(b.Name, "acceptAll") == 0)
                 Receiver.accepted = true;
             else if (String.Compare(b.Name, "rejectAll") == 0)
                 Receiver.accepted = false;
-            foreach (fileToAccept f in AcceptingFiles)
+            foreach (FileToAccept f in AcceptingFiles)
             {
                 Receiver.idFileToAccept = f.Id;
                 Receiver.mre.Set();
                 Thread.Sleep(50);
                 toRemove.Add(f);
             }
-            foreach (fileToAccept f in toRemove)
+            foreach (FileToAccept f in toRemove)
                 AcceptingFiles.Remove(f);
             Close();
         }
 
-        public class fileToAccept
+        public class FileToAccept
         {
             public string FileName { get => fileName; set => fileName = value; }
             public string UserName { get => userName; set => userName = value; }
             public string FileSize { get => fileSize; set => fileSize = value; }
             public string Id { get => id; set => id = value; }
 
-            public fileToAccept(string fileName, string userName, string fileSize, string id)
+            public FileToAccept(string fileName, string userName, string fileSize, string id)
             {
                 FileName = fileName;
                 UserName = userName;

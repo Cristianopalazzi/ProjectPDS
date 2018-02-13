@@ -16,28 +16,28 @@ namespace EasyShare
         private NeighborProtocol()
         {
             Neighbors = new ConcurrentDictionary<string, Neighbor>();
-            settings = Settings.getInstance;
+            settings = Settings.GetInstance;
             senderEvent = new ManualResetEvent(settings.Online);
 
-            listener = new Thread(listen)
+            listener = new Thread(Listen)
             {
                 Name = "listener",
                 IsBackground = true
             };
             listener.Start();
-            sender = new Thread(sendMe)
+            sender = new Thread(SendMe)
             {
                 Name = "sender",
                 IsBackground = true
             };
             sender.Start();
-            cleanT = new Thread(cleanMap)
+            cleanT = new Thread(CleanMap)
             {
                 Name = "cleaner",
                 IsBackground = true
             };
             cleanT.Start();
-            waitForImage = new Thread(waitForImageRequest)
+            waitForImage = new Thread(WaitForImageRequest)
             {
                 Name = "waitImage",
                 IsBackground = true
@@ -45,7 +45,7 @@ namespace EasyShare
             waitForImage.Start();
         }
 
-        private void listen()
+        private void Listen()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             string recv, remoteIpAddress;
@@ -79,22 +79,20 @@ namespace EasyShare
                     {
                         if (!Neighbors.ContainsKey(senderID))
                         {
-                            byte[] img = requestImg(senderID);
+                            byte[] img = RequestImg(senderID);
                             //TODO TESTARE
                             if (img == null)
                                 continue;
                             Neighbor n = new Neighbor(senderID, img);
                             if (Neighbors.TryAdd(senderID, n))
-                                if (neighborsEvent != null)
-                                    neighborsEvent(n, true);
+                                NeighborsEvent?.Invoke(n, true);
                         }
 
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                     }
                     else if (String.Compare(command, Constants.QUIT) == 0)
                         if (Neighbors.TryRemove(senderID, out Neighbor n))
-                            if (neighborsEvent != null)
-                                neighborsEvent(new Neighbor(senderID,null), false);
+                            NeighborsEvent?.Invoke(new Neighbor(senderID, null), false);
                 }
                 catch (Exception ex)
                 {
@@ -111,7 +109,8 @@ namespace EasyShare
 
 
 
-        public string getUserFromIp(string ipSender)
+            
+        public string GetUserFromIp(string ipSender)
         {
             foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
                 if (String.Compare(pair.Value.NeighborIp, ipSender) == 0)
@@ -119,7 +118,7 @@ namespace EasyShare
             return null;
         }
 
-        void cleanMap()
+        private void CleanMap()
         {
             while (!ShutDown)
             {
@@ -139,14 +138,13 @@ namespace EasyShare
 
                 foreach (string tmp in toRemove)
                     if (Neighbors.TryRemove(tmp, out Neighbor value))
-                        if (neighborsEvent != null)
-                            neighborsEvent(new Neighbor(tmp,null), false);
+                        NeighborsEvent?.Invoke(new Neighbor(tmp, null), false);
 
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
         }
 
-        public void clean()
+        public void Clean()
         {
             List<string> toRemove = new List<string>();
 
@@ -161,13 +159,12 @@ namespace EasyShare
 
             foreach (string tmp in toRemove)
                 if (Neighbors.TryRemove(tmp, out Neighbor value))
-                    if (neighborsEvent != null)
-                        neighborsEvent(new Neighbor(tmp, null), false);
+                    NeighborsEvent?.Invoke(new Neighbor(tmp, null), false);
         }
 
 
 
-        private void sendMe()
+        private void SendMe()
         {
             IPEndPoint ipMulticast = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -199,7 +196,7 @@ namespace EasyShare
             socket.Close();
         }
 
-        public void quitMe()
+        public void QuitMe()
         {
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
@@ -218,7 +215,7 @@ namespace EasyShare
 
         }
 
-        private void waitForImageRequest()
+        private void WaitForImageRequest()
         {
             // TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
@@ -292,7 +289,7 @@ namespace EasyShare
             }
         }
 
-        private byte[] requestImg(string neighbor)
+        private byte[] RequestImg(string neighbor)
         {
             String address = neighbor.Substring(neighbor.IndexOf("@") + 1);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(address), Constants.PORT_TCP_IMG);
@@ -429,7 +426,7 @@ namespace EasyShare
             return result;
         }
 
-        public static NeighborProtocol getInstance
+        public static NeighborProtocol GetInstance
         {
             get
             {
@@ -453,7 +450,7 @@ namespace EasyShare
         private Settings settings;
         public static ManualResetEvent senderEvent;
         public delegate void modifyNeighbors(Neighbor n, bool addOrRemove);
-        public static event modifyNeighbors neighborsEvent;
+        public static event modifyNeighbors NeighborsEvent;
         public static bool ShutDown = false;
         private static object syncLock = new object();
     }
