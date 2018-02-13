@@ -58,14 +58,14 @@ namespace EasyShare
         public bool Remove(TKey key)
         {
             if (key == null) throw new ArgumentNullException("key");
-
-            Dictionary.TryGetValue(key, out TValue value);
-            var removed = Dictionary.TryRemove(key, out value);
-            if (removed)
-                //OnCollectionChanged(NotifyCollectionChangedAction.Remove, new KeyValuePair<TKey, TValue>(key, value));
-                OnCollectionChanged();
-
-
+            bool removed = false;
+            if (Dictionary.TryGetValue(key, out TValue value))
+            {
+                removed = Dictionary.TryRemove(key, out value);
+                if (removed)
+                    //OnCollectionChanged(NotifyCollectionChangedAction.Remove, new KeyValuePair<TKey, TValue>(key, value));
+                    OnCollectionChanged();
+            }
             return removed;
         }
 
@@ -203,8 +203,7 @@ namespace EasyShare
             }
             else
             {
-                Dictionary[key] = value;
-
+                Dictionary.TryAdd(key, value);
                 OnCollectionChanged(NotifyCollectionChangedAction.Add, new KeyValuePair<TKey, TValue>(key, value));
             }
         }

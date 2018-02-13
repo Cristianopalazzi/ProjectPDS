@@ -6,7 +6,6 @@ using System.Net;
 using System.IO;
 using System.IO.Compression;
 using System.Windows.Forms;
-using System.Windows.Media.Imaging;
 using System.Diagnostics;
 
 namespace EasyShare
@@ -38,7 +37,6 @@ namespace EasyShare
 
                 while (true)
                 {
-                    Console.WriteLine("Waiting for a connection...");
                     Socket handler = listener.Accept();
                     Thread myThread = new Thread(() => ReceiveFromSocket(handler));
                     myThread.SetApartmentState(ApartmentState.STA);
@@ -74,7 +72,7 @@ namespace EasyShare
             handler.SendTimeout = 2500;
             string zipLocation = String.Empty, fileNameString = String.Empty, ipSender = String.Empty, id = String.Empty;
             ZipArchive archive = null;
-            int temp = 0;
+            long temp = 0;
             long zipFileSize = 0;
             FileStream fs = null;
             string user = String.Empty;
@@ -209,7 +207,7 @@ namespace EasyShare
                 {
                     if (zipFileSize - temp > Constants.PACKET_SIZE)
                         bytesRec = handler.Receive(data, 0, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
-                    else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
+                    else bytesRec = handler.Receive(data, 0, (int)(zipFileSize - temp), SocketFlags.None, out sockError);
 
                     if (sockError == SocketError.Success)
                     {

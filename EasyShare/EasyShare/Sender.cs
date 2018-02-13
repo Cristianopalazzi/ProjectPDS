@@ -74,7 +74,7 @@ namespace EasyShare
                     return;
                 }
 
-                int temp = 0, percentage = 0;
+                long temp = 0, percentage = 0;
                 fs = File.Open(zipLocation, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 data = new byte[Constants.PACKET_SIZE];
@@ -88,7 +88,7 @@ namespace EasyShare
                     if (zipLength - temp > Constants.PACKET_SIZE)
                         readBytes = fs.Read(data, 0, Constants.PACKET_SIZE);
                     else
-                        readBytes = fs.Read(data, 0, (int)zipLength - temp);
+                        readBytes = fs.Read(data, 0, (int)(zipLength - temp));
 
                     sent = sender.Send(data, 0, readBytes, SocketFlags.None, out sockError);
 
@@ -140,7 +140,6 @@ namespace EasyShare
                 UpdateFileState?.Invoke(sender, Constants.FILE_STATE.ERROR);
                 FileRejected?.Invoke(fileName, ipAddr, Constants.NOTIFICATION_STATE.SEND_ERROR);
             }
-
             catch (Exception e)
             {
                 Console.WriteLine("Sender");

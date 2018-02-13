@@ -85,8 +85,8 @@ namespace EasyShare
                             Neighbor n = new Neighbor(senderID, img);
                             Neighbors.Add(senderID, n);
                         }
-
-                        Neighbors[senderID].Counter = Constants.MAX_COUNTER;
+                        if (Neighbors.TryGetValue(senderID, out Neighbor n1))
+                            n1.Counter = Constants.MAX_COUNTER;
                     }
                     else if (String.Compare(command, Constants.QUIT) == 0)
                         Neighbors.Remove(senderID);
@@ -127,7 +127,10 @@ namespace EasyShare
                         toRemove.Add(pair.Key);
                     }
                     else
-                        Neighbors[pair.Key].Counter = 0;
+                    {
+                        if (neighbors.TryGetValue(pair.Key, out Neighbor n))
+                            n.Counter = 0;
+                    }
                 }
 
                 foreach (string tmp in toRemove)

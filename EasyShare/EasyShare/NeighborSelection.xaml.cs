@@ -23,11 +23,9 @@ namespace EasyShare
 
         private Boolean acceso;
 
-        public ObservableCollection<Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
         public bool Acceso { get => acceso; set => acceso = value; }
         public ObservableCollection<string> FileList { get => fileList; set => fileList = value; }
 
-        private ObservableCollection<Neighbor> neighbors;
         private ObservableCollection<String> fileList;
 
         public NeighborSelection()
@@ -35,7 +33,6 @@ namespace EasyShare
             InitializeComponent();
             DataContext = this;
             NeighborProtocol n = NeighborProtocol.GetInstance;
-            Neighbors = new ObservableCollection<Neighbor>();
             FileList = new ObservableCollection<String>();
             listNeighborSelection.ItemsSource = n.Neighbors;
             Closing += NeighborSelection_Closing;
