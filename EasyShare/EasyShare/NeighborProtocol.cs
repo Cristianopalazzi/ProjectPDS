@@ -15,7 +15,7 @@ namespace EasyShare
     {
         private NeighborProtocol()
         {
-            Neighbors = new ConcurrentDictionary<string, Neighbor>();
+            Neighbors = new ObservableDictionary<string, Neighbor>();
             settings = Settings.GetInstance;
             senderEvent = new ManualResetEvent(settings.Online);
 
@@ -80,19 +80,16 @@ namespace EasyShare
                         if (!Neighbors.ContainsKey(senderID))
                         {
                             byte[] img = RequestImg(senderID);
-                            //TODO TESTARE
                             if (img == null)
                                 continue;
                             Neighbor n = new Neighbor(senderID, img);
-                            if (Neighbors.TryAdd(senderID, n))
-                                NeighborsEvent?.Invoke(n, true);
+                            Neighbors.Add(senderID, n);
                         }
 
                         Neighbors[senderID].Counter = Constants.MAX_COUNTER;
                     }
                     else if (String.Compare(command, Constants.QUIT) == 0)
-                        if (Neighbors.TryRemove(senderID, out Neighbor n))
-                            NeighborsEvent?.Invoke(new Neighbor(senderID, null), false);
+                        Neighbors.Remove(senderID);
                 }
                 catch (Exception ex)
                 {
@@ -108,8 +105,6 @@ namespace EasyShare
         }
 
 
-
-            
         public string GetUserFromIp(string ipSender)
         {
             foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
@@ -135,10 +130,8 @@ namespace EasyShare
                         Neighbors[pair.Key].Counter = 0;
                 }
 
-
                 foreach (string tmp in toRemove)
-                    if (Neighbors.TryRemove(tmp, out Neighbor value))
-                        NeighborsEvent?.Invoke(new Neighbor(tmp, null), false);
+                    Neighbors.Remove(tmp);
 
                 Thread.Sleep(Constants.CLEAN_TIME);
             }
@@ -158,8 +151,7 @@ namespace EasyShare
             }
 
             foreach (string tmp in toRemove)
-                if (Neighbors.TryRemove(tmp, out Neighbor value))
-                    NeighborsEvent?.Invoke(new Neighbor(tmp, null), false);
+                Neighbors.Remove(tmp);
         }
 
 
@@ -217,7 +209,6 @@ namespace EasyShare
 
         private void WaitForImageRequest()
         {
-            // TODO aggiungere timeout alle socket per evitare alte latenze nella fase di NeighborProtocol
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
@@ -442,15 +433,13 @@ namespace EasyShare
             }
         }
 
-        public ConcurrentDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
+        public ObservableDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
 
-        private ConcurrentDictionary<string, Neighbor> neighbors;
+        private ObservableDictionary<string, Neighbor> neighbors;
         private Thread listener, cleanT, sender, waitForImage;
         private static NeighborProtocol instance = null;
         private Settings settings;
         public static ManualResetEvent senderEvent;
-        public delegate void modifyNeighbors(Neighbor n, bool addOrRemove);
-        public static event modifyNeighbors NeighborsEvent;
         public static bool ShutDown = false;
         private static object syncLock = new object();
     }

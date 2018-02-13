@@ -28,7 +28,6 @@ namespace EasyShare
             Deactivated += MainWindow_Deactivated;
             Closing += MainWindow_Closing;
 
-            NeighborProtocol.NeighborsEvent += Modify_neighbors;
             Sender.UpdateProgress += UpdateProgressBar;
             Sender.UpdateFileState += Sender_updateFileState;
             Receiver.UpdateProgress += UpdateReceivingProgressBar;
@@ -40,11 +39,10 @@ namespace EasyShare
             Queue.QueueUpdateState += Sender_updateFileState;
             App.AskForExit += App_askForExit;
 
-            NeighborsValues = new ObservableCollection<Neighbor>();
             FilesToSend = new ObservableCollection<SendingFile>();
             FilesToReceive = new ObservableCollection<ReceivingFile>();
             DataContext = this;
-            Neighbors.ItemsSource = NeighborsValues;
+            Neighbors.ItemsSource = NeighborProtocol.GetInstance.Neighbors;
             sendingFiles.ItemsSource = FilesToSend;
             listReceivingFiles.ItemsSource = FilesToReceive;
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(filesToSend);
@@ -115,8 +113,7 @@ namespace EasyShare
                     {
                         r.File_state = Constants.FILE_STATE.CANCELED;
                         r.Pic = new BitmapImage(new Uri(App.currentDirectoryResources + "/cross.ico"));
-                        TriggerBalloon?.Invoke(r.Filename, r.Name, state); // TODO testare
-
+                        TriggerBalloon?.Invoke(r.Filename, r.Name, state);
                         break;
                     }
             }));
@@ -303,28 +300,6 @@ namespace EasyShare
                 FilesToSend.Remove(sf);
         }
 
-        //aggiorno la lista dei vicini online
-        public void Modify_neighbors(Neighbor neighbor, bool addOrRemove)
-        {
-            bool isPresent = false;
-            //AddOrRemove = true per neighbor da aggiungere e false da cancellare
-            foreach (Neighbor n in NeighborsValues)
-            {
-                if (String.Compare(neighbor.NeighborIp, n.NeighborIp) == 0 && String.Compare(neighbor.NeighborName, n.NeighborName) == 0)
-                {
-                    isPresent = true;
-                    if (!addOrRemove)
-                        Application.Current.Dispatcher.Invoke(new Action(() => { NeighborsValues.Remove(n); }));
-                    break;
-                }
-            }
-            if (addOrRemove && !isPresent)
-                Dispatcher.Invoke(new Action(() =>
-                {
-                    NeighborsValues.Add(neighbor);
-                }));
-        }
-
         //mostro il dialog per scegliere la cartella in cui salvare il file in ricezione
         public void OpenFolderBrowserDialog(object sender, EventArgs e)
         {
@@ -365,12 +340,10 @@ namespace EasyShare
             return false;
         }
 
-        private ObservableCollection<Neighbor> neighborsValues;
         private ObservableCollection<SendingFile> filesToSend;
         private ObservableCollection<ReceivingFile> filesToReceive;
         private Settings sets;
 
-        public ObservableCollection<Neighbor> NeighborsValues { get => neighborsValues; set => neighborsValues = value; }
         public ObservableCollection<SendingFile> FilesToSend { get => filesToSend; set => filesToSend = value; }
         public ObservableCollection<ReceivingFile> FilesToReceive { get => filesToReceive; set => filesToReceive = value; }
 

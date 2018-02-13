@@ -175,7 +175,6 @@ namespace EasyShare
                 if (sockError != SocketError.Success)
                     throw new SocketException();
                 string zipFileName = Encoding.ASCII.GetString(zipNameAndZipLength, 0, zipFileNameLength);
-                zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
 
                 zipLocation = App.defaultFolder + "\\" + zipFileName;
                 if (File.Exists(zipLocation))
@@ -193,15 +192,14 @@ namespace EasyShare
 
                 fs = new FileStream(zipLocation, FileMode.Create, FileAccess.Write);
 
-
                 string senderID = user + "@" + ipSender;
                 if (!NeighborProtocol.GetInstance.Neighbors.TryGetValue(senderID, out Neighbor neighbor))
                     neighbor = new Neighbor(senderID, File.ReadAllBytes(App.currentDirectoryResources + "/anonimo.png"));
-                if (UpdateReceivingFiles != null)
-                {
-                    ReceivingFile rf = new ReceivingFile(neighbor, fileNameString, id);
-                    UpdateReceivingFiles(rf);
-                }
+
+                ReceivingFile rf1 = new ReceivingFile(neighbor, fileNameString, id);
+                UpdateReceivingFiles?.Invoke(rf1);
+
+                zipFileSize = BitConverter.ToInt64(zipNameAndZipLength, zipFileNameLength);
                 int percentage = 0;
 
                 byte[] data = new byte[Constants.PACKET_SIZE];
@@ -210,9 +208,7 @@ namespace EasyShare
                 while (temp < zipFileSize)
                 {
                     if (zipFileSize - temp > Constants.PACKET_SIZE)
-                    {
                         bytesRec = handler.Receive(data, 0, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
-                    }
                     else bytesRec = handler.Receive(data, 0, (int)zipFileSize - temp, SocketFlags.None, out sockError);
 
                     if (sockError == SocketError.Success)
@@ -229,11 +225,7 @@ namespace EasyShare
                         }
                     }
                     else
-                    {
-                        if (fs != null)
-                            fs.Close();
                         throw new SocketException();
-                    }
 
                     if (bytesRec == 0)
                         break;
@@ -247,7 +239,6 @@ namespace EasyShare
                     return;
                 }
                 fs.Close();
-
 
                 if (Settings.GetInstance.AutoRename)
                     OverwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user, id);
@@ -288,14 +279,22 @@ namespace EasyShare
                     }
                 }
             }
+
             catch (SocketException e)
             {
+                Console.WriteLine("Receiver");
+                var st = new StackTrace(e, true);
+                // Get the top stack frame
+                var frame = st.GetFrame(st.FrameCount - 1);
+                // Get the line number from the stack frame
+                var line = frame.GetFileLineNumber();
+                Console.WriteLine("Error at line {0} ", line);
                 Console.WriteLine(e.SocketErrorCode);
+
                 if (zipFileSize == 0)
-                    if (ReceivingFailure != null)
-                        ReceivingFailure(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
-                    else
-                        FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.REC_ERROR);
+                    ReceivingFailure?.Invoke(fileNameString, ipSender, Constants.NOTIFICATION_STATE.NET_ERROR);
+                else
+                    FileCancel?.Invoke(id, Constants.NOTIFICATION_STATE.REC_ERROR);
             }
             catch (Exception e)
             {

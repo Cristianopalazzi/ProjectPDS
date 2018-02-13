@@ -29,10 +29,10 @@ namespace EasyShare
         {
             String appPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             Process[] p = Process.GetProcessesByName("EasyShare");
+
             if (p.Length > 1)
-            {
                 Environment.Exit(0);
-            }
+
             Queue.OpenNeighbors += Neighbor_selection;
             Queue.QueueBalloon += CreateBalloons;
             Sender.FileRejected += CreateBalloons;
@@ -69,7 +69,6 @@ namespace EasyShare
             n.QuitMe(); nIcon.Dispose(); Settings.WriteSettings(Settings.GetInstance);
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
-            //Thread.Sleep(350);
             App.Current.Shutdown();
         }
 
@@ -220,8 +219,6 @@ namespace EasyShare
                 n.QuitMe(); nIcon.Dispose(); Settings.WriteSettings(Settings.GetInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
-                //TODO confermare cancellazione e poi chiusura come soluzione
-                //Thread.Sleep(350);
                 App.Current.Shutdown();
             };
             nIcon.Visible = true;
@@ -262,8 +259,8 @@ namespace EasyShare
                     ns.FileList.Clear();
                     ns.Acceso = true;
                     ns.FileList.Add(file);
-                    ns.WindowState = WindowState.Normal;
                 }
+                ns.WindowState = WindowState.Normal;
                 ns.Show();
                 ns.Activate();
                 ns.Topmost = true;

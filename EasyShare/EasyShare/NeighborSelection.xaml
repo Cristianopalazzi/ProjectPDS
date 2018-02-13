@@ -7,6 +7,8 @@
         xmlns:local="clr-namespace:EasyShare"
         mc:Ignorable="d"
         Name="windowNeighborSelection"
+        MinWidth="500"
+        MinHeight="300"
         Title="Scegli con chi condividere il file" Width="500" SizeToContent="Height" BorderThickness="0" GlowBrush="Black">
     <Controls:MetroWindow.Resources>
         <local:PathConverter x:Key="myConverter"/>
@@ -46,7 +48,7 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <ListView x:Name="listNeighborSelection" ItemsSource="{Binding Neighbors}" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+            <ListView x:Name="listNeighborSelection" HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectedValuePath="Key">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <UniformGrid Columns="5" HorizontalAlignment="Stretch" />
@@ -74,10 +76,10 @@
 
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" ToolTip="{Binding NeighborName}">
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" ToolTip="{Binding Path=Value.NeighborName}">
                             <Ellipse Height="64" Width="64">
                                 <Ellipse.Fill>
-                                    <ImageBrush  ImageSource="{Binding NeighborImage}"/>
+                                    <ImageBrush  ImageSource="{Binding Path=Value.NeighborImage}"/>
                                 </Ellipse.Fill>
 
                                 <Ellipse.Style>
@@ -92,7 +94,7 @@
                                 </Ellipse.Style>
                             </Ellipse>
 
-                            <TextBlock Text="{Binding NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom" MaxWidth="64" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Path = Value.NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom" MaxWidth="64" TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

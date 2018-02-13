@@ -130,7 +130,6 @@ namespace EasyShare
             }
             catch (SocketException e)
             {
-                //TODO eseguire sempre in debug perchè qualcosa va storto
                 Console.WriteLine("Sender");
                 var st = new StackTrace(e, true);
                 // Get the top stack frame

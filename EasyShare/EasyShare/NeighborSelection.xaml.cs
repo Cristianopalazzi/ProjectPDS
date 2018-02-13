@@ -35,10 +35,9 @@ namespace EasyShare
             InitializeComponent();
             DataContext = this;
             NeighborProtocol n = NeighborProtocol.GetInstance;
-            NeighborProtocol.NeighborsEvent += Modify_neighbors;
             Neighbors = new ObservableCollection<Neighbor>();
             FileList = new ObservableCollection<String>();
-            listNeighborSelection.ItemsSource = Neighbors;
+            listNeighborSelection.ItemsSource = n.Neighbors;
             Closing += NeighborSelection_Closing;
             Acceso = false;
         }
@@ -47,25 +46,22 @@ namespace EasyShare
         {
             ClosingSelection?.Invoke();
             e.Cancel = true;
-            //WindowState = WindowState.Minimized;
             Hide();
         }
 
-
-
         private void Button_send_files(object sender, RoutedEventArgs e)
         {
-            List<Neighbor> selected = null;
+            List<KeyValuePair<string, Neighbor>> selected = null;
             List<SendingFile> sendingFiles = null;
             if (listNeighborSelection.SelectedItems.Count > 0)
             {
-                selected = listNeighborSelection.SelectedItems.Cast<Neighbor>().ToList();
+                selected = listNeighborSelection.SelectedItems.Cast<KeyValuePair<string, Neighbor>>().ToList();
                 foreach (String file in FileList)
                 {
                     sendingFiles = new List<SendingFile>();
-                    foreach (Neighbor n in selected)
+                    foreach (KeyValuePair<string, Neighbor> n in selected)
                     {
-                        SendingFile sf = new SendingFile(n, file);
+                        SendingFile sf = new SendingFile(n.Value, file);
                         sendingFiles.Add(sf);
                     }
                     SendSelectedNeighbors(sendingFiles);
@@ -76,30 +72,6 @@ namespace EasyShare
             else
                 this.ShowMessageAsync("Ops", "Seleziona almeno un contatto");
         }
-
-        public void Modify_neighbors(Neighbor neighbor, bool addOrRemove)
-        {
-            bool isPresent = false;
-            //AddOrRemove = true per neighbor da aggiungere e false da cancellare
-            foreach (Neighbor n in Neighbors)
-            {
-                if (String.Compare(neighbor.NeighborIp, n.NeighborIp) == 0 && String.Compare(neighbor.NeighborName, n.NeighborName) == 0)
-                {
-                    isPresent = true;
-                    if (!addOrRemove)
-                        Application.Current.Dispatcher.Invoke(new Action(() => { Neighbors.Remove(n); }));
-                    break;
-                }
-            }
-            if (addOrRemove && !isPresent)
-                Dispatcher.Invoke(new Action(() =>
-                {
-                    Neighbors.Add(neighbor);
-                }));
-        }
-
-
-
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
