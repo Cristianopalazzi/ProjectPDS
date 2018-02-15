@@ -35,7 +35,7 @@
                 </Controls:DropDownButton>
             </Controls:Badged>
             <Border DockPanel.Dock="Top" BorderThickness="1" BorderBrush="LightGray" Margin="0,0,0,5"/>
-            <Button DockPanel.Dock="Bottom" Content="Invia" Click="Button_send_files" Width="80" Height="40"   HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,30,10">
+            <Button DockPanel.Dock="Bottom" Content="Invia" Click="Button_send_files" Width="80" Height="40"   HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,10,30,10" IsDefault="True">
                 <Button.Style>
                     <Style TargetType="Button" BasedOn="{StaticResource MetroButton}">
                         <Setter Property="Visibility" Value="Visible" />

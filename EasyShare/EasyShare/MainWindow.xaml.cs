@@ -61,6 +61,10 @@ namespace EasyShare
                 if (acceptance == null)
                 {
                     acceptance = new Acceptance();
+                    acceptance.Topmost = true;
+                    acceptance.Topmost = false;
+                    acceptance.Activate();
+                    acceptance.WindowState = WindowState.Normal;
                     acceptance.Show();
                 }
                 acceptance.AcceptingFiles.Add(new Acceptance.FileToAccept(fileName, userName, dimension, id));

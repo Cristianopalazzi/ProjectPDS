@@ -144,33 +144,7 @@ namespace EasyShare
                     }
                 }
 
-                string currentDirectory = String.Empty;
-                while (String.IsNullOrEmpty(currentDirectory))
-                {
-                    if (!settings.DefaultDir)
-                    {
-                        FolderBrowserDialog fbd = new FolderBrowserDialog
-                        {
-                            Description = "Selezione la cartella in cui salvare il file"
-                        };
-                        if (fbd.ShowDialog() == DialogResult.OK)
-                            currentDirectory = fbd.SelectedPath;
-                    }
-                    else
-                    {
-                        if (Directory.Exists(settings.DefaultDirPath))
-                            currentDirectory = settings.DefaultDirPath;
-                        else
-                        {
-                            FolderBrowserDialog fbd = new FolderBrowserDialog
-                            {
-                                Description = "La cartella predefinita non è stata trovata, selezionane un altra"
-                            };
-                            if (fbd.ShowDialog() == DialogResult.OK)
-                                currentDirectory = fbd.SelectedPath;
-                        }
-                    }
-                }
+            
 
                 byte[] zipCommandZipNameLength = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
                 received = handler.Receive(zipCommandZipNameLength, 0, zipCommandZipNameLength.Length, SocketFlags.None, out sockError);
@@ -250,6 +224,35 @@ namespace EasyShare
                 }
                 fs.Close();
 
+                string currentDirectory = String.Empty;
+                while (String.IsNullOrEmpty(currentDirectory))
+                {
+                    if (!settings.DefaultDir)
+                    {
+                        FolderBrowserDialog fbd = new FolderBrowserDialog
+                        {
+                            Description = "Selezione la cartella in cui salvare il file"
+                        };
+                        if (fbd.ShowDialog() == DialogResult.OK)
+                            currentDirectory = fbd.SelectedPath;
+                    }
+                    else
+                    {
+                        if (Directory.Exists(settings.DefaultDirPath))
+                            currentDirectory = settings.DefaultDirPath;
+                        else
+                        {
+                            FolderBrowserDialog fbd = new FolderBrowserDialog
+                            {
+                                Description = "La cartella predefinita non è stata trovata, selezionane un altra"
+                                
+                            };
+                            if (fbd.ShowDialog() == DialogResult.OK)
+                                currentDirectory = fbd.SelectedPath;
+                        }
+                    }
+                }
+
                 if (Settings.GetInstance.AutoRename)
                     OverwriteFileName(commandString, fileNameString, zipLocation, currentDirectory, user, id);
                 else
@@ -265,6 +268,10 @@ namespace EasyShare
                             if (File.Exists(currentDirectory + "\\" + entry.Name))
                             {
                                 rf.SetFields(entry.Name, currentDirectory, 0);
+                                rf.Activate();
+                                rf.Topmost = true;
+                                rf.Topmost = false;
+                                rf.WindowState = System.Windows.WindowState.Normal;
                                 rf.ShowDialog();
                                 if (String.IsNullOrEmpty(rf.NewName))
                                     throw new Exception();

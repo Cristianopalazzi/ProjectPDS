@@ -27,6 +27,6 @@
         <TextBlock Grid.Column="0"  Grid.Row="1" Name="actionTextBlock" Margin="5" FontSize="16"/>
         <TextBox Grid.Column="0" Grid.Row="2" Height="30" Name="newNameTextBox" Margin="5" MaxLength="100" FontSize="16"
                           AcceptsReturn="False" AcceptsTab="False" Width="220" MaxWidth="220" HorizontalAlignment="Left"/>
-        <Button Grid.Row="3" Grid.Column="2" Width="80" Height="30" Content="OK" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Click="Button_Click" />
+        <Button Grid.Row="3" Grid.Column="2" Width="80" Height="30" Content="OK" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="10" Click="Button_Click" IsDefault="True" />
     </Grid>
 </Controls:MetroWindow>
