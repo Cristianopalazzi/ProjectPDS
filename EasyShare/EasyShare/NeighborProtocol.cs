@@ -15,7 +15,7 @@ namespace EasyShare
     {
         private NeighborProtocol()
         {
-            Neighbors = new ObservableDictionary<string, Neighbor>();
+            Neighbors = new ObservableConcurrentDictionary<string, Neighbor>();
             settings = Settings.GetInstance;
             senderEvent = new ManualResetEvent(settings.Online);
 
@@ -85,8 +85,8 @@ namespace EasyShare
                             Neighbor n = new Neighbor(senderID, img);
                             Neighbors.Add(senderID, n);
                         }
-                        if (Neighbors.TryGetValue(senderID, out Neighbor n1))
-                            n1.Counter = Constants.MAX_COUNTER;
+                        if (Neighbors.TryGetValue(senderID, out Neighbor n2))
+                            n2.Counter = Constants.MAX_COUNTER;
                     }
                     else if (String.Compare(command, Constants.QUIT) == 0)
                         Neighbors.Remove(senderID);
@@ -436,9 +436,9 @@ namespace EasyShare
             }
         }
 
-        public ObservableDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
+        public ObservableConcurrentDictionary<string, Neighbor> Neighbors { get => neighbors; set => neighbors = value; }
 
-        private ObservableDictionary<string, Neighbor> neighbors;
+        private ObservableConcurrentDictionary<string, Neighbor> neighbors;
         private Thread listener, cleanT, sender, waitForImage;
         private static NeighborProtocol instance = null;
         private Settings settings;

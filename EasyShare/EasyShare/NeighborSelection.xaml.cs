@@ -31,12 +31,12 @@ namespace EasyShare
         public NeighborSelection()
         {
             InitializeComponent();
+            Acceso = false;
+            Closing += NeighborSelection_Closing;
             DataContext = this;
             NeighborProtocol n = NeighborProtocol.GetInstance;
             FileList = new ObservableCollection<String>();
             listNeighborSelection.ItemsSource = n.Neighbors;
-            Closing += NeighborSelection_Closing;
-            Acceso = false;
         }
 
         private void NeighborSelection_Closing(object sender, System.ComponentModel.CancelEventArgs e)

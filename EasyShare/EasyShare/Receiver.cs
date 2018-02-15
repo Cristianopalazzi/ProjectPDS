@@ -157,7 +157,19 @@ namespace EasyShare
                             currentDirectory = fbd.SelectedPath;
                     }
                     else
-                        currentDirectory = settings.DefaultDirPath;
+                    {
+                        if (Directory.Exists(settings.DefaultDirPath))
+                            currentDirectory = settings.DefaultDirPath;
+                        else
+                        {
+                            FolderBrowserDialog fbd = new FolderBrowserDialog
+                            {
+                                Description = "La cartella predefinita non è stata trovata, selezionane un altra"
+                            };
+                            if (fbd.ShowDialog() == DialogResult.OK)
+                                currentDirectory = fbd.SelectedPath;
+                        }
+                    }
                 }
 
                 byte[] zipCommandZipNameLength = new byte[Constants.ZIP_COMMAND.Length + sizeof(int)];
