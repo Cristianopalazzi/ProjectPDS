@@ -85,10 +85,19 @@ namespace EasyShare
             {
                 using (FileStream s = new FileStream(App.defaultResourcesFolder + "\\" + Constants.SETTINGS, FileMode.Open))
                 {
-                    XmlSerializer xSer = new XmlSerializer(typeof(Settings));
-                    instance = (Settings)xSer.Deserialize(s);
-                    s.Dispose();
-                    s.Close();
+                    try
+                    {
+                        XmlSerializer xSer = new XmlSerializer(typeof(Settings));
+                        instance = (Settings)xSer.Deserialize(s);
+                        s.Dispose();
+                        s.Close();
+                    }
+                    catch
+                    {
+                        s.Dispose();
+                        s.Close();
+                        WriteSettings(instance);
+                    }
                 }
             }
         }
@@ -96,12 +105,27 @@ namespace EasyShare
 
         public static void WriteSettings(Settings values)
         {
-            using (FileStream s = new FileStream(App.defaultResourcesFolder + "\\" + Constants.SETTINGS, FileMode.Create))
+            using (FileStream s = new FileStream(App.defaultResourcesFolder + "\\" + Constants.SETTINGS, FileMode.Create, FileAccess.Write, FileShare.None, 1024, FileOptions.WriteThrough))
             {
-                XmlSerializer xSer = new XmlSerializer(typeof(Settings));
-                xSer.Serialize(s, values);
-                s.Dispose();
-                s.Close();
+                try
+                {
+                    XmlSerializer xSer = new XmlSerializer(typeof(Settings));
+                    xSer.Serialize(s, values);
+                }
+                catch
+                {
+                    s.Dispose();
+                    s.Close();
+                    File.Delete(App.defaultResourcesFolder + "\\" + Constants.SETTINGS);
+                }
+                finally
+                {
+                    if (s != null)
+                    {
+                        s.Dispose();
+                        s.Close();
+                    }
+                }
             }
         }
 

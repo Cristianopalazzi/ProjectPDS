@@ -66,7 +66,9 @@ namespace EasyShare
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
         {
-            n.QuitMe(); nIcon.Dispose(); Settings.WriteSettings(Settings.GetInstance);
+            n.QuitMe();
+            nIcon.Dispose();
+            Settings.WriteSettings(Settings.GetInstance);
             NeighborProtocol.ShutDown = true;
             NeighborProtocol.senderEvent.Set();
             App.Current.Shutdown();
