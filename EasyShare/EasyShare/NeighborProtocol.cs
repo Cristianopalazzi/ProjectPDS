@@ -47,11 +47,12 @@ namespace EasyShare
 
         private void Listen()
         {
+            IPEndPoint localEndPoint = new IPEndPoint(App.checkInterfaces(), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             string recv, remoteIpAddress;
 
             EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
+            //IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
 
             socket.SetSocketOption(SocketOptionLevel.IP,
                 SocketOptionName.AddMembership,
@@ -163,8 +164,7 @@ namespace EasyShare
         {
             IPEndPoint ipMulticast = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
+            socket.SetSocketOption(SocketOptionLevel.IP,SocketOptionName.MulticastInterface, App.checkInterfaces().GetAddressBytes());
             byte[] toBytes = Encoding.UTF8.GetBytes(Constants.HELL + Environment.UserName);
 
             while (senderEvent.WaitOne())
@@ -212,7 +212,7 @@ namespace EasyShare
 
         private void WaitForImageRequest()
         {
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
+            IPEndPoint localEndPoint = new IPEndPoint(App.checkInterfaces(), Constants.PORT_TCP_IMG);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
             listener.Bind(localEndPoint);

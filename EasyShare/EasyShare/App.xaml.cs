@@ -4,6 +4,8 @@ using System.IO;
 using Microsoft.Win32;
 using System.Threading;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
+using System.Net;
 
 namespace EasyShare
 {
@@ -54,11 +56,25 @@ namespace EasyShare
             mw = new MainWindow();
             ns = new NeighborSelection();
             us = new UserSettings();
-
             nIcon = new System.Windows.Forms.NotifyIcon();
             InitializeNotifyIcon();
         }
 
+        public static IPAddress checkInterfaces()
+        {
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet && ni.OperationalStatus == OperationalStatus.Up)
+                    foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            return ip.Address;
+                if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && ni.OperationalStatus == OperationalStatus.Up)
+                    foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                            return ip.Address;
+            }
+            return IPAddress.Any;
+        }
         private void NeighborSelection_closingSelection()
         {
             ns.Acceso = false;

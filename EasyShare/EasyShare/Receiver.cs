@@ -25,7 +25,7 @@ namespace EasyShare
 
         private void StartServer()
         {
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP);
+            IPEndPoint localEndPoint = new IPEndPoint(App.checkInterfaces(), Constants.PORT_TCP);
             Socket listener = null;
             try
             {
