@@ -18,6 +18,7 @@ namespace EasyShare
             Neighbors = new ObservableConcurrentDictionary<string, Neighbor>();
             settings = Settings.GetInstance;
             senderEvent = new ManualResetEvent(settings.Online);
+            address = App.CheckInterfaces();
 
             listener = new Thread(Listen)
             {
@@ -47,16 +48,14 @@ namespace EasyShare
 
         private void Listen()
         {
+            IPEndPoint localEndPoint = new IPEndPoint(address, Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             string recv, remoteIpAddress;
 
             EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_UDP);
-
             socket.SetSocketOption(SocketOptionLevel.IP,
                 SocketOptionName.AddMembership,
-                new MulticastOption(IPAddress.Parse(Constants.MULTICAST)));
-
+                new MulticastOption(IPAddress.Parse(Constants.MULTICAST), address));
             socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastLoopback, false);
 
             socket.Bind(localEndPoint);
@@ -118,7 +117,6 @@ namespace EasyShare
             while (!ShutDown)
             {
                 List<string> toRemove = new List<string>();
-
                 foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
                 {
                     if (pair.Value.Counter == 0)
@@ -143,7 +141,6 @@ namespace EasyShare
         public void Clean()
         {
             List<string> toRemove = new List<string>();
-
             foreach (KeyValuePair<string, Neighbor> pair in Neighbors)
             {
                 if (pair.Value.Counter == 0)
@@ -163,8 +160,7 @@ namespace EasyShare
         {
             IPEndPoint ipMulticast = new IPEndPoint(IPAddress.Parse(Constants.MULTICAST), Constants.PORT_UDP);
             Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            EndPoint senderRemote = new IPEndPoint(IPAddress.Any, 0);
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastInterface, address.GetAddressBytes());
             byte[] toBytes = Encoding.UTF8.GetBytes(Constants.HELL + Environment.UserName);
 
             while (senderEvent.WaitOne())
@@ -212,7 +208,7 @@ namespace EasyShare
 
         private void WaitForImageRequest()
         {
-            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Constants.PORT_TCP_IMG);
+            IPEndPoint localEndPoint = new IPEndPoint(address, Constants.PORT_TCP_IMG);
             Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Socket handler = null;
             listener.Bind(localEndPoint);
@@ -236,10 +232,7 @@ namespace EasyShare
                     }
                     else
                     {
-
-                        var accountImage = images
-                     .OrderByDescending(f => f.LastWriteTime)
-                     .First();
+                        var accountImage = images.OrderByDescending(f => f.LastWriteTime).First();
 
                         string imgPath = Environment.GetEnvironmentVariable("AppData") + Constants.ACCOUNT_IMAGE + accountImage.Name;
                         byte[] imgLength = BitConverter.GetBytes((int)accountImage.Length);
@@ -261,11 +254,8 @@ namespace EasyShare
                             if (error != SocketError.Success)
                                 throw new SocketException();
                         }
-
                     }
-
                 }
-
                 catch (Exception e)
                 {
                     Console.WriteLine("NeighborProtocol");
@@ -314,9 +304,7 @@ namespace EasyShare
                     {
                         if (img.Length - received > Constants.PACKET_SIZE)
                             received += receiver.Receive(img, received, Constants.PACKET_SIZE, SocketFlags.None, out sockError);
-
                         else received += receiver.Receive(img, received, img.Length - received, SocketFlags.None, out sockError);
-
                         if (sockError != SocketError.Success)
                             throw new SocketException();
                     }
@@ -445,5 +433,6 @@ namespace EasyShare
         public static ManualResetEvent senderEvent;
         public static bool ShutDown = false;
         private static object syncLock = new object();
+        private IPAddress address;
     }
 }
