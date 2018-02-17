@@ -60,7 +60,7 @@ namespace EasyShare
             InitializeNotifyIcon();
         }
 
-        public static IPAddress checkInterfaces()
+        public static IPAddress CheckInterfaces()
         {
             foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
             {
