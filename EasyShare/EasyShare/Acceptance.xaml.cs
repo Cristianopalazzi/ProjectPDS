@@ -38,7 +38,10 @@ namespace EasyShare
             Receiver.mre.Set();
             AcceptingFiles.Remove(sf);
             if (acceptingFiles.Count == 0)
+            {
+                Receiver.mre.Reset();
                 Close();
+            }
         }
 
         private void AcceptOrRejectAll(object sender, RoutedEventArgs e)
@@ -58,6 +61,8 @@ namespace EasyShare
             }
             foreach (FileToAccept f in toRemove)
                 AcceptingFiles.Remove(f);
+
+            Receiver.mre.Reset();
             Close();
         }
 

@@ -73,7 +73,7 @@ namespace EasyShare
 
         private void Sender_updateFileState(Socket sock, Constants.FILE_STATE state)
         {
-            sendingFiles.Dispatcher.Invoke(new Action(() =>
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (SendingFile sf in FilesToSend)
                 {
@@ -110,7 +110,7 @@ namespace EasyShare
         //file annullato da parte del sender => aggiorno la lista dei file in ricezione
         private void File_cancel(string id, Constants.NOTIFICATION_STATE state)
         {
-            listReceivingFiles.Dispatcher.Invoke(new Action(() =>
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 foreach (ReceivingFile r in FilesToReceive)
                     if (String.Compare(r.Guid, id) == 0)
@@ -127,7 +127,7 @@ namespace EasyShare
         // aggiungo un nuovo file in ricezione alla lista
         private void UpdateReceivingFiles(ReceivingFile file)
         {
-            listReceivingFiles.Dispatcher.Invoke(new Action(() =>
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 FilesToReceive.Add(file);
             }));
@@ -138,7 +138,7 @@ namespace EasyShare
         {
             try
             {
-                sendingFiles.Dispatcher.Invoke(new Action(() =>
+                Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     foreach (SendingFile sf in FilesToSend)
                         if (sf.Sock == sock)
@@ -178,7 +178,7 @@ namespace EasyShare
         {
             try
             {
-                Dispatcher.Invoke(new Action(() =>
+                Application.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     foreach (ReceivingFile r in FilesToReceive)
                     {

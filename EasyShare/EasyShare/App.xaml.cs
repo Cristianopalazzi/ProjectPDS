@@ -43,11 +43,7 @@ namespace EasyShare
             Receiver.ReceivingFailure += CreateBalloons;
             NeighborSelection.ClosingSelection += NeighborSelection_closingSelection;
 
-            if (Directory.Exists(defaultFolder))
-                foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
-                    f.Delete();
-            else Directory.CreateDirectory(defaultFolder);
-
+            ClearTemporary();
 
             s = Settings.GetInstance;
             queue = new Queue();
@@ -58,6 +54,15 @@ namespace EasyShare
             us = new UserSettings();
             nIcon = new System.Windows.Forms.NotifyIcon();
             InitializeNotifyIcon();
+        }
+
+        public void ClearTemporary()
+        {
+
+            if (Directory.Exists(defaultFolder))
+                foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
+                    f.Delete();
+            else Directory.CreateDirectory(defaultFolder);
         }
 
         public static IPAddress CheckInterfaces()
@@ -75,6 +80,7 @@ namespace EasyShare
             }
             return IPAddress.Any;
         }
+
         private void NeighborSelection_closingSelection()
         {
             ns.Acceso = false;
@@ -82,6 +88,7 @@ namespace EasyShare
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
         {
+            ClearTemporary();
             n.QuitMe();
             nIcon.Dispose();
             Settings.WriteSettings(Settings.GetInstance);
@@ -101,7 +108,7 @@ namespace EasyShare
                         nIcon.BalloonTipText = "ricevuto correttamente da " + userName;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.None;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
 
@@ -111,7 +118,7 @@ namespace EasyShare
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.None;
                         nIcon.BalloonTipText = "inviato correttamente a " + userName;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
 
@@ -121,7 +128,7 @@ namespace EasyShare
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipText = userName + " ha annullato l'invio";
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.REFUSED:
@@ -130,7 +137,7 @@ namespace EasyShare
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipText = userName + " ha rifiutato il tuo file";
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.NET_ERROR:
@@ -142,7 +149,7 @@ namespace EasyShare
                         if (!String.IsNullOrEmpty(user))
                             text = String.Concat(text, ": " + user);
                         nIcon.BalloonTipText = text;
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.SEND_ERROR:
@@ -155,7 +162,7 @@ namespace EasyShare
                             text = String.Concat(text, "a: " + user);
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.REC_ERROR:
@@ -165,7 +172,7 @@ namespace EasyShare
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.FILE_ERROR_REC:
@@ -175,7 +182,7 @@ namespace EasyShare
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 0; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.FILE_ERROR_SEND:
@@ -185,7 +192,7 @@ namespace EasyShare
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
                 case Constants.NOTIFICATION_STATE.EXISTS:
@@ -195,7 +202,7 @@ namespace EasyShare
                         nIcon.BalloonTipText = text;
                         nIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Error;
                         nIcon.BalloonTipClicked += delegate { mw.tabControl.SelectedIndex = 1; mw.Show(); mw.Activate(); mw.WindowState = WindowState.Normal; };
-                        nIcon.ShowBalloonTip(3000);
+                        nIcon.ShowBalloonTip(2000);
                         break;
                     }
             }
@@ -234,11 +241,15 @@ namespace EasyShare
                         if (!AskForExit())
                             return;
 
-                n.QuitMe(); nIcon.Dispose(); Settings.WriteSettings(Settings.GetInstance);
+                ClearTemporary();
+                n.QuitMe();
+                nIcon.Dispose();
+                Settings.WriteSettings(Settings.GetInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
                 App.Current.Shutdown();
             };
+            
             nIcon.Visible = true;
             nIcon.MouseClick += NIcon_MouseClick;
         }
@@ -263,7 +274,7 @@ namespace EasyShare
 
         private void Neighbor_selection(string file)
         {
-            Dispatcher.Invoke(new Action(() =>
+            Application.Current.Dispatcher.Invoke(new Action(() =>
             {
                 if (ns.Acceso)
                 {
