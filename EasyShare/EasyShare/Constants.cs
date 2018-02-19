@@ -4,8 +4,8 @@
     {
         public const int MAX_COUNTER = 1;
         public const string MULTICAST = "239.0.0.222"; // ip multicast
-        public const int HELLO_TIME = 1000;
-        public const int CLEAN_TIME = 10 * HELLO_TIME;
+        public const int HELLO_TIME = 2000; 
+        public const int CLEAN_TIME = 3 * HELLO_TIME;
         public const int PORT_UDP = 9100; //The port on which to listen for incoming data
         public const int PORT_UDP_IMG = 9050;
         public const int BUFLEN = 300; //Max length of bufferThe port on which to listen for incoming data

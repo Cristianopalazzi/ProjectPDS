@@ -38,10 +38,17 @@ namespace EasyShare
                 while (true)
                 {
                     Socket handler = listener.Accept();
-                    Thread myThread = new Thread(() => ReceiveFromSocket(handler));
-                    myThread.SetApartmentState(ApartmentState.STA);
-                    myThread.IsBackground = true;
-                    myThread.Start();
+                    if (!Settings.GetInstance.Online)
+                    {
+                        ReleaseResources(handler);
+                    }
+                    else
+                    {
+                        Thread myThread = new Thread(() => ReceiveFromSocket(handler));
+                        myThread.SetApartmentState(ApartmentState.STA);
+                        myThread.IsBackground = true;
+                        myThread.Start();
+                    }
                 }
             }
             catch (Exception e)
