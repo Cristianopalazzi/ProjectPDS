@@ -71,7 +71,6 @@ namespace EasyShare
                     remoteIpAddress = ((IPEndPoint)senderRemote).Address.ToString();
                     string command = recv.Substring(0, 4);
                     string senderName = recv.Substring(4);
-
                     string senderID = String.Concat(senderName, String.Concat("@", remoteIpAddress));
                     Console.WriteLine("HELLO FROM {0} ", senderID);
                     if (String.Compare(command, Constants.HELL) == 0)

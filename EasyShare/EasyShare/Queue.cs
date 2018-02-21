@@ -81,10 +81,10 @@ namespace EasyShare
                     else zipInfo = cachingFiles[pathFile];
                 }
 
-                if(zipInfo == null)
+                if (zipInfo == null)
                 {
                     QueueUpdateState(sf[0].Sock, Constants.FILE_STATE.ERROR);
-                    QueueBalloon(Path.GetFileName(pathFile), null, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND); 
+                    QueueBalloon(Path.GetFileName(pathFile), null, Constants.NOTIFICATION_STATE.FILE_ERROR_SEND);
                     continue;
                 }
 
@@ -97,7 +97,7 @@ namespace EasyShare
                     })
                     {
                         Name = "thread che manda " + s.FileName + " a  " + s.Name,
-                        IsBackground = true 
+                        IsBackground = true
                     };
                     t.Start();
                 }
@@ -115,8 +115,6 @@ namespace EasyShare
             string zipLocation = String.Empty;
             try
             {
-
-
                 string zipToSend = RandomStr() + Constants.ZIP_EXTENSION;
                 FileAttributes attr = File.GetAttributes(pathFile);
                 zipLocation = App.defaultFolder + "\\" + zipToSend;
@@ -144,13 +142,13 @@ namespace EasyShare
                 cachingFiles.Add(pathFile, zipInfo);
                 return zipInfo;
             }
-            catch 
+            catch
             {
                 if (!String.IsNullOrEmpty(zipLocation))
                     File.Delete(zipLocation);
                 return null;
             }
-            
+
         }
 
         private bool FileChanged(string pathFile)

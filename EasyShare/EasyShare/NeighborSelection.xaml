@@ -94,7 +94,7 @@
                                 </Ellipse.Style>
                             </Ellipse>
 
-                            <TextBlock Text="{Binding Path = Value.NeighborName}" HorizontalAlignment="Center" FontSize="16" VerticalAlignment="Bottom" MaxWidth="64" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Path = Value.NeighborName}" HorizontalAlignment="Center" FontSize="14" MaxWidth="64" VerticalAlignment="Bottom"  TextTrimming="CharacterEllipsis"/>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

@@ -69,7 +69,7 @@
                                             <ImageBrush ImageSource="{Binding Image}"/>
                                         </Ellipse.Fill>
                                     </Ellipse>
-                                    <TextBlock Text="{Binding Name}" TextAlignment="Center" FontSize="16" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="{Binding Name}" TextAlignment="Center" FontSize="16" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}"/>
                                 </StackPanel>
                                 <TextBlock Grid.Column="1" ToolTip="{Binding Filename}" TextTrimming="CharacterEllipsis" Text="{Binding Filename}" TextAlignment="Left" FontSize="16" Margin="5,0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 <Grid Grid.Column="2" >
@@ -142,7 +142,7 @@
                                             <ImageBrush ImageSource="{Binding Immagine}"/>
                                         </Ellipse.Fill>
                                     </Ellipse>
-                                    <TextBlock Text="{Binding Name}" TextAlignment="Center" TextTrimming ="CharacterEllipsis" FontSize="16"/>
+                                    <TextBlock Text="{Binding Name}" TextAlignment="Center" TextTrimming ="CharacterEllipsis" FontSize="16" ToolTip="{Binding Name}"/>
                                 </StackPanel>
                                 <Grid Grid.Column="1" VerticalAlignment="Center">
                                     <Grid.RowDefinitions>

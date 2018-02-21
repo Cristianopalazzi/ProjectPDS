@@ -21,20 +21,8 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_4A64E2937A8398F8EA028C794C2BE9F6"
-        "OwnerKey" = "8:_E44E5EE721CF4A628CED7B44409357C7"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_4CB4B5CF964847108D5E4082B1473E2C"
         "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_5EF6BE05D21CDA17709017503F1AB1AB"
-        "OwnerKey" = "8:_4A64E2937A8398F8EA028C794C2BE9F6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -53,6 +41,12 @@
         {
         "MsmKey" = "8:_8A91F0C8078848438FD51BE056177B94"
         "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_8B924F5FE5FCFC68760E1E70AB04622D"
+        "OwnerKey" = "8:_E44E5EE721CF4A628CED7B44409357C7"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -123,6 +117,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_F688F5DD69345E7668633B2A3A5B8E8A"
+        "OwnerKey" = "8:_8B924F5FE5FCFC68760E1E70AB04622D"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_CDABD7A71F3F4A9A88E5028A7018FAE6"
         "MsmSig" = "8:_UNDEFINED"
@@ -136,13 +136,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_4A64E2937A8398F8EA028C794C2BE9F6"
+        "OwnerKey" = "8:_8B924F5FE5FCFC68760E1E70AB04622D"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_5EF6BE05D21CDA17709017503F1AB1AB"
+        "OwnerKey" = "8:_F688F5DD69345E7668633B2A3A5B8E8A"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -272,37 +272,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_4A64E2937A8398F8EA028C794C2BE9F6"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_4A64E2937A8398F8EA028C794C2BE9F6"
-                    {
-                    "Name" = "8:MahApps.Metro.DLL"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:MahApps.Metro.DLL"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_E3C1A675EA2C48CA862726CDB1C1B2DA"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4CB4B5CF964847108D5E4082B1473E2C"
             {
             "SourcePath" = "8:..\\EasyShare\\bin\\Debug\\EasyShare.exe.config"
@@ -321,37 +290,6 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_5EF6BE05D21CDA17709017503F1AB1AB"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_5EF6BE05D21CDA17709017503F1AB1AB"
-                    {
-                    "Name" = "8:System.Windows.Interactivity.DLL"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:System.Windows.Interactivity.DLL"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_E3C1A675EA2C48CA862726CDB1C1B2DA"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7B67659E10364B5FBD5E2EE0330CCCB0"
@@ -423,6 +361,37 @@
             "Register" = "3:1"
             "Exclude" = "11:FALSE"
             "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_8B924F5FE5FCFC68760E1E70AB04622D"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:MahApps.Metro, Version=1.5.0.23, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_8B924F5FE5FCFC68760E1E70AB04622D"
+                    {
+                    "Name" = "8:MahApps.Metro.DLL"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:MahApps.Metro.DLL"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_E3C1A675EA2C48CA862726CDB1C1B2DA"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_938B773E10DC4C48A08DA6F606DD9FE6"
@@ -658,6 +627,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_F688F5DD69345E7668633B2A3A5B8E8A"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_F688F5DD69345E7668633B2A3A5B8E8A"
+                    {
+                    "Name" = "8:System.Windows.Interactivity.DLL"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:System.Windows.Interactivity.DLL"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_E3C1A675EA2C48CA862726CDB1C1B2DA"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
         }
         "FileType"
         {
@@ -734,7 +734,7 @@
             "{1525181F-901A-416C-8A58-119130FE478E}:_FBF485DCF51B4513A97438AB4398D601"
             {
             "Name" = "8:#1919"
-            "AlwaysCreate" = "11:FALSE"
+            "AlwaysCreate" = "11:TRUE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Property" = "8:ProgramMenuFolder"
@@ -759,7 +759,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:EasyShare"
         "ProductCode" = "8:{B67E672B-85D8-42B6-B03B-1CF172CFDFEA}"
-        "PackageCode" = "8:{4395D136-B47F-46FA-BE96-F50D318230BB}"
+        "PackageCode" = "8:{F0A1501C-264B-492A-BF8B-3A8428B8375F}"
         "UpgradeCode" = "8:{D275BFFD-2491-4411-849B-39DCF9B7AC7F}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -881,7 +881,7 @@
                                     {
                                     "Name" = "8:Condividi con"
                                     "Condition" = "8:"
-                                    "AlwaysCreate" = "11:FALSE"
+                                    "AlwaysCreate" = "11:TRUE"
                                     "DeleteAtUninstall" = "11:TRUE"
                                     "Transitive" = "11:FALSE"
                                         "Keys"
@@ -890,8 +890,8 @@
                                             {
                                             "Name" = "8:command"
                                             "Condition" = "8:"
-                                            "AlwaysCreate" = "11:FALSE"
-                                            "DeleteAtUninstall" = "11:FALSE"
+                                            "AlwaysCreate" = "11:TRUE"
+                                            "DeleteAtUninstall" = "11:TRUE"
                                             "Transitive" = "11:FALSE"
                                                 "Keys"
                                                 {
@@ -953,7 +953,7 @@
                                     {
                                     "Name" = "8:Condividi con"
                                     "Condition" = "8:"
-                                    "AlwaysCreate" = "11:FALSE"
+                                    "AlwaysCreate" = "11:TRUE"
                                     "DeleteAtUninstall" = "11:TRUE"
                                     "Transitive" = "11:FALSE"
                                         "Keys"
@@ -963,7 +963,7 @@
                                             "Name" = "8:command"
                                             "Condition" = "8:"
                                             "AlwaysCreate" = "11:TRUE"
-                                            "DeleteAtUninstall" = "11:FALSE"
+                                            "DeleteAtUninstall" = "11:TRUE"
                                             "Transitive" = "11:FALSE"
                                                 "Keys"
                                                 {
