@@ -61,7 +61,15 @@ namespace EasyShare
 
             if (Directory.Exists(defaultFolder))
                 foreach (FileInfo f in new DirectoryInfo(defaultFolder).GetFiles("*.zip"))
-                    f.Delete();
+                    try
+                    {
+                        f.Delete();
+                    }
+                    catch
+                    {
+                        return;
+                    }
+
             else Directory.CreateDirectory(defaultFolder);
         }
 
@@ -88,7 +96,6 @@ namespace EasyShare
 
         private void SystemEvents_SessionEnded(object sender, SessionEndedEventArgs e)
         {
-            ClearTemporary();
             n.QuitMe();
             nIcon.Dispose();
             Settings.WriteSettings(Settings.GetInstance);
@@ -241,15 +248,17 @@ namespace EasyShare
                         if (!AskForExit())
                             return;
 
-                ClearTemporary();
+
                 n.QuitMe();
                 nIcon.Dispose();
                 Settings.WriteSettings(Settings.GetInstance);
                 NeighborProtocol.ShutDown = true;
                 NeighborProtocol.senderEvent.Set();
                 App.Current.Shutdown();
+                if (!filesInProgress)
+                    ClearTemporary();
             };
-            
+
             nIcon.Visible = true;
             nIcon.MouseClick += NIcon_MouseClick;
         }

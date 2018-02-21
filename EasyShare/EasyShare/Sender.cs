@@ -44,6 +44,10 @@ namespace EasyShare
                 UpdateFileState?.Invoke(sender, Constants.FILE_STATE.ACCEPTANCE);
                 byte[] responseFromServer = new byte[Constants.ACCEPT_FILE.Length];
                 sender.Receive(responseFromServer, 0, responseFromServer.Length, SocketFlags.None, out sockError);
+                if (!sender.Connected)
+                {
+                    return;
+                }
                 if (sockError != SocketError.Success)
                 {
                     throw new SocketException();
@@ -64,8 +68,14 @@ namespace EasyShare
                 int received = 0;
                 byte[] data = new byte[Constants.DECLINE_FILE.Length];
                 received = sender.Receive(data, 0, Constants.DECLINE_FILE.Length, SocketFlags.None, out sockError);
+                if (!sender.Connected)
+                {
+                    return;
+                }
                 if (received == 0 || sockError != SocketError.Success)
+                {
                     throw new SocketException();
+                }
 
                 if (string.Compare(Encoding.ASCII.GetString(data), Constants.DECLINE_FILE) == 0)
                 {
